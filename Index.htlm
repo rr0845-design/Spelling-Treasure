@@ -1,0 +1,38 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8"/>
+    <meta content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=0" name="viewport"/>
+    <title>Spelling Treasure</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/gsap.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.6.0/dist/confetti.browser.min.js"></script>
+    
+    <!-- Firebase CDN -->
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
+        import { getFirestore } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
+
+        // 🌟 ใส่ Config ของคุณครูตรงนี้ครับ
+        const firebaseConfig = {
+            apiKey: "AIzaSyBaaLvQCgokMUeqVm0VMxwHGE3xtFJk0Zs",
+            authDomain: "spellingtreasure.firebaseapp.com",
+            projectId: "spellingtreasure",
+            storageBucket: "spellingtreasure.appspot.com",
+            messagingSenderId: "763332831883",
+            appId: "1:763332831883:web:a032042096e8a9d2c4028e"
+        };
+
+        const app = initializeApp(firebaseConfig);
+        const db = getFirestore(app);
+        window.db = db;
+    </script>
+</head>
+<body class="bg-[#0A1F16] text-white">
+    <!-- UI ธีมป่าสมบัติที่จัดไว้ให้แล้ว -->
+    <div id="app" class="p-6">
+        <h1 class="text-3xl font-black text-[#FFD700]">Spelling Treasure</h1>
+        <p>เชื่อมต่อ Firebase เรียบร้อยแล้ว พร้อมเริ่มลุย!</p>
+    </div>
+</body>
+</html>
