@@ -34,5 +34,32 @@
         <h1 class="text-3xl font-black text-[#FFD700]">Spelling Treasure</h1>
         <p>เชื่อมต่อ Firebase เรียบร้อยแล้ว พร้อมเริ่มลุย!</p>
     </div>
+    <div id="admin-panel" class="p-6 bg-white/10 rounded-xl mt-10">
+    <h2 class="text-xl font-bold text-[#FFD700]">Admin: Import Vocab (540 คำ)</h2>
+    <textarea id="vocabInput" class="w-full h-32 mt-4 text-black p-2" placeholder="Copy ข้อมูลจาก Google Sheets มาวางตรงนี้..."></textarea>
+    <button onclick="importVocab()" class="mt-4 px-6 py-2 bg-green-600 text-white rounded">Import เข้า Firestore</button>
+</div>
+<script type="module">
+    import { doc, setDoc } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
+    
+    window.importVocab = async () => {
+        const rawData = document.getElementById('vocabInput').value;
+        const rows = rawData.split('\n');
+        
+        for (let row of rows) {
+            const cols = row.split('\t'); // Google Sheets มักจะ Copy มาเป็น Tab
+            if (cols.length >= 4) {
+                const vocabData = {
+                    id: cols[0],
+                    word: cols[1],
+                    category: cols[2],
+                    meaning: cols[3]
+                };
+                await setDoc(doc(window.db, "vocab_master", vocabData.id), vocabData);
+            }
+        }
+        alert("Import สำเร็จเรียบร้อยแล้วครับ!");
+    };
+</script>
 </body>
 </html>
