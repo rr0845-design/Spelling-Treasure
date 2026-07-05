@@ -2,20 +2,19 @@
 <html lang="th">
 <head>
     <meta charset="UTF-8">
-    <title>Spelling Treasure - Admin Console</title>
+    <title>Spelling Treasure - Data Viewer</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <!-- Firebase SDK -->
     <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-firestore-compat.js"></script>
 </head>
 <body class="bg-[#0A1F16] text-white p-6 md:p-10">
-    <h1 class="text-3xl font-black text-[#FFD700] mb-6">Spelling Treasure - Admin Console</h1>
+    <h1 class="text-3xl font-black text-[#FFD700] mb-6">Spelling Treasure - Data Viewer</h1>
     
     <div class="bg-white/10 p-6 rounded-xl border border-white/20">
-        <h2 class="text-xl font-bold mb-4">ระบบนำเข้าข้อมูลอัตโนมัติ (Multi-Collection)</h2>
-        
-        <label class="block mb-2">เลือก Collection ปลายทาง:</label>
-        <select id="targetCollection" class="text-black p-2 rounded w-full mb-4">
+        <label class="block mb-2 font-bold text-[#FFD700]">เลือก Collection ที่ต้องการดู:</label>
+        <select id="viewCollection" class="text-black p-3 rounded w-full mb-6 font-medium" onchange="viewData()">
+            <option value="">-- เลือก Collection --</option>
             <option value="Vocab_Master">Vocab_Master</option>
             <option value="User_Profile">User_Profile</option>
             <option value="User_Streak">User_Streak</option>
@@ -24,18 +23,23 @@
             <option value="Assessment_Records">Assessment_Records</option>
         </select>
 
-        <textarea id="vocabInput" class="w-full h-64 text-black p-4 rounded font-mono text-sm" placeholder="วางข้อมูลจาก Sheets (รวมแถวหัวตาราง) มาวางตรงนี้..."></textarea>
-        
-        <button onclick="runImport()" class="mt-4 px-8 py-3 bg-green-600 hover:bg-green-700 font-bold rounded text-white w-full transition">เริ่มนำเข้าฐานข้อมูล</button>
+        <div class="overflow-x-auto bg-white/5 rounded-lg">
+            <table id="dataTable" class="w-full text-left text-sm">
+                <thead id="tableHead" class="bg-white/10 border-b border-white/20 uppercase text-xs tracking-wider"></thead>
+                <tbody id="tableBody" class="divide-y divide-white/10">
+                    <tr><td class="p-6 text-center italic">เลือก Collection ด้านบนเพื่อเริ่มดูข้อมูลครับ...</td></tr>
+                </tbody>
+            </table>
+        </div>
     </div>
 
     <script>
-        // ใส่ Config Firebase ของคุณครูที่นี่
         const firebaseConfig = {
             apiKey: "AIzaSyBaaLvQCgokMUeqVm0VMxwHGE3xtFJk0Zs",
             authDomain: "spellingtreasure.firebaseapp.com",
+            databaseURL: "https://spellingtreasure-default-rtdb.asia-southeast1.firebasedatabase.app",
             projectId: "spellingtreasure",
-            storageBucket: "spellingtreasure.appspot.com",
+            storageBucket: "spellingtreasure.firebasestorage.app",
             messagingSenderId: "763332831883",
             appId: "1:763332831883:web:a032042096e8a9d2c4028e"
         };
@@ -43,32 +47,31 @@
         firebase.initializeApp(firebaseConfig);
         const db = firebase.firestore();
 
-        async function runImport() {
-            const collection = document.getElementById('targetCollection').value;
-            const input = document.getElementById('vocabInput').value;
-            if(!input) return alert("ยังไม่ได้วางข้อมูลครับ!");
+        async function viewData() {
+            const collection = document.getElementById('viewCollection').value;
+            if (!collection) return;
+
+            const tableHead = document.getElementById('tableHead');
+            const tableBody = document.getElementById('tableBody');
             
-            const rows = input.split('\n').filter(row => row.trim() !== "");
-            const headers = rows[0].split('\t').map(h => h.trim().toLowerCase());
-            let successCount = 0;
+            tableBody.innerHTML = "<tr><td class='p-6 text-center'>กำลังโหลดข้อมูล...</td></tr>";
 
-            for(let i = 1; i < rows.length; i++) {
-                const cols = rows[i].split('\t');
-                let dataObject = {};
-                headers.forEach((header, index) => {
-                    dataObject[header] = cols[index] ? cols[index].trim() : "";
-                });
-
-                try {
-                    if (collection === "Activity_Logs") {
-                        await db.collection(collection).add(dataObject);
-                    } else {
-                        await db.collection(collection).doc(cols[0].trim()).set(dataObject);
-                    }
-                    successCount++;
-                } catch(err) { console.error("Error ที่แถว " + i, err); }
+            const snapshot = await db.collection(collection).get();
+            if (snapshot.empty) {
+                tableBody.innerHTML = "<tr><td class='p-6 text-center'>ไม่พบข้อมูลในนี้ครับ</td></tr>";
+                tableHead.innerHTML = "";
+                return;
             }
-            alert("เรียบร้อย! นำเข้าข้อมูลเข้า " + collection + " ได้ทั้งหมด " + successCount + " รายการ");
+
+            const firstDoc = snapshot.docs[0].data();
+            const headers = Object.keys(firstDoc);
+            
+            tableHead.innerHTML = `<tr>${headers.map(h => `<th class="p-4">${h}</th>`).join('')}</tr>`;
+            
+            tableBody.innerHTML = snapshot.docs.map(doc => {
+                const data = doc.data();
+                return `<tr>${headers.map(h => `<td class="p-4 border-b border-white/5">${data[h] || '-'}</td>`).join('')}</tr>`;
+            }).join('');
         }
     </script>
 </body>
