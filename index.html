@@ -1,19 +1,36 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="th">
 <head>
-    <meta charset="utf-8"/>
-    <meta content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=0" name="viewport"/>
-    <title>Spelling Treasure</title>
+    <meta charset="UTF-8">
+    <title>Spelling Treasure - Admin Console</title>
     <script src="https://cdn.tailwindcss.com"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/gsap.min.js"></script>
-    <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.6.0/dist/confetti.browser.min.js"></script>
+    <!-- Firebase SDK -->
+    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-firestore-compat.js"></script>
+</head>
+<body class="bg-[#0A1F16] text-white p-6 md:p-10">
+    <h1 class="text-3xl font-black text-[#FFD700] mb-6">Spelling Treasure - Admin Console</h1>
     
-    <!-- Firebase CDN -->
-    <script type="module">
-        import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
-        import { getFirestore } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
+    <div class="bg-white/10 p-6 rounded-xl border border-white/20">
+        <h2 class="text-xl font-bold mb-4">ระบบนำเข้าข้อมูลอัตโนมัติ (Multi-Collection)</h2>
+        
+        <label class="block mb-2">เลือก Collection ปลายทาง:</label>
+        <select id="targetCollection" class="text-black p-2 rounded w-full mb-4">
+            <option value="Vocab_Master">Vocab_Master</option>
+            <option value="User_Profile">User_Profile</option>
+            <option value="User_Streak">User_Streak</option>
+            <option value="User_Progress">User_Progress</option>
+            <option value="Activity_Logs">Activity_Logs</option>
+            <option value="Assessment_Records">Assessment_Records</option>
+        </select>
 
-        // 🌟 ใส่ Config ของคุณครูตรงนี้ครับ
+        <textarea id="vocabInput" class="w-full h-64 text-black p-4 rounded font-mono text-sm" placeholder="วางข้อมูลจาก Sheets (รวมแถวหัวตาราง) มาวางตรงนี้..."></textarea>
+        
+        <button onclick="runImport()" class="mt-4 px-8 py-3 bg-green-600 hover:bg-green-700 font-bold rounded text-white w-full transition">เริ่มนำเข้าฐานข้อมูล</button>
+    </div>
+
+    <script>
+        // ใส่ Config Firebase ของคุณครูที่นี่
         const firebaseConfig = {
             apiKey: "AIzaSyBaaLvQCgokMUeqVm0VMxwHGE3xtFJk0Zs",
             authDomain: "spellingtreasure.firebaseapp.com",
@@ -23,57 +40,36 @@
             appId: "1:763332831883:web:a032042096e8a9d2c4028e"
         };
 
-        const app = initializeApp(firebaseConfig);
-        const db = getFirestore(app);
-        window.db = db;
-    </script>
-</head>
-<body class="bg-[#0A1F16] text-white">
-    <!-- UI ธีมป่าสมบัติที่จัดไว้ให้แล้ว -->
-    <div id="app" class="p-6">
-        <h1 class="text-3xl font-black text-[#FFD700]">Spelling Treasure</h1>
-        <p>เชื่อมต่อ Firebase เรียบร้อยแล้ว พร้อมเริ่มลุย!</p>
-    </div>
-    <div id="admin-panel" class="p-6 bg-white/10 rounded-xl mt-10">
-    <h2 class="text-xl font-bold text-[#FFD700]">Admin: Import Vocab (540 คำ)</h2>
-    <textarea id="vocabInput" class="w-full h-32 mt-4 text-black p-2" placeholder="Copy ข้อมูลจาก Google Sheets มาวางตรงนี้..."></textarea>
-    <button onclick="importVocab()" class="mt-4 px-6 py-2 bg-green-600 text-white rounded">Import เข้า Firestore</button>
-</div>
-<script type="module">
-    import { doc, setDoc } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
-    
-<script>
-    async function runImport() {
-        const collection = document.getElementById('targetCollection').value;
-        const input = document.getElementById('vocabInput').value;
-        if(!input) return alert("วางข้อมูลก่อนนะครับ!");
-        
-        const rows = input.split('\n');
-        const headers = rows[0].split('\t');
-        let successCount = 0;
+        firebase.initializeApp(firebaseConfig);
+        const db = firebase.firestore();
 
-        for(let i = 1; i < rows.length; i++) {
-            if (rows[i].trim() === "") continue; // ข้ามแถวว่าง
-            const cols = rows[i].split('\t');
+        async function runImport() {
+            const collection = document.getElementById('targetCollection').value;
+            const input = document.getElementById('vocabInput').value;
+            if(!input) return alert("ยังไม่ได้วางข้อมูลครับ!");
             
-            let dataObject = {};
-            headers.forEach((header, index) => {
-                dataObject[header.trim().toLowerCase()] = cols[index] ? cols[index].trim() : "";
-            });
+            const rows = input.split('\n').filter(row => row.trim() !== "");
+            const headers = rows[0].split('\t').map(h => h.trim().toLowerCase());
+            let successCount = 0;
 
-            try {
-                // เช็คถ้าเป็น Activity_Logs ให้ใช้ .add() เพื่อสร้าง ID ใหม่เสมอ (ไม่ทับกัน)
-                if (collection === "Activity_Logs") {
-                    await firebase.firestore().collection(collection).add(dataObject);
-                } else {
-                    // ถ้าเป็น Vocab หรือ Profile ให้ใช้ ID แถวแรกเป็น Key
-                    await firebase.firestore().collection(collection).doc(cols[0].trim()).set(dataObject);
-                }
-                successCount++;
-            } catch(err) { console.error("Error แถวที่ " + i, err); }
+            for(let i = 1; i < rows.length; i++) {
+                const cols = rows[i].split('\t');
+                let dataObject = {};
+                headers.forEach((header, index) => {
+                    dataObject[header] = cols[index] ? cols[index].trim() : "";
+                });
+
+                try {
+                    if (collection === "Activity_Logs") {
+                        await db.collection(collection).add(dataObject);
+                    } else {
+                        await db.collection(collection).doc(cols[0].trim()).set(dataObject);
+                    }
+                    successCount++;
+                } catch(err) { console.error("Error ที่แถว " + i, err); }
+            }
+            alert("เรียบร้อย! นำเข้าข้อมูลเข้า " + collection + " ได้ทั้งหมด " + successCount + " รายการ");
         }
-        alert("สำเร็จ! นำเข้าข้อมูลเข้า " + collection + " ทั้งหมด " + successCount + " รายการ");
-    }
-</script>
+    </script>
 </body>
 </html>
