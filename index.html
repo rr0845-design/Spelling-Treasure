@@ -1,78 +1,1164 @@
 <!DOCTYPE html>
-<html lang="th">
+<html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <title>Spelling Treasure - Data Viewer</title>
-    <script src="https://cdn.tailwindcss.com"></script>
-    <!-- Firebase SDK -->
-    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
-    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-firestore-compat.js"></script>
-</head>
-<body class="bg-[#0A1F16] text-white p-6 md:p-10">
-    <h1 class="text-3xl font-black text-[#FFD700] mb-6">Spelling Treasure - Data Viewer</h1>
+    <meta charset="utf-8"/>
+    <meta content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=0" name="viewport"/>
+    <title>Spelling Master</title>
     
-    <div class="bg-white/10 p-6 rounded-xl border border-white/20">
-        <label class="block mb-2 font-bold text-[#FFD700]">เลือก Collection ที่ต้องการดู:</label>
-        <select id="viewCollection" class="text-black p-3 rounded w-full mb-6 font-medium" onchange="viewData()">
-            <option value="">-- เลือก Collection --</option>
-            <option value="Vocab_Master">Vocab_Master</option>
-            <option value="User_Profile">User_Profile</option>
-            <option value="User_Streak">User_Streak</option>
-            <option value="User_Progress">User_Progress</option>
-            <option value="Activity_Logs">Activity_Logs</option>
-            <option value="Assessment_Records">Assessment_Records</option>
-        </select>
+    <script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/gsap.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.6.0/dist/confetti.browser.min.js"></script> 
+    
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Mali:wght@400;700;900&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght@400;700&display=swap" rel="stylesheet"/>
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Color+Emoji&display=swap" rel="stylesheet">
+    
+    <style>
+        :root {
+            /* 🌲 Fantasy Forest Theme Colors */
+            --bg-forest-light: #183C2A; 
+            --bg-forest-dark: #0A1F16;  
+            
+            /* 📦 Chest Colors */
+            --wood-panel: #5C3A21;      
+            --wood-inner: #452814;      
+            --wood-border: #2A170B;     
+            --iron-border: #8BA1AB;     
+            --iron-dark: #546E7A;       
 
-        <div class="overflow-x-auto bg-white/5 rounded-lg">
-            <table id="dataTable" class="w-full text-left text-sm">
-                <thead id="tableHead" class="bg-white/10 border-b border-white/20 uppercase text-xs tracking-wider"></thead>
-                <tbody id="tableBody" class="divide-y divide-white/10">
-                    <tr><td class="p-6 text-center italic">เลือก Collection ด้านบนเพื่อเริ่มดูข้อมูลครับ...</td></tr>
-                </tbody>
-            </table>
+            /* 🪙 Accents & Texts */
+            --text-light: #FDF5E6;      
+            --text-gold: #FFD700;       
+            --gold-btn: #FFC107;        
+            --gold-dark: #D48806;
+            --magic-green: #4CAF50;     
+            --magic-dark: #2E7D32;
+            --danger-red: #E53935;
+            --danger-dark: #B71C1C;
+        }
+
+        html, body {
+            height: 100dvh; overflow: hidden; margin: 0; padding: 0;
+            background: radial-gradient(circle at 50% 30%, var(--bg-forest-light) 0%, var(--bg-forest-dark) 100%);
+            -ms-overflow-style: none; scrollbar-width: none;
+        }
+
+        body { 
+            color: var(--text-light); font-family: 'Mali', cursive; user-select: none; 
+            -webkit-tap-highlight-color: transparent; display: flex; flex-direction: column;
+        }
+
+        ::-webkit-scrollbar { display: none !important; width: 0px !important; height: 0px !important; background: transparent !important; }
+
+        /* 🌟 หีบสมบัติ (Squircle 32px) */
+        .glass-card { 
+            background-color: var(--wood-panel);
+            border: 4px solid var(--iron-border);
+            border-radius: 32px; 
+            box-shadow: 0 8px 0 var(--wood-border), inset 0 0 20px rgba(0,0,0,0.4);
+            color: var(--text-light);
+        }
+
+        /* 🌟 ปุ่มมุม 24px + 300ms Ease In/Out */
+        .btn-3d { transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1); border-radius: 24px; position: relative; transform: translateY(0); border: none; }
+        .btn-3d:active:not(:disabled) { transform: translateY(6px) !important; border-bottom-width: 0px !important; box-shadow: none !important; margin-bottom: 6px; }
+
+        /* ปุ่มต่างๆ ตามธีม RPG */
+        .btn-wood { background-color: var(--wood-inner); border-bottom: 5px solid var(--wood-border); border-top: 2px solid #784A2B; color: var(--text-gold); }
+        .btn-magic { background-color: var(--magic-green); border-bottom: 5px solid var(--magic-dark); border-top: 2px solid #81C784; color: white; text-shadow: 0 2px 2px rgba(0,0,0,0.3); }
+        .btn-gold { background-color: var(--gold-btn); border-bottom: 5px solid var(--gold-dark); border-top: 2px solid #FFF59D; color: #5C3A21; font-weight: 900; }
+        .btn-danger { background-color: var(--danger-red); border-bottom: 5px solid var(--danger-dark); border-top: 2px solid #EF9A9A; color: white; }
+
+        /* 🔥 Block Blast Style Blocks */
+        .block-puzzle {
+            background-color: #FFD700;
+            border-radius: 14px;
+            box-shadow: 0 6px 0 #D48806, 0 10px 15px rgba(0,0,0,0.3);
+            transition: all 0.15s ease;
+            cursor: pointer;
+        }
+        .block-puzzle:active:not(:disabled) {
+            transform: translateY(6px);
+            box-shadow: 0 0px 0 #D48806, 0 2px 5px rgba(0,0,0,0.3);
+        }
+
+        .hidden { display: none !important; }
+        .app-view { display: none; } 
+
+        .play-pulse-ring {
+            position: absolute; width: 100%; height: 100%; border-radius: 50%;
+            border: 4px solid var(--gold-btn); animation: play-pulse 2s infinite ease-in-out; pointer-events: none;
+            box-shadow: 0 0 20px var(--gold-btn);
+        }
+        @keyframes play-pulse { 0% { transform: scale(1); opacity: 0.8; } 100% { transform: scale(1.3); opacity: 0; } }
+
+        /* ✨ หิ่งห้อยและละอองเวทมนตร์ (Fireflies) */
+        #bg-magic-motes { position: fixed; top: 0; left: 0; width: 100%; height: 100%; z-index: 0; pointer-events: none; overflow: hidden; }
+        .firefly {
+            position: absolute; border-radius: 50%; opacity: 0;
+            background: #FFF; box-shadow: 0 0 10px 2px var(--gold-btn);
+            animation: float linear infinite ease-in-out;
+        }
+        @keyframes float {
+            0% { transform: translateY(110vh) translateX(0px) scale(0.5); opacity: 0; }
+            20% { opacity: 0.8; } 80% { opacity: 0.8; }
+            100% { transform: translateY(-10vh) translateX(50px) scale(1.2); opacity: 0; }
+        }
+
+        .loading-dot { display: inline-block; animation: bounce-dot 1.2s infinite ease-in-out both; }
+        .loading-dot:nth-child(1) { animation-delay: -0.32s; }
+        .loading-dot:nth-child(2) { animation-delay: -0.16s; }
+        .loading-dot:nth-child(3) { animation-delay: 0s; }
+        @keyframes bounce-dot {
+            0%, 80%, 100% { transform: translateY(0); }
+            40% { transform: translateY(-6px); text-shadow: 0 0 10px var(--gold-btn); } 
+        }
+
+        .bounce-in { animation: bounceIn 0.3s ease-in-out; }
+        @keyframes bounceIn {
+            0% { transform: scale(0.9); opacity: 0; }
+            100% { transform: scale(1); opacity: 1; }
+        }
+
+        /* สำหรับหน้าจอล็อก */
+        body.locked-ui header, body.locked-ui #bottom-nav-bar, body.locked-ui #btn-play-normal, body.locked-ui #btn-post-test, body.locked-ui #home-stats-cards, body.locked-ui .play-pulse-ring {
+            filter: grayscale(80%) brightness(0.5); pointer-events: none; opacity: 0.5; transition: all 0.3s ease-in-out;
+        }
+        body.locked-ui #btn-pre-test { animation: pretest-pulse 1.5s infinite ease-in-out; border-color: var(--danger-red) !important; color: white !important; box-shadow: 0 0 20px var(--danger-red); }
+        body.locked-ui #test-camp-title::after { content: " (บังคับสอบก่อน!)"; color: #FFCDD2; font-size: 13px; }
+        @keyframes pretest-pulse { 0% { transform: scale(1); } 50% { transform: scale(1.05); } 100% { transform: scale(1); } }
+    </style>
+</head>
+
+<body class="w-full h-[100dvh] relative overflow-hidden" id="app-body">
+
+    <div id="bg-magic-motes"></div>
+
+    <!-- Splash, Header & Other Sections Remained Unchanged for Stability -->
+    <div id="splash-screen" class="fixed top-0 left-0 w-full h-[100dvh] z-[100] bg-[#0A1F16]/95 backdrop-blur-md flex flex-col items-center justify-center">
+        <div class="flex flex-col items-center w-full max-w-[280px]">
+            <div class="w-24 h-24 bg-gradient-to-b from-[#FFD700] to-[#D48806] text-[#5C3A21] rounded-[2rem] flex items-center justify-center shadow-[0_0_30px_rgba(255,215,0,0.5)] z-10 border-4 border-[#FFF8DC]">
+                <span class="material-symbols-outlined" style="font-size: 50px; font-variation-settings: 'FILL' 1;">🧭</span>
+            </div>
+            
+            <div class="w-full h-4 bg-[#2A170B] rounded-full overflow-hidden shadow-inner mt-6 border-2 border-[#546E7A]">
+                <div id="splash-progress" class="h-full bg-gradient-to-r from-[#FFC107] to-[#FF9800] rounded-full" style="width: 0%; transition: width 10s ease-in-out;"></div>
+            </div>
+
+            <h2 class="text-[20px] font-black text-[#FFE066] mt-6 tracking-wide flex items-end drop-shadow-md">
+                Finding Treasure
+                <span class="loading-dot ml-1">.</span><span class="loading-dot">.</span><span class="loading-dot">.</span>
+            </h2>
+        </div>
+    </div>
+
+    <header class="flex-shrink-0 w-full glass-card !border-t-0 !border-l-0 !border-r-0 !rounded-none !rounded-b-[32px] sticky top-0 z-30 hidden" id="main-header">
+        <div class="max-w-2xl mx-auto w-full flex justify-between items-center p-4 sm:p-5 relative z-20">
+            <div class="flex items-center gap-3">
+                <div class="w-12 h-12 rounded-[16px] btn-gold flex items-center justify-center shadow-lg flex-shrink-0">
+                    <span class="material-symbols-outlined text-[#5C3A21]" style="font-size: 28px; font-variation-settings: 'FILL' 1;">account_circle</span>
+                </div>
+                <div class="overflow-hidden">
+                    <h1 class="font-black text-[20px] text-[#FFD700] leading-tight truncate drop-shadow-md">Spelling Treasure</h1>
+                    <p id="header-email-display" class="text-[13px] font-bold text-[#E0E0E0] truncate max-w-[150px] sm:max-w-[180px]">Loading...</p>
+                </div>
+            </div>
+            <div class="flex gap-2 flex-shrink-0">
+                <div class="bg-[#2A170B]/80 border border-[#546E7A] text-[#FFD700] rounded-full px-4 py-1.5 flex items-center gap-1.5 font-bold shadow-inner">
+                    <span class="text-base drop-shadow-[0_0_5px_#FFD700]">🔥</span> <span id="header-streak" class="tracking-wide text-sm">0</span>
+                </div>
+            </div>
+        </div>
+    </header>
+
+    <main class="flex-grow overflow-y-auto w-full max-w-2xl mx-auto px-4 sm:px-5 pt-4 pb-28 scroll-smooth relative z-10" id="main-content-area">
+        
+        <section id="view-register" class="app-view h-full flex-col items-center justify-center pt-6 pb-12">
+            <div class="glass-card p-8 text-center w-full max-w-sm mx-auto relative border-b-[8px]">
+                <div class="w-24 h-24 bg-gradient-to-br from-[#FFD700] to-[#FF9800] border-4 border-[#FFF8DC] text-[#5C3A21] rounded-[2rem] flex items-center justify-center text-[44px] mx-auto mb-6 shadow-[0_0_20px_rgba(255,215,0,0.6)]">
+                    🗺️
+                </div>
+                <h2 class="text-3xl font-black text-[#FFD700] mb-8 tracking-wider drop-shadow-md">New Hunter</h2>
+                <input type="text" id="player-name-input" placeholder="ใส่ชื่อนักล่าสมบัติ..." class="w-full px-4 py-4 mb-8 bg-[#FFF8DC] border-4 border-[#546E7A] rounded-[24px] focus:outline-none focus:border-[#4CAF50] focus:ring-4 focus:ring-[#4CAF50]/50 text-center font-black text-[#5C3A21] text-xl transition-all shadow-inner placeholder-[#A1887F]" maxlength="15">
+                <button onclick="submitPlayerName()" id="btn-submit-name" class="btn-3d btn-magic w-full py-4 font-black text-[24px] flex items-center justify-center tracking-widest shadow-lg">
+                    START ADVENTURE!
+                </button>
+            </div>
+        </section>
+
+        <section id="view-welcome-back" class="app-view h-full flex-col items-center justify-center pt-10">
+            <div class="glass-card p-8 text-center w-full max-w-sm mx-auto relative border-b-[8px]">
+                <div class="w-24 h-24 btn-magic rounded-[2rem] flex items-center justify-center text-[40px] mx-auto mb-6 shadow-[0_0_20px_rgba(76,175,80,0.6)]">👋</div>
+                <h2 class="text-3xl font-black text-[#FFD700] mb-1 drop-shadow-md">Welcome Back!</h2>
+                <h3 id="welcome-name" class="text-2xl font-black text-[#E0E0E0] mb-8 tracking-wide">Name</h3>
+                
+                <div class="bg-[#2A170B] rounded-[24px] p-5 flex items-center justify-center gap-4 mb-8 border-4 border-[#546E7A] shadow-inner">
+                    <span class="text-5xl drop-shadow-[0_0_15px_#FF9800]">🔥</span>
+                    <div class="text-left">
+                        <p class="text-[13px] font-bold text-[#FFD700] uppercase tracking-widest">ค้นหาต่อเนื่อง</p>
+                        <p class="text-3xl font-black text-white"><span id="welcome-streak">0</span> <span class="text-lg text-gray-300">Days</span></p>
+                    </div>
+                </div>
+                
+                <button onclick="switchView('view-home')" class="btn-3d btn-gold w-full py-4 font-black text-[20px] flex items-center justify-center gap-2 tracking-widest shadow-lg">
+                    เปิดหีบสมบัติ <span class="material-symbols-outlined font-black">arrow_forward</span>
+                </button>
+            </div>
+        </section>
+
+        <section id="view-home" class="app-view space-y-5">
+            <div id="home-contextual-alert" class="p-3 bg-[#452814] border-4 border-[#8BA1AB] rounded-[24px] text-[#FFD700] text-[14px] font-bold text-center tracking-wide shadow-lg bounce-in relative overflow-hidden">
+                <div class="absolute inset-0 bg-gradient-to-r from-transparent via-white/10 to-transparent skew-x-12 translate-x-[-100%] animate-[shimmer_2s_infinite]"></div>
+                ยินดีต้อนรับสู่เกมล่าสมบัติ วันนี้พร้อมแล้วหรือยัง?
+            </div>
+
+            <div id="home-content" class="flex flex-col items-center justify-center pt-2 pb-6">
+                <div class="text-center mb-8">
+                    <div class="inline-flex items-center justify-center gap-2 bg-[#2A170B] border-2 border-[#546E7A] px-4 py-1.5 rounded-full mb-3 shadow-inner">
+                        <span class="text-[11px] font-bold text-[#E0E0E0] uppercase tracking-widest">Treasure Rank</span>
+                        <span class="text-[13px] font-black text-[#5C3A21] bg-[#FFD700] px-2.5 py-0.5 rounded-lg border border-[#FFF8DC] shadow-[0_0_8px_#FFD700]" id="home-cefr-rank">A2</span>
+                    </div>
+                    <h2 class="text-[28px] sm:text-[32px] font-black text-white tracking-tight drop-shadow-lg text-shadow-md">Ready to Hunt?</h2>
+                    <p class="text-[#A5D6A7] mt-1 text-[15px] drop-shadow-sm">ได้เวลาสะสมเหรียญทองแล้ว!</p>
+                </div>
+
+                <div class="relative flex items-center justify-center mb-8 mt-2">
+                    <div class="play-pulse-ring"></div>
+                    <button id="btn-play-normal" onclick="startPlaySession('normal')" class="btn-3d btn-gold relative w-44 h-44 sm:w-48 sm:h-48 !rounded-[48px] flex flex-col items-center justify-center shadow-[0_0_30px_rgba(255,215,0,0.4)] focus:outline-none group z-10 border-4 border-[#FFF8DC]">
+                        <span class="material-symbols-outlined mb-1 text-[#5C3A21] transition-transform duration-300 group-active:scale-90" style="font-size: 64px; font-variation-settings: 'FILL' 1;">key</span>
+                        <span class="text-[20px] font-black tracking-widest text-[#5C3A21]">UNLOCK</span>
+                    </button>
+                </div>
+
+                <div class="w-full p-5 glass-card relative overflow-hidden border-b-[6px]">
+                    <div class="flex items-center gap-3 mb-4">
+                        <div class="w-10 h-10 rounded-[12px] btn-wood flex items-center justify-center">
+                            <span class="material-symbols-outlined text-[#FFD700]" style="font-size: 22px;">map</span>
+                        </div>
+                        <h3 id="test-camp-title" class="font-bold text-[#FFE066] text-[16px] drop-shadow-md">แบบทดสอบนักล่าสมบัติ</h3>
+                    </div>
+                    <div class="grid grid-cols-2 gap-4 relative z-10">
+                        <button id="btn-pre-test" onclick="startPlaySession('pre')" class="btn-3d btn-wood py-3.5 font-black text-[14px] flex flex-col items-center gap-1 focus:outline-none">
+                            Pre-Test
+                        </button>
+                        <button id="btn-post-test" onclick="startPlaySession('post')" class="btn-3d btn-magic py-3.5 font-black text-[14px] flex flex-col items-center gap-1 focus:outline-none">
+                            Post-Test
+                        </button>
+                    </div>
+                </div>
+
+                <div id="home-stats-cards" class="grid grid-cols-2 gap-4 w-full mt-5">
+                    <div class="glass-card p-4 text-center border-b-[6px]">
+                        <span class="text-[24px] drop-shadow-[0_0_10px_#FFD700]">🪙</span>
+                        <p class="text-[11px] text-[#A89B82] font-bold uppercase tracking-wider mt-1.5">Gold Coins</p>
+                        <p class="text-2xl font-black text-[#FFD700] mt-0.5" id="mini-score">0</p>
+                    </div>
+                    <div class="glass-card p-4 text-center border-b-[6px]">
+                        <span class="text-[24px] drop-shadow-[0_0_10px_#4CAF50]">🌿</span>
+                        <p class="text-[11px] text-[#A89B82] font-bold uppercase tracking-wider mt-1.5">Daily Hunt</p>
+                        <p class="text-2xl font-black text-[#4CAF50] mt-0.5"><span id="mini-streak">0</span> <span class="text-[12px] font-bold text-[#A5D6A7]">Days</span></p>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- 🔥 GAME VIEW UPDATED TO BLOCK BLAST UI -->
+        <section id="view-game" class="app-view space-y-4">
+            <div class="glass-card p-4 flex items-center gap-4 border-b-[6px] !rounded-2xl">
+                <div class="flex-grow flex flex-col gap-2">
+                    <div class="text-[13px] font-bold text-[#FFE066] tracking-wide uppercase flex items-center gap-2 drop-shadow-sm">
+                        Chest <span id="current-question-num" class="font-black text-white text-xl">1</span><span class="text-[11px] text-gray-300">/20</span>
+                        <span id="test-mode-badge" class="hidden px-2 py-0.5 rounded-[8px] bg-[#E53935] text-white text-[10px] tracking-widest font-black shadow-[0_0_10px_#E53935]">TRIAL</span>
+                    </div>
+                    <div class="w-full bg-[#0A1F16] border border-[#2A170B] h-3 rounded-full overflow-hidden shadow-inner mt-1 relative">
+                        <div id="game-progress-bar" class="bg-gradient-to-r from-[#FFD700] to-[#4CAF50] h-full rounded-full transition-all duration-300 ease-in-out relative" style="width: 5%"></div>
+                    </div>
+                </div>
+                <button onclick="showConfirmExitModal()" class="btn-3d bg-[#2A170B] border-2 border-[#546E7A] text-gray-400 w-10 h-10 flex-shrink-0 flex items-center justify-center focus:outline-none !rounded-xl hover:text-white transition">
+                    <span class="material-symbols-outlined" style="font-size: 20px; font-weight: bold;">close</span>
+                </button>
+            </div>
+            
+            <div id="game-content" class="space-y-5"></div>
+        </section>
+
+        <!-- Wordbank, Leaderboard, Profile Sections Remained Unchanged -->
+        <section id="view-wordbank" class="app-view space-y-5">
+            <div class="glass-card p-6 space-y-5 border-b-[6px]">
+                <div class="flex items-center gap-4 mb-2">
+                    <div class="w-14 h-14 rounded-[16px] btn-gold flex items-center justify-center shadow-[0_0_15px_rgba(255,215,0,0.4)]">
+                        <span class="material-symbols-outlined text-[#5C3A21]" style="font-size: 30px; font-variation-settings: 'FILL' 1;">inventory_2</span>
+                    </div>
+                    <div>
+                        <h3 class="font-black text-[22px] text-[#FFD700] leading-none drop-shadow-md">Loot Inventory</h3>
+                        <p class="text-[14px] text-[#E0E0E0] mt-1.5">สมบัติคำศัพท์ทั้งหมดที่คุณค้นพบ</p>
+                    </div>
+                </div>
+                <div class="space-y-4">
+                    <div class="relative">
+                        <span class="material-symbols-outlined absolute left-4 top-4 text-[#5C3A21]" style="font-size: 22px;">search</span>
+                        <input type="text" id="vocab-search-input" oninput="filterWordBank()" placeholder="ค้นหาสมบัติที่ซ่อนอยู่..." class="w-full pl-12 pr-4 py-3.5 bg-[#FFF8DC] border-4 border-[#8BA1AB] rounded-[24px] focus:ring-4 focus:ring-[#FFD700]/50 text-[16px] text-[#5C3A21] font-bold transition-all duration-300 ease-in-out placeholder-[#A1887F] shadow-inner"/>
+                    </div>
+                    <div class="flex overflow-x-auto gap-2 pb-2 scrollbar-hide" id="bank-filter-tags">
+                        <button onclick="setBankFilter('all', this)" class="bank-tag active px-5 py-2.5 text-[13px] whitespace-nowrap rounded-[16px] font-black bg-[#FFD700] text-[#5C3A21] shadow-[0_0_10px_rgba(255,215,0,0.5)] transition-all duration-300 ease-in-out border-b-4 border-[#D48806]">All Loot</button>
+                        <button onclick="setBankFilter('0', this)" class="bank-tag px-5 py-2.5 text-[13px] whitespace-nowrap rounded-[16px] font-bold bg-[#452814] text-[#E0E0E0] border-2 border-[#546E7A] transition-all duration-300 ease-in-out">Review</button>
+                        <button onclick="setBankFilter('1', this)" class="bank-tag px-5 py-2.5 text-[13px] whitespace-nowrap rounded-[16px] font-bold bg-[#452814] text-[#E0E0E0] border-2 border-[#546E7A] transition-all duration-300 ease-in-out">Chest 1</button>
+                        <button onclick="setBankFilter('2', this)" class="bank-tag px-5 py-2.5 text-[13px] whitespace-nowrap rounded-[16px] font-bold bg-[#452814] text-[#E0E0E0] border-2 border-[#546E7A] transition-all duration-300 ease-in-out">Chest 2</button>
+                        <button onclick="setBankFilter('5', this)" class="bank-tag px-5 py-2.5 text-[13px] whitespace-nowrap rounded-[16px] font-bold bg-[#452814] text-[#E0E0E0] border-2 border-[#546E7A] transition-all duration-300 ease-in-out flex items-center gap-1"><span class="text-[15px] drop-shadow-[0_0_5px_#FFD700]">👑</span> Mastered</button>
+                    </div>
+                </div>
+            </div>
+            <div id="vocab-bank-list" class="space-y-3"></div>
+        </section>
+
+        <section id="view-leaderboard" class="app-view space-y-5">
+            <div class="glass-card p-6 text-center border-b-[6px]">
+                <div class="inline-flex items-center justify-center w-20 h-20 rounded-[24px] btn-gold shadow-[0_0_20px_rgba(255,215,0,0.5)] text-4xl mb-4">🏆</div>
+                <h3 class="font-black text-[26px] text-[#FFD700] drop-shadow-md">Hunter Rankings</h3>
+                <p class="text-[14px] text-[#E0E0E0] mt-1">ใครคือนักล่าสมบัติอันดับหนึ่งที่นี่!</p>
+            </div>
+            <div class="glass-card overflow-hidden !p-0 border-b-[6px]">
+                <table class="w-full text-left">
+                    <thead>
+                        <tr class="bg-[#2A170B] text-[#FFD700] text-[13px] font-black uppercase tracking-wider border-b-2 border-[#546E7A]">
+                            <th class="p-4 text-center w-16">Rank</th>
+                            <th class="p-4">Hunter Name</th>
+                            <th class="p-4 text-right">Coins</th>
+                        </tr>
+                    </thead>
+                    <tbody id="leaderboard-rows-container" class="bg-[#452814]"></tbody>
+                </table>
+            </div>
+        </section>
+
+        <section id="view-profile" class="app-view space-y-5">
+            <div class="glass-card p-6 relative overflow-hidden bg-gradient-to-br from-[#183C2A] to-[#0A1F16] border-b-[6px]">
+                <div class="relative z-10 flex flex-col items-center text-center">
+                    <div class="w-24 h-24 rounded-[2rem] bg-[#2A170B] border-4 border-[#FFD700] flex items-center justify-center text-5xl mb-4 shadow-[0_0_20px_rgba(255,215,0,0.4)]">💸</div>
+                    <h2 class="text-3xl font-black text-[#FFD700] drop-shadow-md" id="profile-email">Loading...</h2>
+                    <p class="text-[#A5D6A7] font-bold text-[14px] mb-3" id="profile-real-email">email</p>
+                    
+                    <div class="mt-2 bg-[#0A1F16]/80 px-5 py-2 rounded-[16px] border-2 border-[#546E7A] shadow-inner flex items-center gap-3">
+                        <span class="text-[12px] text-gray-300 font-bold uppercase tracking-wider">Treasure Rank</span>
+                        <span class="text-[15px] font-black text-[#5C3A21] bg-[#FFD700] px-3 py-0.5 rounded-[10px] shadow-[0_0_8px_#FFD700]" id="profile-cefr-rank">A2</span>
+                    </div>
+                </div>
+                <div class="absolute -right-10 -bottom-10 w-48 h-48 bg-[#4CAF50]/10 rounded-full blur-3xl"></div>
+            </div>
+
+            <div class="grid grid-cols-2 gap-4">
+                <div class="glass-card p-5 text-center border-b-[6px]">
+                    <p class="text-[12px] text-[#A89B82] font-bold uppercase tracking-widest">Total Coins</p>
+                    <p class="text-3xl font-black mt-2 text-[#FFD700] drop-shadow-md" id="profile-score">0</p>
+                </div>
+                <div class="glass-card p-5 text-center border-b-[6px]">
+                    <p class="text-[12px] text-[#A89B82] font-bold uppercase tracking-widest">My Ranking</p>
+                    <p class="text-3xl font-black mt-2 text-[#4CAF50] drop-shadow-md" id="profile-rank">-</p>
+                </div>
+            </div>
+
+            <div class="glass-card p-6 border-b-[6px]">
+                <h3 class="font-black text-[#FFE066] text-[18px] flex items-center gap-2 mb-5 drop-shadow-md">
+                    <span class="material-symbols-outlined text-[#FFD700]" style="font-size: 26px; font-variation-settings: 'FILL' 1;">military_tech</span>
+                    Hunter Badges
+                </h3>
+                <div class="grid grid-cols-3 gap-3" id="profile-badges-container"></div>
+            </div>
+
+            <div class="glass-card p-6 border-b-[6px]">
+                <div class="flex justify-between items-center mb-6">
+                    <h3 class="font-black text-[#FFE066] text-[18px] flex items-center gap-2 drop-shadow-md">
+                        <span class="material-symbols-outlined text-[#4CAF50]" style="font-size: 26px; font-variation-settings: 'FILL' 1;">analytics</span>
+                        Chest Progress
+                    </h3>
+                    <span class="text-[12px] text-[#183C2A] font-black bg-[#A5D6A7] px-3 py-1.5 rounded-[12px] shadow-[0_0_8px_#A5D6A7]" id="profile-words-ratio">0/0 Loot</span>
+                </div>
+                
+                <div class="grid grid-cols-2 gap-4">
+                    <div class="bg-[#2A170B] rounded-[20px] p-4 flex justify-between items-center border-2 border-[#546E7A]">
+                        <div class="flex flex-col"><span class="text-[13px] font-bold text-gray-300">Unseen</span><span class="text-[10px] text-gray-500">ยังไม่ค้นพบ</span></div>
+                        <span class="text-xl font-black text-gray-300" id="stat-unseen">0</span>
+                    </div>
+                    <div class="bg-[#3E2723] rounded-[20px] p-4 flex justify-between items-center border-2 border-[#E53935]">
+                        <div class="flex flex-col"><span class="text-[13px] font-bold text-[#EF9A9A]">Review</span><span class="text-[10px] text-[#E53935]">ใกล้จะหลุดมือ</span></div>
+                        <span class="text-xl font-black text-[#EF9A9A]" id="stat-box0">0</span>
+                    </div>
+                    <div class="bg-[#452814] rounded-[20px] p-4 flex justify-between items-center border-2 border-[#FFC107]">
+                        <div class="flex flex-col"><span class="text-[13px] font-bold text-[#FFE082]">Chest 1</span><span class="text-[10px] text-[#FFC107]">ทวนใน 1 วัน</span></div>
+                        <span class="text-xl font-black text-[#FFE082]" id="stat-box1">0</span>
+                    </div>
+                    <div class="bg-[#452814] rounded-[20px] p-4 flex justify-between items-center border-2 border-[#FFC107]">
+                        <div class="flex flex-col"><span class="text-[13px] font-bold text-[#FFE082]">Chest 2</span><span class="text-[10px] text-[#FFC107]">ทวนใน 3 วัน</span></div>
+                        <span class="text-xl font-black text-[#FFE082]" id="stat-box2">0</span>
+                    </div>
+                    <div class="bg-[#1B3526] rounded-[20px] p-4 flex justify-between items-center border-2 border-[#4CAF50]">
+                        <div class="flex flex-col"><span class="text-[13px] font-bold text-[#A5D6A7]">Chest 3</span><span class="text-[10px] text-[#4CAF50]">ทวนใน 7 วัน</span></div>
+                        <span class="text-xl font-black text-[#A5D6A7]" id="stat-box3">0</span>
+                    </div>
+                    <div class="bg-[#1B3526] rounded-[20px] p-4 flex justify-between items-center border-2 border-[#4CAF50]">
+                        <div class="flex flex-col"><span class="text-[13px] font-bold text-[#A5D6A7]">Chest 4</span><span class="text-[10px] text-[#4CAF50]">ทวนใน 14 วัน</span></div>
+                        <span class="text-xl font-black text-[#A5D6A7]" id="stat-box4">0</span>
+                    </div>
+                    <div class="col-span-2 bg-gradient-to-r from-[#FFD700]/20 to-[#FF9800]/20 rounded-[24px] p-5 flex justify-between items-center border-4 border-[#FFD700] relative overflow-hidden mt-2 shadow-[0_0_15px_rgba(255,215,0,0.3)]">
+                        <div class="relative z-10 flex items-center gap-4">
+                            <span class="text-3xl drop-shadow-[0_0_10px_#FFD700]">👑</span>
+                            <div class="flex flex-col"><span class="text-[16px] font-black text-[#FFD700] drop-shadow-md">Legendary (Chest 5)</span><span class="text-[12px] text-[#FFE082] font-bold">สมบัติถาวร</span></div>
+                        </div>
+                        <span class="text-3xl font-black text-[#FFD700] relative z-10 drop-shadow-md" id="stat-box5">0</span>
+                    </div>
+                </div>
+            </div>
+
+            <div class="mt-8 mb-10">
+                <button onclick="confirmLogout()" class="btn-3d btn-danger w-full py-4 font-black text-[16px] flex items-center justify-center gap-2 focus:outline-none shadow-lg tracking-widest">
+                    <span class="material-symbols-outlined" style="font-size: 24px;">directions_run</span>
+                    หนีออกจากป่า (Switch Account)
+                </button>
+            </div>
+        </section>
+
+    </main>
+
+    <div class="fixed bottom-5 sm:bottom-6 left-0 right-0 z-40 flex justify-center pointer-events-none hidden" id="bottom-nav-container">
+        <nav id="bottom-nav-bar" class="pointer-events-auto glass-card !rounded-[32px] border-4 border-[#8BA1AB] flex justify-between items-center px-2 py-2 w-[92%] max-w-[480px] relative z-50 bg-[#2A170B] shadow-[0_10px_30px_rgba(0,0,0,0.6)]">
+            <button onclick="switchView('view-home')" id="nav-btn-home" class="btn-3d flex-1 flex flex-col items-center justify-center py-2.5 text-[#5C3A21] focus:outline-none bg-gradient-to-b from-[#FFD700] to-[#FF9800] !rounded-[24px] shadow-[0_0_15px_rgba(255,215,0,0.5)] border-b-4 border-[#D48806] mx-1 transition-all duration-300 ease-in-out">
+                <span class="material-symbols-outlined" style="font-variation-settings: 'FILL' 1; font-size: 28px;">🗺️</span>
+                <span class="text-[10px] font-black mt-1 uppercase tracking-widest">Hunt</span>
+            </button>
+            <button onclick="switchView('view-wordbank')" id="nav-btn-wordbank" class="btn-3d flex-1 flex flex-col items-center justify-center py-2.5 text-[#A89B82] focus:outline-none bg-[#452814] !rounded-[24px] border-b-2 border-[#2A170B] mx-1 transition-all duration-300 ease-in-out">
+                <span class="material-symbols-outlined" style="font-size: 28px;">🪎</span>
+                <span class="text-[10px] font-bold mt-1 uppercase tracking-widest">Treasure</span>
+            </button>
+            <button onclick="switchView('view-leaderboard')" id="nav-btn-leaderboard" class="btn-3d flex-1 flex flex-col items-center justify-center py-2.5 text-[#A89B82] focus:outline-none bg-[#452814] !rounded-[24px] border-b-2 border-[#2A170B] mx-1 transition-all duration-300 ease-in-out">
+                <span class="material-symbols-outlined" style="font-size: 28px;">🏆</span>
+                <span class="text-[10px] font-bold mt-1 uppercase tracking-widest">Rank</span>
+            </button>
+            <button onclick="switchView('view-profile')" id="nav-btn-profile" class="btn-3d flex-1 flex flex-col items-center justify-center py-2.5 text-[#A89B82] focus:outline-none bg-[#452814] !rounded-[24px] border-b-2 border-[#2A170B] mx-1 transition-all duration-300 ease-in-out">
+                <span class="material-symbols-outlined" style="font-size: 28px;">🪪</span>
+                <span class="text-[10px] font-bold mt-1 uppercase tracking-widest">Me</span>
+            </button>
+        </nav>
+    </div>
+
+    <!-- Modals -->
+    <div id="confirm-exit-modal" class="fixed inset-0 z-50 flex items-center justify-center bg-[#0A1F16]/80 backdrop-blur-sm hidden p-4 opacity-0">
+        <div class="glass-card p-8 w-full max-w-sm text-center relative border-b-[8px]" id="exit-modal-content">
+            <div class="w-20 h-20 btn-danger rounded-[24px] flex items-center justify-center text-4xl mx-auto mb-5 border-b-4"><span class="material-symbols-outlined text-white" style="font-size: 40px;">directions_run</span></div>
+            <h3 class="text-[24px] font-black text-[#FFD700] mb-2 drop-shadow-md">หนีกลับแคมป์?</h3>
+            <p class="text-[15px] text-gray-300 mb-8 font-bold">สมบัติที่กำลังเปิดในรอบนี้จะหายไปนะ!</p>
+            <button onclick="executeExitGame()" class="btn-3d btn-danger w-full py-4 font-black mb-4 text-[18px] tracking-widest">ใช่หนีเลย</button>
+            <button onclick="closeConfirmExitModal()" class="btn-3d btn-wood w-full py-4 font-black text-[18px] tracking-widest">อยู่ต่อ</button>
+        </div>
+    </div>
+
+    <div id="logout-modal" class="fixed inset-0 z-50 flex items-center justify-center bg-[#0A1F16]/80 backdrop-blur-sm hidden p-4 opacity-0">
+        <div class="glass-card p-8 w-full max-w-sm text-center relative border-b-[8px]" id="logout-modal-content">
+            <div class="w-20 h-20 btn-danger rounded-[24px] flex items-center justify-center text-4xl mx-auto mb-5 border-b-4"><span class="material-symbols-outlined text-white" style="font-size: 40px;">logout</span></div>
+            <h3 class="text-[24px] font-black text-[#FFD700] mb-2 drop-shadow-md">เปลี่ยนนักล่า?</h3>
+            <p class="text-[15px] text-gray-300 mb-8 font-bold">ระบบจะพากลับไปหน้าเข้าสู่ระบบ Google</p>
+            <button onclick="executeLogout()" class="btn-3d btn-danger w-full py-4 font-black mb-4 text-[18px] tracking-widest">ใช่สลับบัญชี</button>
+            <button onclick="closeLogoutModal()" class="btn-3d btn-wood w-full py-4 font-black text-[18px] tracking-widest">ยกเลิก</button>
+        </div>
+    </div>
+
+    <div id="score-result-modal" class="fixed inset-0 z-[100] flex items-center justify-center bg-[#0A1F16]/90 backdrop-blur-md hidden p-4 opacity-0">
+        <div class="glass-card p-8 w-full max-w-sm text-center relative border-b-[8px] border-x-4 border-[#FFD700] shadow-[0_0_40px_rgba(255,215,0,0.4)]" id="score-modal-content">
+            <div class="w-24 h-24 btn-gold rounded-[2rem] flex items-center justify-center text-5xl mx-auto mb-5 border-b-[6px] shadow-[0_0_20px_rgba(255,215,0,0.6)]">🏆</div>
+            <h3 class="text-[30px] font-black text-[#FFD700] mb-2 drop-shadow-lg text-shadow-md">การล่าสิ้นสุดลงแล้ว!</h3>
+            <p class="text-[16px] text-gray-200 font-bold mb-3">คุณเก็บเหรียญทองได้</p>
+            <div class="text-[52px] font-black text-white mb-8 drop-shadow-[0_0_15px_#FFD700]" id="final-score-display">0 / 20</div>
+            <button onclick="closeScoreModalAndGoHome()" class="btn-3d btn-gold w-full py-4 font-black text-[20px] flex items-center justify-center gap-2 tracking-widest shadow-lg">
+                <span class="material-symbols-outlined text-[#5C3A21] text-[28px] font-bold">map</span> รับรางวัล
+            </button>
         </div>
     </div>
 
     <script>
-        const firebaseConfig = {
-            apiKey: "AIzaSyBaaLvQCgokMUeqVm0VMxwHGE3xtFJk0Zs",
-            authDomain: "spellingtreasure.firebaseapp.com",
-            databaseURL: "https://spellingtreasure-default-rtdb.asia-southeast1.firebasedatabase.app",
-            projectId: "spellingtreasure",
-            storageBucket: "spellingtreasure.firebasestorage.app",
-            messagingSenderId: "763332831883",
-            appId: "1:763332831883:web:a032042096e8a9d2c4028e"
+        const APP_URL = "<?= ScriptApp.getService().getUrl() ?>";
+
+        let rawEmail = "<?= typeof userEmail !== 'undefined' ? userEmail : '' ?>";
+        if (rawEmail.startsWith("<" + "?=") || !rawEmail) { rawEmail = "guest@school.edu"; }
+        const currentUserEmail = rawEmail; 
+
+        let appData = { 
+            userEmail: currentUserEmail, displayName: "", score: 0, boxStats: {}, leaderboard: [], myRank: -1, 
+            wordList: [], currentFilter: 'all', searchQuery: '', hasDonePreTest: false, cefrRank: 'A2', needRegistration: false, streak: 0 
+        };
+        let gameSession = { isTestMode: false, testType: 'normal', words: [], index: 0, targetWord: "", guessedLetters: new Set(), mistakes: 0, maxMistakes: 5, sessionLogs: [] };
+
+        let isDataLoaded = false;
+        let isTimerDone = false;
+
+        function createFallingBackground() {
+            const bg = document.getElementById('bg-magic-motes');
+            if(!bg) return;
+            for(let i=0; i<30; i++) {
+                let bokeh = document.createElement('div');
+                let size = Math.random() * 6 + 2; 
+                bokeh.className = 'firefly';
+                bokeh.style.width = size + 'px'; bokeh.style.height = size + 'px';
+                bokeh.style.left = Math.random() * 100 + 'vw';
+                bokeh.style.animationDuration = (Math.random() * 10 + 8) + 's';
+                bokeh.style.animationDelay = '-' + (Math.random() * 15) + 's';
+                bg.appendChild(bokeh);
+            }
+        }
+        createFallingBackground();
+
+        window.addEventListener('keydown', (e) => {
+            if (document.activeElement.tagName === 'INPUT') return;
+            const key = e.key.toUpperCase();
+            if (/^[A-Z]$/.test(key)) {
+                const poolBtns = document.querySelectorAll('.gsap-letter-box');
+                for (let btn of poolBtns) { if (btn.innerText === key && !btn.disabled) { btn.click(); break; } }
+            }
+            if (e.key === 'Enter') {
+                const nextBtn = document.getElementById('btn-next-word');
+                if (nextBtn && !nextBtn.classList.contains('hidden')) { nextBtn.click(); }
+                const scoreModal = document.getElementById('score-result-modal');
+                if (scoreModal && !scoreModal.classList.contains('hidden')) { closeScoreModalAndGoHome(); }
+            }
+        });
+
+        function shuffleArray(arr) {
+            const newArr = [...arr];
+            for (let i = newArr.length - 1; i > 0; i--) { const j = Math.floor(Math.random() * (i + 1)); [newArr[i], newArr[j]] = [newArr[j], newArr[i]]; }
+            return newArr;
+        }
+
+        function escapeHTML(str) { return (!str) ? '' : String(str).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;').replace(/'/g, '&#039;'); }
+        function safeSetText(id, text) { const el = document.getElementById(id); if (el) el.innerText = text; }
+        function safeSetHTML(id, html) { const el = document.getElementById(id); if (el) el.innerHTML = html; }
+
+        function switchView(viewId) {
+            if (!appData.hasDonePreTest && viewId !== 'view-home' && viewId !== 'view-game' && viewId !== 'view-register' && viewId !== 'view-welcome-back') {
+                alert("ต้องผ่านวิหารทดสอบ (Pre-Test) ก่อนถึงจะออกล่าสมบัติได้! 🗺️"); return;
+            }
+            if (!document.startViewTransition) {
+                performViewSwitch(viewId);
+            } else {
+                document.startViewTransition(() => performViewSwitch(viewId));
+            }
+        }
+
+        function performViewSwitch(viewId) {
+            ['view-home', 'view-game', 'view-wordbank', 'view-leaderboard', 'view-profile', 'view-register', 'view-welcome-back'].forEach(id => {
+                const el = document.getElementById(id); if(el) el.style.display = 'none';
+            });
+            
+            const activeView = document.getElementById(viewId); 
+            if (activeView) {
+                activeView.style.display = (viewId === 'view-register' || viewId === 'view-welcome-back') ? 'flex' : 'block';
+                document.getElementById('main-content-area').scrollTop = 0;
+                gsap.fromTo(activeView, { opacity: 0, y: 15 }, { opacity: 1, y: 0, duration: 0.3, ease: "power2.inOut" });
+            }
+            
+            const bottomNav = document.getElementById('bottom-nav-container');
+            const mainHeader = document.getElementById('main-header');
+            
+            if (viewId === 'view-register' || viewId === 'view-welcome-back') {
+                if(bottomNav) bottomNav.classList.add('hidden');
+                if(mainHeader) mainHeader.classList.add('hidden');
+            } else {
+                if(bottomNav) bottomNav.classList.remove('hidden');
+                if(mainHeader) mainHeader.classList.remove('hidden');
+                const navInner = document.getElementById('bottom-nav-bar');
+                if(navInner) { gsap.to(navInner, { y: (viewId === 'view-game') ? 150 : 0, duration: 0.3, ease: "power2.inOut" }); }
+            }
+            
+            ['nav-btn-home', 'nav-btn-wordbank', 'nav-btn-leaderboard', 'nav-btn-profile'].forEach(id => {
+                const btn = document.getElementById(id);
+                if(btn) {
+                    if(viewId === id.replace('nav-btn-', 'view-')) { 
+                        btn.className = "btn-3d flex-1 flex flex-col items-center justify-center py-2.5 text-[#5C3A21] focus:outline-none bg-gradient-to-b from-[#FFD700] to-[#FF9800] !rounded-[24px] shadow-[0_0_15px_rgba(255,215,0,0.5)] border-b-4 border-[#D48806] mx-1 transition-all duration-300 ease-in-out";
+                        btn.querySelector('.material-symbols-outlined').style.fontVariationSettings = "'FILL' 1"; 
+                    } else { 
+                        btn.className = "btn-3d flex-1 flex flex-col items-center justify-center py-2.5 text-[#A89B82] focus:outline-none bg-[#452814] !rounded-[24px] border-b-2 border-[#2A170B] mx-1 transition-all duration-300 ease-in-out";
+                        btn.querySelector('.material-symbols-outlined').style.fontVariationSettings = "'FILL' 0"; 
+                    }
+                }
+            });
+        }
+
+        function submitPlayerName() {
+            const input = document.getElementById('player-name-input');
+            const name = input.value.trim();
+            if (name.length < 2) { alert("ชื่อนักล่าต้องมีอย่างน้อย 2 ตัวอักษรครับ!"); return; }
+
+            const btn = document.getElementById('btn-submit-name');
+            const originalText = btn.innerHTML;
+            btn.innerHTML = `<div class="w-8 h-8 border-4 border-[#5C3A21] border-t-transparent rounded-full animate-spin"></div>`;
+            btn.disabled = true;
+
+            if (typeof google !== 'undefined' && google.script) {
+                google.script.run.withSuccessHandler(function(savedName) {
+                    appData.displayName = savedName;
+                    appData.needRegistration = false;
+                    safeSetText('header-email-display', savedName);
+                    safeSetText('profile-email', savedName);
+                    switchView('view-home'); 
+                }).withFailureHandler(function() {
+                    alert("บันทึกชื่อไม่สำเร็จ ลองอีกครั้งครับ");
+                    btn.innerHTML = originalText; btn.disabled = false;
+                }).savePlayerName(name);
+            } else {
+                setTimeout(() => {
+                    appData.displayName = name; appData.needRegistration = false;
+                    safeSetText('header-email-display', name); safeSetText('profile-email', name);
+                    switchView('view-home');
+                }, 1000);
+            }
+        }
+
+        function confirmLogout() {
+            const modal = document.getElementById('logout-modal');
+            const content = document.getElementById('logout-modal-content');
+            if(modal) {
+                modal.classList.remove('hidden');
+                gsap.to(modal, {opacity: 1, duration: 0.3, ease: "power2.inOut"});
+                gsap.fromTo(content, {scale: 0.8, y: 30}, {scale: 1, y: 0, duration: 0.3, ease: "power2.inOut"});
+            }
+        }
+        function closeLogoutModal() { const modal = document.getElementById('logout-modal'); if(modal) gsap.to(modal, {opacity: 0, duration: 0.3, ease: "power2.inOut", onComplete: () => modal.classList.add('hidden')}); }
+        function executeLogout() { window.top.location.href = "https://accounts.google.com/AccountChooser?continue=" + encodeURIComponent(APP_URL); }
+
+        function showConfirmExitModal() { 
+            const modal = document.getElementById('confirm-exit-modal');
+            const content = document.getElementById('exit-modal-content');
+            if(modal) {
+                modal.classList.remove('hidden');
+                gsap.to(modal, {opacity: 1, duration: 0.3, ease: "power2.inOut"});
+                gsap.fromTo(content, {scale: 0.8, y: 30}, {scale: 1, y: 0, duration: 0.3, ease: "power2.inOut"});
+            }
+        }
+        function closeConfirmExitModal() { const modal = document.getElementById('confirm-exit-modal'); if(modal) gsap.to(modal, {opacity: 0, duration: 0.3, ease: "power2.inOut", onComplete: () => modal.classList.add('hidden')}); }
+        function executeExitGame() { closeConfirmExitModal(); switchView('view-home'); }
+
+        function showErrorScreen() {
+            const splashScreen = document.getElementById('splash-screen');
+            if(splashScreen) {
+                splashScreen.innerHTML = `
+                <div class="flex flex-col items-center">
+                    <div class="w-24 h-24 bg-[#B71C1C] border-4 border-[#FFF8DC] text-white rounded-[2rem] flex items-center justify-center text-5xl mb-6 shadow-[0_0_20px_#E53935]">
+                        <span class="material-symbols-outlined" style="font-size: 50px;">sentiment_dissatisfied</span>
+                    </div>
+                    <h2 class="text-3xl font-black text-[#EF9A9A] mb-2 drop-shadow-md">LOST SIGNAL</h2>
+                    <p class="text-[#E0E0E0] text-center mb-8 font-bold">หลงทางในป่าเวทมนตร์ (เน็ตหลุด) ลองใหม่อีกครั้งนะ</p>
+                    <button onclick="window.location.reload()" class="btn-3d btn-gold w-full max-w-[240px] py-4 text-[20px] font-black focus:outline-none tracking-widest shadow-lg">TRY AGAIN</button>
+                </div>`;
+            }
+        }
+
+        window.onload = function() { 
+            setTimeout(() => {
+                const progress = document.getElementById('splash-progress');
+                if (progress) progress.style.width = '100%';
+            }, 50); 
+
+            setTimeout(() => {
+                isTimerDone = true;
+                checkReadyToStart();
+            }, 3000); // 💡 ปรับลดเวลาโหลดให้เร็วขึ้นได้ตามชอบ (เดิม 10 วิ)
+
+            if (typeof google !== 'undefined' && google.script) {
+                google.script.run.withSuccessHandler(onDashboardLoaded).withFailureHandler(function(error) { 
+                    showErrorScreen(); 
+                }).getHomeData();
+            } else { 
+                setTimeout(() => { onDashboardLoaded({}); }, 1000); 
+            }
         };
 
-        firebase.initializeApp(firebaseConfig);
-        const db = firebase.firestore();
+        function createBadgeHTML(icon, title, desc, isUnlocked) {
+            var bgClass = isUnlocked ? "bg-[#452814] border-[#FFD700] shadow-[0_0_10px_rgba(255,215,0,0.3)]" : "bg-[#2A170B] border-[#546E7A] grayscale opacity-50";
+            var textClass = isUnlocked ? "text-[#FFD700]" : "text-[#A89B82]";
+            var iconClass = isUnlocked ? "drop-shadow-[0_0_8px_#FFD700] scale-110" : "scale-90";
 
-        async function viewData() {
-            const collection = document.getElementById('viewCollection').value;
-            if (!collection) return;
+            return `
+            <div class="flex flex-col items-center justify-center p-3 rounded-[24px] border-2 ${bgClass} transition-all duration-300 ease-in-out">
+                <div class="text-[36px] mb-2 transition-transform ${iconClass}">${icon}</div>
+                <p class="text-[12px] font-black ${textClass} leading-tight text-center drop-shadow-md">${title}</p>
+                <p class="text-[10px] text-gray-300 text-center mt-1 leading-tight">${desc}</p>
+            </div>
+            `;
+        }
 
-            const tableHead = document.getElementById('tableHead');
-            const tableBody = document.getElementById('tableBody');
+        function updateContextualAlert() {
+            const alertBox = document.getElementById('home-contextual-alert');
+            if(!alertBox) return;
             
-            tableBody.innerHTML = "<tr><td class='p-6 text-center'>กำลังโหลดข้อมูล...</td></tr>";
+            let message = "ยินดีต้อนรับสู่ป่าเวทมนตร์ Spelling Treasure! วันนี้พร้อมล่าสมบัติคำศัพท์หรือยัง?";
+            
+            if (appData.boxStats["5"] > 40 && appData.boxStats["5"] < 50) {
+                message = "อีกแค่ " + (50 - appData.boxStats["5"]) + " คำ จะปลดล็อกเหรียญ Legendary Hunter แล้วนะ ลุยเลย!";
+            } else if (appData.streak > 0 && appData.streak < 3) {
+                message = "เข้าป่าต่อเนื่องอีก " + (3 - appData.streak) + " วัน จะปลดล็อกเหรียญไฟลุก On Fire! สู้ๆ";
+            } else if (appData.score > 100) {
+                message = "สุดยอดนักล่า! คุณสะสมเหรียญทองเกิน 100 เหรียญแล้ว!";
+            }
+            
+            alertBox.innerHTML = `<div class="absolute inset-0 bg-gradient-to-r from-transparent via-white/10 to-transparent skew-x-12 translate-x-[-100%] animate-[shimmer_2s_infinite]"></div>` + message;
+        }
 
-            const snapshot = await db.collection(collection).get();
-            if (snapshot.empty) {
-                tableBody.innerHTML = "<tr><td class='p-6 text-center'>ไม่พบข้อมูลในนี้ครับ</td></tr>";
-                tableHead.innerHTML = "";
-                return;
+        function onDashboardLoaded(data) {
+            try {
+                if (!data) data = {};
+                appData.userEmail = data.userEmail || "Unknown User";  
+                appData.displayName = data.displayName || ""; 
+                appData.needRegistration = (appData.displayName === ""); 
+                
+                appData.score = Number(data.score) || 0;
+                appData.streak = data.streak || 0;
+                appData.boxStats = data.boxStats || {}; 
+                appData.leaderboard = data.leaderboard || [];
+                appData.myRank = Number(data.myRank) || -1; 
+                appData.wordList = data.wordList || [];
+                
+                appData.hasDonePreTest = data.hasDonePreTest === true;
+                if (!appData.hasDonePreTest) { document.body.classList.add('locked-ui'); } 
+                else { document.body.classList.remove('locked-ui'); }
+
+                appData.cefrRank = data.cefrRank || 'A2';
+                safeSetText('home-cefr-rank', appData.cefrRank);
+                safeSetText('profile-cefr-rank', appData.cefrRank);
+
+                const showName = appData.displayName !== "" ? appData.displayName : appData.userEmail.split('@')[0];
+                safeSetText('header-email-display', showName); 
+                safeSetText('profile-email', showName); 
+                safeSetText('profile-real-email', appData.userEmail); 
+                
+                safeSetText('header-streak', appData.streak);
+                safeSetText('mini-score', appData.score); safeSetText('mini-streak', appData.streak);
+                safeSetText('profile-score', appData.score);
+                safeSetText('profile-rank', appData.myRank > 0 ? ("#" + appData.myRank) : "-");
+                
+                const totalVocab = data.totalVocab || appData.wordList.length || 0;
+                const masteredCount = appData.wordList.filter(w => w && w.level !== 'unseen').length;
+                safeSetText('profile-words-ratio', `${masteredCount}/${totalVocab} Loot`);
+
+                safeSetText('stat-unseen', appData.boxStats["unseen"] || 0); safeSetText('stat-box0', appData.boxStats["0"] || 0);
+                safeSetText('stat-box1', appData.boxStats["1"] || 0); safeSetText('stat-box2', appData.boxStats["2"] || 0);
+                safeSetText('stat-box3', appData.boxStats["3"] || 0); safeSetText('stat-box4', appData.boxStats["4"] || 0); safeSetText('stat-box5', appData.boxStats["5"] || 0);
+
+                var badges = data.badges || {};
+                var badgesHTML = '';
+                badgesHTML += createBadgeHTML('🗺️', 'Explorer', 'เปิดแผนที่', badges.newCamper);
+                badgesHTML += createBadgeHTML('🔥', 'On Fire', 'ล่า 3 วันรวด', badges.streak3);
+                badgesHTML += createBadgeHTML('🐉', 'Legend', 'ล่า 7 วันรวด', badges.streak7);
+                badgesHTML += createBadgeHTML('👑', 'Wordsmith', 'เจอสมบัติ 50 ชิ้น', badges.wordsmith);
+                badgesHTML += createBadgeHTML('🎯', 'A2 Master', 'พิชิตดันเจี้ยน A2', badges.a2Master);
+                badgesHTML += createBadgeHTML('🏆', 'B1 Master', 'พิชิตดันเจี้ยน B1', badges.b1Master);
+                safeSetHTML('profile-badges-container', badgesHTML);
+
+                renderWordBank(); renderLeaderboard();
+                updateContextualAlert();
+                
+                isDataLoaded = true;
+                checkReadyToStart();
+
+            } catch (err) { console.error(err); }
+        }
+
+        function checkReadyToStart() {
+            if (isDataLoaded && isTimerDone) {
+                const splash = document.getElementById('splash-screen');
+                if(splash) { 
+                    gsap.to(splash, { 
+                        opacity: 0, 
+                        duration: 0.4, 
+                        ease: "power2.inOut", 
+                        onComplete: () => { 
+                            splash.classList.add('hidden'); 
+                            if (appData.needRegistration) {
+                                switchView('view-register');
+                            } else {
+                                safeSetText('welcome-name', appData.displayName);
+                                safeSetText('welcome-streak', appData.streak);
+                                switchView('view-welcome-back');
+                            }
+                        } 
+                    }); 
+                }
+            }
+        }
+
+        function startPlaySession(modeType) {
+            gameSession.isTestMode = (modeType !== 'normal'); gameSession.testType = modeType;
+            const badge = document.getElementById('test-mode-badge');
+            if(badge) {
+                if(gameSession.isTestMode) {
+                    badge.classList.remove('hidden'); badge.innerText = (modeType === 'pre') ? "TRIAL" : "BOSS";
+                    badge.className = "px-2 py-0.5 rounded-[8px] bg-[#E53935] text-white text-[10px] tracking-widest font-black shadow-[0_0_10px_#E53935]";
+                } else { badge.classList.add('hidden'); }
             }
 
-            const firstDoc = snapshot.docs[0].data();
-            const headers = Object.keys(firstDoc);
+            switchView('view-game');
+            safeSetHTML('game-content', `
+                <div class="py-32 flex flex-col items-center justify-center">
+                    <div class="w-14 h-14 border-4 border-[#546E7A] border-t-[#FFD700] rounded-full animate-spin shadow-[0_0_15px_rgba(255,215,0,0.5)]"></div>
+                    <p class="text-[#FFE066] mt-5 font-bold text-[16px] tracking-widest drop-shadow-md">Searching Treasure...</p>
+                </div>`);
             
-            tableHead.innerHTML = `<tr>${headers.map(h => `<th class="p-4">${h}</th>`).join('')}</tr>`;
-            
-            tableBody.innerHTML = snapshot.docs.map(doc => {
-                const data = doc.data();
-                return `<tr>${headers.map(h => `<td class="p-4 border-b border-white/5">${data[h] || '-'}</td>`).join('')}</tr>`;
-            }).join('');
+            if (typeof google !== 'undefined' && google.script) {
+                if (modeType === 'normal') { 
+                    google.script.run.withSuccessHandler(initGameSession).withFailureHandler((err)=> { 
+                        console.error(err); alert("ค้นหาสมบัติล้มเหลว"); switchView('view-home'); 
+                    }).getTodayVocab(); 
+                } 
+                else { 
+                    google.script.run.withSuccessHandler(res => { 
+                        if(res && res.error) { alert(res.error); switchView('view-home'); return; } initGameSession(res); 
+                    }).withFailureHandler((err)=> { 
+                        console.error(err); alert("ปลดล็อกวิหารทดสอบล้มเหลว"); switchView('view-home'); 
+                    }).getTestData(modeType); 
+                }
+            } else { alert("ไม่สามารถเล่นได้ในระบบออฟไลน์"); switchView('view-home'); }
         }
+
+        function initGameSession(words) {
+            if (!words || words.length === 0) { alert("ไม่มีคำศัพท์ในระบบ หรือการดึงข้อมูลผิดพลาด"); switchView('view-home'); return; }
+            gameSession.words = words; gameSession.index = 0; gameSession.sessionLogs = [];
+            loadSpellingWord();
+        }
+
+        // 🔥 อัปเดตส่วน Game Content (Block Blast UI)
+        function loadSpellingWord() {
+            try {
+                const wordObj = gameSession.words[gameSession.index];
+                if (!wordObj) { alert("พบปัญหาในการดึงคำศัพท์ข้อนี้"); switchView('view-home'); return; }
+
+                gameSession.targetWord = String(wordObj.v1 || '').trim().toUpperCase();
+                gameSession.guessedLetters = new Set();
+                gameSession.mistakes = 0;
+
+                let wordLen = gameSession.targetWord.replace(/[^A-Z]/g, '').length; 
+                let numHints = 1; if (wordLen >= 7) numHints = 3; else if (wordLen >= 4) numHints = 2; 
+                let uniqueChars = Array.from(new Set(gameSession.targetWord.replace(/[^A-Z]/g, '').split('')));
+                if (numHints >= uniqueChars.length) numHints = Math.max(0, uniqueChars.length - 1);
+                let shuffledChars = shuffleArray(uniqueChars);
+                for(let i = 0; i < numHints; i++) { gameSession.guessedLetters.add(shuffledChars[i]); }
+
+                safeSetText('current-question-num', gameSession.index + 1);
+                const pBar = document.getElementById('game-progress-bar');
+                if(pBar) pBar.style.width = (((gameSession.index + 1) / gameSession.words.length) * 100) + '%';
+
+                safeSetHTML('game-content', `
+                    <!-- 💡 Meaning Box แบบใหม่ สะอาดขึ้น -->
+                    <div class="bg-[#183C2A] p-6 rounded-2xl shadow-xl border border-[#2A170B] w-full max-w-sm mx-auto mb-6 text-center" id="word-meaning-card">
+                        <span class="text-[12px] text-[#4CAF50] font-black uppercase tracking-[0.2em] block mb-2 drop-shadow-sm">Meaning</span>
+                        <h3 class="text-[26px] font-bold text-white leading-relaxed drop-shadow-md">${escapeHTML(wordObj.meaning)}</h3>
+                    </div>
+                    
+                    <div class="flex justify-center items-center gap-1.5 mb-5" id="game-hearts"></div>
+                    
+                    <!-- 💡 Slots รองรับบล็อกพัซเซิล -->
+                    <div id="spelling-slots" class="flex flex-wrap justify-center gap-2 mb-10 min-h-[60px]"></div>
+                    
+                    <!-- 💡 ตัวเลือกบล็อกตัวอักษร -->
+                    <div id="letter-pool-container" class="flex flex-wrap justify-center gap-3 max-w-[320px] mx-auto"></div>
+                    
+                    <div id="game-feedback" class="hidden mt-6 opacity-0"></div>
+                    
+                    <div class="flex justify-center mt-8" id="skip-action-container">
+                        <button id="btn-skip-word" onclick="skipCurrentWord()" class="btn-3d bg-transparent border-2 border-[#546E7A] text-[#8BA1AB] hover:bg-[#2A170B] hover:text-white px-6 py-2.5 rounded-[16px] font-bold text-[14px] flex items-center gap-1 focus:outline-none transition-colors">
+                            <span class="material-symbols-outlined text-[18px]">skip_next</span> ยอมแพ้หีบนี้
+                        </button>
+                    </div>
+
+                    <div class="mt-8">
+                        <button id="btn-next-word" onclick="nextPlayWord()" class="hidden block-puzzle w-full py-4 text-[#0A1F16] font-black text-[20px] flex items-center justify-center gap-2 focus:outline-none">
+                            NEXT CHEST <span class="material-symbols-outlined" style="font-size: 26px; font-weight: bold;">arrow_forward</span>
+                        </button>
+                    </div>
+                `);
+
+                gsap.fromTo("#word-meaning-card", {scale: 0.95, opacity: 0}, {scale: 1, opacity: 1, duration: 0.4, ease: "back.out(1.2)"});
+                updateSpellingUI(true); 
+                generateLetterBoxes();
+            } catch(e) { console.error(e); }
+        }
+
+        // 🔥 เปลี่ยนหน้าตา Slot ตัวอักษรให้เหมือนกระดานวางบล็อก
+        function updateSpellingUI(isInitialLoad = false) {
+            const slotsContainer = document.getElementById('spelling-slots');
+            let slotsHTML = ''; let isWon = true;
+
+            for (let char of gameSession.targetWord) {
+                if (char === ' ' || char === '-') { slotsHTML += `<div class="w-4 flex items-end justify-center pb-2 text-[#546E7A] font-bold">-</div>`; continue; }
+                if (gameSession.guessedLetters.has(char)) { 
+                    slotsHTML += `<div class="gsap-slot w-12 h-12 md:w-14 md:h-14 bg-[#FFD700] rounded-xl shadow-[0_4px_0_#D48806] text-[28px] font-black text-[#0A1F16] flex items-center justify-center uppercase mx-[2px] transition-all relative">
+                                    <div class="absolute inset-0 bg-white/20 rounded-xl" style="clip-path: polygon(0 0, 100% 0, 100% 30%, 0 100%);"></div>
+                                    <span class="relative z-10">${char}</span>
+                                  </div>`; 
+                } else { 
+                    slotsHTML += `<div class="gsap-slot w-12 h-12 md:w-14 md:h-14 bg-[#0A1F16] border-2 border-[#183C2A] rounded-xl shadow-inner text-3xl font-black text-transparent flex items-center justify-center uppercase mx-[2px]">_</div>`; 
+                    isWon = false; 
+                }
+            }
+            safeSetHTML('spelling-slots', slotsHTML); 
+
+            if (isInitialLoad && slotsContainer && slotsContainer.children.length > 0) {
+                gsap.fromTo(".gsap-slot", {y: -10, opacity: 0, scale: 0.8}, {y: 0, opacity: 1, scale: 1, duration: 0.3, stagger: 0.05, ease: "back.out(1.5)"});
+            }
+
+            let heartsHTML = '';
+            for(let i=0; i < gameSession.maxMistakes; i++) { 
+                if (i < gameSession.mistakes) { heartsHTML += '<span class="text-[26px] filter grayscale opacity-20 transition-all duration-300">❤️</span>'; } 
+                else { heartsHTML += '<span class="gsap-heart text-[26px] drop-shadow-[0_0_8px_#E53935] text-[#E53935]">❤️</span>'; } 
+            }
+            safeSetHTML('game-hearts', heartsHTML); 
+            if(isInitialLoad) gsap.fromTo(".gsap-heart", {scale: 0}, {scale: 1, duration: 0.4, stagger: 0.1, ease: "back.out(2)"});
+
+            if (isWon && !isInitialLoad) { endWordPlay(true); } 
+            else if (gameSession.mistakes >= gameSession.maxMistakes) { endWordPlay(false); }
+        }
+
+        // 🔥 สร้างปุ่มตัวเลือกแบบ Block Blast
+        function generateLetterBoxes() {
+            const container = document.getElementById('letter-pool-container'); 
+            if(!container) return;
+            container.innerHTML = ''; 
+            
+            let targetLetters = Array.from(new Set(gameSession.targetWord.replace(/[^A-Z]/g, '').split('')));
+            let distractors = shuffleArray("ABCDEFGHIJKLMNOPQRSTUVWXYZ".split('').filter(l => !targetLetters.includes(l)));
+            let finalPool = shuffleArray(targetLetters.concat(distractors.slice(0, Math.max(0, 15 - targetLetters.length))));
+            
+            finalPool.forEach(letter => {
+                const btn = document.createElement('button');
+                if (gameSession.guessedLetters.has(letter)) {
+                    btn.className = "gsap-letter-box w-12 h-12 md:w-14 md:h-14 bg-[#0A1F16] text-[#183C2A] border-2 border-[#183C2A] font-black rounded-xl text-[24px] cursor-not-allowed opacity-30 shadow-inner translate-y-3";
+                    btn.disabled = true;
+                } else {
+                    btn.className = "gsap-letter-box block-puzzle w-12 h-12 md:w-14 md:h-14 text-[24px] font-black text-[#0A1F16] flex items-center justify-center relative focus:outline-none opacity-0 translate-y-6";
+                    btn.onclick = () => handleGuess(letter, btn);
+                }
+                
+                // Add highlight inner element for 3D look
+                btn.innerHTML = `<div class="absolute inset-0 bg-white/20 rounded-xl pointer-events-none" style="clip-path: polygon(0 0, 100% 0, 100% 30%, 0 100%);"></div><span class="relative z-10 pointer-events-none">${letter}</span>`; 
+                container.appendChild(btn); 
+            });
+
+            gsap.to(".gsap-letter-box", { opacity: 1, y: 0, duration: 0.4, stagger: 0.03, ease: "back.out(1.5)" });
+        }
+
+        function handleGuess(letter, btnNode) {
+            if (gameSession.guessedLetters.has(letter) || gameSession.mistakes >= gameSession.maxMistakes) return;
+            
+            gsap.fromTo(btnNode, { scale: 0.8 }, { scale: 1, duration: 0.2, ease: "power2.out" });
+            gameSession.guessedLetters.add(letter);
+            
+            if (gameSession.targetWord.includes(letter)) {
+                btnNode.className = "gsap-letter-box w-12 h-12 md:w-14 md:h-14 bg-[#4CAF50] text-[#0A1F16] font-black rounded-xl text-[24px] shadow-[0_6px_0_#2E7D32]";
+            } else {
+                gameSession.mistakes++; 
+                btnNode.className = "gsap-letter-box w-12 h-12 md:w-14 md:h-14 bg-[#E53935] text-white font-black rounded-xl text-[24px] opacity-60 shadow-[0_6px_0_#B71C1C]";
+                
+                gsap.to('#main-content-area', {
+                    keyframes: [
+                        { x: -10, duration: 0.05 }, { x: 10, duration: 0.05 },
+                        { x: -6, duration: 0.05 }, { x: 6, duration: 0.05 },
+                        { x: 0, duration: 0.05 }
+                    ]
+                });
+            }
+            btnNode.disabled = true; updateSpellingUI();
+        }
+
+        function skipCurrentWord() {
+            if (gameSession.mistakes >= gameSession.maxMistakes) return;
+            gameSession.mistakes = gameSession.maxMistakes; 
+            updateSpellingUI(); 
+        }
+
+        // 🔥 เอฟเฟกต์ตอนจบข้อ (Blast Effect)
+        function endWordPlay(isWin) {
+            const skipAction = document.getElementById('skip-action-container');
+            if(skipAction) skipAction.classList.add('hidden');
+
+            const current = gameSession.words[gameSession.index];
+            const letterBoxes = document.querySelectorAll(".gsap-letter-box");
+
+            // ✨ เพิ่ม Blast Animation ให้ Slot ระเบิดความปัง
+            if (isWin) {
+                gsap.to(".gsap-slot", {
+                    scale: 1.1, 
+                    boxShadow: "0 0 30px #FFD700", 
+                    backgroundColor: "#FFF", 
+                    duration: 0.2, 
+                    yoyo: true, 
+                    repeat: 1,
+                    stagger: 0.05,
+                    ease: "power1.inOut"
+                });
+            }
+
+            const showNextStep = () => {
+                const pool = document.getElementById('letter-pool-container'); if(pool) pool.classList.add('hidden');
+                const nBtn = document.getElementById('btn-next-word'); if(nBtn) nBtn.classList.remove('hidden');
+                const fb = document.getElementById('game-feedback'); 
+                
+                if(fb) {
+                    fb.classList.remove('hidden');
+                    if (isWin) {
+                        fb.className = 'bg-[#183C2A] p-6 rounded-2xl shadow-xl border border-[#4CAF50] text-center mt-3';
+                        fb.innerHTML = `<div class="flex items-center justify-center gap-2 mb-2"><div class="text-[#4CAF50] bg-[#0A1F16] p-2 rounded-full"><span class="material-symbols-outlined font-black text-3xl">check_circle</span></div><h4 class="font-black text-[#A5D6A7] text-[26px]">BLAST!</h4></div><p class="text-[14px] text-white">ยอดเยี่ยม! สะกดได้ถูกต้อง</p>`;
+                        gameSession.sessionLogs.push({ vocabId: current.id, status: 'Correct' });
+                    } else {
+                        fb.className = 'bg-[#3E2723] p-6 rounded-2xl shadow-xl border border-[#E53935] text-center mt-3';
+                        fb.innerHTML = `<div class="flex items-center justify-center gap-2 mb-4"><div class="text-[#E53935] bg-[#0A1F16] p-2 rounded-full"><span class="material-symbols-outlined font-black text-3xl">cancel</span></div><h4 class="font-black text-[#EF9A9A] text-[22px]">Oops!</h4></div><p class="text-[13px] text-gray-300 mb-2">เฉลยคือ:</p><div class="text-3xl font-black text-[#FFD700] tracking-widest bg-[#0A1F16] py-3 rounded-xl shadow-inner border border-[#2A170B]">${gameSession.targetWord}</div>`;
+                        gameSession.sessionLogs.push({ vocabId: current.id, status: 'Wrong' });
+                    }
+                    gsap.fromTo(fb, {scale: 0.8, opacity: 0, y: 20}, {scale: 1, opacity: 1, y: 0, duration: 0.4, ease: "back.out(1.2)"});
+                }
+            };
+
+            if (letterBoxes.length > 0) {
+                gsap.to(".gsap-letter-box", { opacity: 0, scale: 0.5, y: 20, duration: 0.3, stagger: 0.02, ease: "power2.in", onComplete: showNextStep });
+            } else { showNextStep(); }
+        }
+
+        function nextPlayWord() {
+            gameSession.index++;
+            if (gameSession.index < gameSession.words.length) { loadSpellingWord(); } 
+            else { finishGameSession(); }
+        }
+
+        function finishGameSession() {
+            safeSetHTML('game-content', `
+                <div class="py-20 flex flex-col items-center justify-center text-center">
+                    <div class="w-16 h-16 border-4 border-[#183C2A] border-t-[#FFD700] rounded-full animate-spin shadow-[0_0_20px_#FFD700]"></div>
+                    <p class="text-[#FFE066] mt-6 font-black text-[16px] tracking-widest drop-shadow-md">Saving Loot...</p>
+                </div>`);
+                
+            if (typeof google !== 'undefined' && google.script) {
+                if (gameSession.isTestMode) {
+                    let correctCount = gameSession.sessionLogs.filter(l => l.status === 'Correct').length;
+                    let idsString = gameSession.words.map(w => w.id).join(',');
+                    google.script.run.withSuccessHandler(function() {
+                        showScoreModal(correctCount, gameSession.words.length);
+                    }).saveTestResult(gameSession.testType, correctCount, idsString);
+                } else {
+                    google.script.run.withSuccessHandler(function() {
+                        if (typeof google !== 'undefined' && google.script) {
+                            google.script.run.withSuccessHandler(function(data) {
+                                onDashboardLoaded(data); 
+                                switchView('view-home');
+                            }).getHomeData();
+                        }
+                    }).saveBulkLogs(gameSession.sessionLogs);
+                }
+            } else { setTimeout(() => { switchView('view-home'); }, 1000); }
+        }
+
+        function showScoreModal(score, total) {
+            safeSetText('final-score-display', `${score} / ${total}`);
+            const modal = document.getElementById('score-result-modal');
+            const content = document.getElementById('score-modal-content');
+            
+            if(modal) {
+                modal.classList.remove('hidden');
+                gsap.to(modal, {opacity: 1, duration: 0.3, ease: "power2.inOut"});
+                gsap.fromTo(content, {scale: 0.8, y: 30}, {scale: 1, y: 0, duration: 0.3, ease: "power2.inOut"});
+                confetti({ particleCount: 200, spread: 100, origin: { y: 0.6 }, colors: ['#FFD700', '#FF9800', '#4CAF50', '#FFF'] });
+            }
+        }
+
+        function closeScoreModalAndGoHome() {
+            const modal = document.getElementById('score-result-modal');
+            if(modal) {
+                gsap.to(modal, {opacity: 0, duration: 0.3, ease: "power2.inOut", onComplete: () => {
+                    modal.classList.add('hidden');
+                    if (typeof google !== 'undefined' && google.script) {
+                        google.script.run.withSuccessHandler(function(data) {
+                            onDashboardLoaded(data); 
+                            switchView('view-home');
+                        }).getHomeData();
+                    }
+                }});
+            }
+        }
+
+        function renderLeaderboard() {
+            try {
+                const container = document.getElementById('leaderboard-rows-container'); if(!container) return;
+                let tableHTML = ''; 
+                if (!appData.leaderboard || appData.leaderboard.length === 0) {
+                    container.innerHTML = `<tr><td colspan="3" class="p-10 text-center text-[#A89B82] text-[15px] font-bold">ยังไม่มีนักล่าในป่านี้...</td></tr>`; return;
+                }
+                appData.leaderboard.forEach((player, index) => {
+                    if (!player) return;
+                    const rankNum = index + 1; 
+                    let rankBadge = `<span class="text-[#FFE066] font-black text-[15px]">${rankNum}</span>`;
+                    if (rankNum === 1) rankBadge = `<div class="w-9 h-9 rounded-[14px] bg-gradient-to-b from-[#FFD700] to-[#FF9800] border-b-2 flex items-center justify-center text-[15px] font-black mx-auto text-[#5C3A21] shadow-[0_0_10px_#FFD700]">1</div>`;
+                    else if (rankNum === 2) rankBadge = `<div class="w-9 h-9 rounded-[14px] bg-gradient-to-b from-[#E0E0E0] to-[#9E9E9E] border-b-2 flex items-center justify-center text-[15px] font-black mx-auto text-[#212121]">2</div>`;
+                    else if (rankNum === 3) rankBadge = `<div class="w-9 h-9 rounded-[14px] bg-gradient-to-b from-[#FFB300] to-[#F57C00] border-b-2 flex items-center justify-center text-[15px] font-black mx-auto text-[#3E2723]">3</div>`;
+                    
+                    const isMe = (player.rawEmail === appData.userEmail.trim().toLowerCase());
+                    tableHTML += `
+                        <tr class="border-b border-[#546E7A] last:border-0 ${isMe ? 'bg-[#FFD700]/20' : ''} transition-all duration-300 ease-in-out">
+                            <td class="p-4 text-center w-16">${rankBadge}</td>
+                            <td class="p-4 font-bold text-white text-[15px]">
+                                ${escapeHTML(player.displayName)} ${isMe ? '<span class="ml-2 text-[10px] bg-[#4CAF50] text-white px-2.5 py-1 rounded-[8px] font-black tracking-widest shadow-[0_0_5px_#4CAF50]">ME</span>' : ''}
+                            </td>
+                            <td class="p-4 text-right font-black text-[#FFD700] text-[18px] drop-shadow-md">${player.score}</td>
+                        </tr>
+                    `;
+                });
+                container.innerHTML = tableHTML;
+            } catch(e) {}
+        }
+
+        function setBankFilter(filterVal, elementBtn) {
+            appData.currentFilter = filterVal;
+            document.querySelectorAll('.bank-tag').forEach(t => t.className = "bank-tag px-5 py-2.5 text-[13px] whitespace-nowrap rounded-[16px] font-bold bg-[#452814] text-[#E0E0E0] border-2 border-[#546E7A] transition-all duration-300 ease-in-out");
+            elementBtn.className = "bank-tag px-5 py-2.5 text-[13px] whitespace-nowrap rounded-[16px] font-black bg-[#FFD700] text-[#5C3A21] shadow-[0_0_10px_rgba(255,215,0,0.5)] transition-all duration-300 ease-in-out border-b-4 border-[#D48806]";
+            renderWordBank();
+        }
+
+        function filterWordBank() {
+            const input = document.getElementById('vocab-search-input');
+            if(input) { appData.searchQuery = input.value.toLowerCase().trim(); renderWordBank(); }
+        }
+
+        function renderWordBank() {
+            try {
+                const container = document.getElementById('vocab-bank-list'); if(!container) return;
+                let wordBankHTML = ''; 
+                let filteredList = appData.wordList.filter(item => {
+                    if (!item || String(item.level) === 'unseen') return false;
+                    if (appData.currentFilter !== 'all' && String(item.level !== undefined ? item.level : '') !== appData.currentFilter) return false;
+                    if (appData.searchQuery) return String(item.v1 || '').toLowerCase().includes(appData.searchQuery) || String(item.meaning || '').toLowerCase().includes(appData.searchQuery);
+                    return true;
+                });
+
+                if (filteredList.length === 0) { 
+                    container.innerHTML = `<div class="glass-card p-10 text-center border-4 border-dashed border-[#546E7A] bg-[#2A170B]/50"><span class="material-symbols-outlined text-[#8BA1AB] text-5xl mb-3">search_off</span><p class="text-[#FFE066] font-bold text-[15px]">ไม่พบสมบัติชิ้นนี้ในหีบ</p></div>`; return; 
+                }
+
+                filteredList.forEach(item => {
+                    let badgeClass = "bg-[#2A170B] text-gray-300 border border-[#546E7A]"; let badgeText = "New";
+                    if (item.level == "0") { badgeClass = "bg-[#3E2723] text-[#EF9A9A] border border-[#E53935]"; badgeText = "Review"; } 
+                    else if (item.level == "1" || item.level == "2") { badgeClass = "bg-[#452814] text-[#FFD700] border border-[#FFC107] shadow-[0_0_5px_rgba(255,215,0,0.3)]"; badgeText = "Chest " + item.level; } 
+                    else if (item.level == "3" || item.level == "4") { badgeClass = "bg-[#1B3526] text-[#A5D6A7] border border-[#4CAF50] shadow-[0_0_5px_rgba(76,175,80,0.3)]"; badgeText = "Chest " + item.level; } 
+                    else if (item.level == "5") { badgeClass = "bg-gradient-to-r from-[#FFD700] to-[#FF9800] text-[#5C3A21] font-black border-2 border-[#FFF8DC] shadow-[0_0_10px_#FFD700]"; badgeText = "👑 Legend"; }
+                    
+                    wordBankHTML += `
+                    <div class="glass-card p-4 flex justify-between items-center transition-transform active:scale-[0.98] bg-[#452814] duration-300 ease-in-out border-b-[6px]">
+                        <div class="w-[75%] pr-3 border-r-2 border-[#546E7A]">
+                            <div class="text-[13px] text-[#A89B82] mb-1 line-clamp-2 font-bold">${escapeHTML(item.meaning)}</div>
+                            <div class="text-[20px] font-black text-[#FFD700] tracking-widest uppercase drop-shadow-sm">${escapeHTML(item.v1)}</div>
+                        </div>
+                        <div class="w-[25%] flex justify-end pl-2">
+                            <div class="text-[11px] px-2 py-2 rounded-[14px] font-bold text-center w-full max-w-[70px] ${badgeClass}">${badgeText}</div>
+                        </div>
+                    </div>`;
+                });
+                container.innerHTML = wordBankHTML; 
+            } catch(e) {}
+        }
+
     </script>
 </body>
 </html>
