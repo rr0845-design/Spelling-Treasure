@@ -1,5 +1,5 @@
 // 🛑 นำ Web App URL ที่ได้จาก GAS มาใส่ตรงนี้
-const GAS_URL = "https://script.google.com/macros/s/AKfycbyRZ4LmjwE7n5dsTSha0soXUmOM6f9zbK4FAefWx8rO0kEy_RHqCsQ8jMmnrtVzx6W3pQ/exec"; 
+const GAS_URL = "https://script.google.com/macros/s/AKfycbwdNyjU1tlQ7tjRvKo08UItDA_WzKcD0GncwoYdVaQuZTRHGgaDiliuYbJNnFN0PJxP/exec"; 
 
 let wordList = [];
 let currentWordIndex = 0;
