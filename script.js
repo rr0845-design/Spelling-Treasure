@@ -1,4 +1,4 @@
-const GAS_URL = "https://script.google.com/macros/s/AKfycbwA6DlcWwq4oP0_w2C4zHtwgSfX1L1G5o70kwEbsfp-IPeDymS5C--YMKtErYxLIGY6qw/exec";
+const GAS_URL = "https://script.google.com/macros/s/AKfycbwdNyjU1tlQ7tjRvKo08UItDA_WzKcD0GncwoYdVaQuZTRHGgaDiliuYbJNnFN0PJxP/exec";
 
 let wordList = [];
 let wordResults = []; // เก็บประวัติการเล่นแต่ละคำ [{id: 'W001', isCorrect: true}, ...]
@@ -77,19 +77,20 @@ async function submitAuth() {
     authBtn.classList.add('opacity-50', 'pointer-events-none');
     
     try {
-        const payload = {
-            action: currentAuthMode,
-            email: emailInput,
-            name: currentAuthMode === 'register' ? nameInput : ""
-        };
+        const timestamp = new Date().getTime();
+        const url = `${GAS_URL}?action=${currentAuthMode}&email=${encodeURIComponent(emailInput)}&name=${encodeURIComponent(currentAuthMode === 'register' ? nameInput : "")}&t=${timestamp}`;
         
-        const response = await fetch(GAS_URL, {
-            method: 'POST',
-            body: JSON.stringify(payload),
-            headers: { "Content-Type": "text/plain;charset=utf-8" }
-        });
+        const response = await fetch(url);
         
-        const json = await response.json();
+        let json;
+        try {
+            json = await response.json();
+        } catch (e) {
+            // ถ้าพังตรงนี้ แปลว่า GAS ไม่ได้ตอบกลับมาเป็น JSON (อาจจะตอบกลับมาเป็นหน้าเว็บ Error ของ Google)
+            console.error("Server didn't return JSON. Please check GAS deployment.");
+            authError.innerText = "❌ ลืมกด New Deployment หรือเปล่าครับ?";
+            return;
+        }
         
         if (json.status === "success") {
             userEmail = emailInput;
@@ -418,19 +419,11 @@ async function saveProgressToGAS() {
     meaningDisplay.innerText = "⏳ กำลังบันทึกผลการเรียนรู้...";
     
     try {
-        const payload = {
-            action: "updateProgress",
-            email: userEmail,
-            updates: wordResults
-        };
+        const timestamp = new Date().getTime();
+        const updatesStr = encodeURIComponent(JSON.stringify(wordResults));
+        const url = `${GAS_URL}?action=updateProgress&email=${encodeURIComponent(userEmail)}&updates=${updatesStr}&t=${timestamp}`;
         
-        const response = await fetch(GAS_URL, {
-            method: 'POST',
-            body: JSON.stringify(payload),
-            headers: {
-                "Content-Type": "text/plain;charset=utf-8" // สำคัญ: ใช้ text/plain เพื่อเลี่ยงปัญหา CORS Preflight ใน GAS
-            }
-        });
+        const response = await fetch(url);
         
         const json = await response.json();
         if (json.status === "success") {
