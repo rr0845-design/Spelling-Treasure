@@ -241,8 +241,8 @@ function loadWord() {
 
     let displayHTML = currentObj.meaningMain;
     if (currentObj.meaningDetail) {
-        // เพิ่มคำอธิบายแบบละเอียด (ช่อง F) โดยให้ขนาดเล็กลง สีจางลง และไม่หนาเท่าคำหลัก
-        displayHTML += `<br><span class="text-xl md:text-3xl text-[#C6BFFF] font-bold mt-2 md:mt-3 block text-stroke-0 drop-shadow-none">${currentObj.meaningDetail}</span>`;
+        // เพิ่มคำอธิบายแบบละเอียด (ช่อง F) สีเข้มเพื่อให้อ่านง่ายบนการ์ดสว่าง
+        displayHTML += `<br><span class="text-xl md:text-3xl text-[#64748B] font-bold mt-2 md:mt-3 block drop-shadow-sm">${currentObj.meaningDetail}</span>`;
     }
     
     document.getElementById('meaning-display').innerHTML = displayHTML;
@@ -335,7 +335,6 @@ function handleGuess(letter, btnElement, colorClass) {
     
     guessedLetters.add(letter);
     
-    gsap.fromTo(btnElement, {scale: 0.8}, {scale: 1, duration: 0.2});
     btnElement.classList.add('disabled');
 
     if (targetWord.includes(letter)) {
@@ -347,7 +346,12 @@ function handleGuess(letter, btnElement, colorClass) {
         soundWrong.play().catch(e => console.log('Audio error:', e));
         mistakes++;
         renderHearts();
-        gsap.to("main", { x: [-8, 8, -5, 5, -2, 2, 0], duration: 0.4, ease: "power1.inOut" });
+        
+        // แก้ไขอนิเมชันสั่นหน้าจอให้สมูทและไม่ค้าง
+        gsap.killTweensOf("main");
+        gsap.set("main", {x: 0});
+        gsap.fromTo("main", {x: -10}, {x: 10, duration: 0.05, yoyo: true, repeat: 5, onComplete: () => gsap.set("main", {x: 0})});
+        
         renderSlots();
     }
 }
@@ -369,7 +373,7 @@ function triggerWin() {
 
     const msg = document.getElementById('feedback-msg');
     msg.innerText = randomCompliment;
-    msg.className = "text-3xl md:text-5xl font-black tracking-widest text-left uppercase text-stroke text-[#20E3B2] drop-shadow-[0_0_15px_#20E3B2]";
+    msg.className = "text-3xl md:text-5xl font-black tracking-widest text-left uppercase text-white drop-shadow-[0_6px_0_#10B981] text-stroke";
     gsap.fromTo(msg, {scale: 0.5, opacity: 0}, {scale: 1, opacity: 1, duration: 0.4, ease: "back.out(2)"});
 
     score += 1; 
@@ -394,7 +398,7 @@ function triggerLose() {
 
     const msg = document.getElementById('feedback-msg');
     msg.innerText = "OUT OF MOVES!";
-    msg.className = "text-2xl md:text-4xl font-black tracking-widest text-left uppercase text-stroke text-[#FF3366] drop-shadow-[0_0_15px_#FF3366]";
+    msg.className = "text-2xl md:text-4xl font-black tracking-widest text-left uppercase text-white drop-shadow-[0_6px_0_#E11D48] text-stroke";
     gsap.fromTo(msg, {scale: 0.5, opacity: 0}, {scale: 1, opacity: 1, duration: 0.4, ease: "back.out(2)"});
 
     setTimeout(() => { moveToNextWord(msg); }, 5000);
@@ -414,7 +418,7 @@ function triggerTimeUp() {
 
     const msg = document.getElementById('feedback-msg');
     msg.innerText = "TIME'S UP!";
-    msg.className = "text-2xl md:text-4xl font-black tracking-widest text-left uppercase text-stroke text-[#FF9F1C] drop-shadow-[0_0_15px_#FF9F1C]";
+    msg.className = "text-2xl md:text-4xl font-black tracking-widest text-left uppercase text-white drop-shadow-[0_6px_0_#EA580C] text-stroke";
     gsap.fromTo(msg, {scale: 0.5, opacity: 0}, {scale: 1, opacity: 1, duration: 0.4, ease: "back.out(2)"});
 
     setTimeout(() => { moveToNextWord(msg); }, 5000);
@@ -436,7 +440,7 @@ function skipWord() {
 
     const msg = document.getElementById('feedback-msg');
     msg.innerText = "SKIPPED";
-    msg.className = "text-2xl md:text-4xl font-black tracking-widest text-left uppercase text-stroke text-[#8BA1AB] drop-shadow-md";
+    msg.className = "text-2xl md:text-4xl font-black tracking-widest text-left uppercase text-white drop-shadow-[0_6px_0_#475569] text-stroke";
     gsap.fromTo(msg, {scale: 0.5, opacity: 0}, {scale: 1, opacity: 1, duration: 0.4, ease: "back.out(2)"});
 
     setTimeout(() => { moveToNextWord(msg); }, 5000);
@@ -477,3 +481,27 @@ async function saveProgressToGAS() {
         meaningDisplay.innerText = "❌ เล่นจบแล้ว แต่ไม่สามารถติดต่อเซิร์ฟเวอร์เพื่อบันทึกผลได้";
     }
 }
+
+// ⌨️ ระบบรองรับการพิมพ์จากแป้นพิมพ์ (Physical Keyboard Support)
+document.addEventListener('keydown', (e) => {
+    // ป้องกันการทำงานซ้อนทับถ้ากำลังโหลด, โดนล็อกหน้าจอ, หรือพิมพ์ในช่อง Login
+    if (isInputLocked) return;
+    if (document.activeElement && document.activeElement.tagName === 'INPUT') return;
+    
+    // ตรวจสอบว่าเป็นตัวอักษรภาษาอังกฤษ A-Z เท่านั้น (ไม่เอาปุ่มพิเศษ)
+    if (/^[a-zA-Z]$/.test(e.key)) {
+        const letter = e.key.toUpperCase();
+        
+        // ค้นหาปุ่มใน Letter Pool ที่ตรงกับตัวอักษรและยังไม่ถูกกด (ไม่ติดคลาส disabled)
+        const pool = document.getElementById('letter-pool');
+        if (!pool) return;
+        
+        const buttons = pool.querySelectorAll('.gsap-btn:not(.disabled)');
+        for (let btn of buttons) {
+            if (btn.innerText === letter) {
+                btn.click(); // สั่งให้ปุ่มถูกกดเสมือนใช้นิ้วจิ้ม
+                break; // กดแค่ปุ่มเดียวในกรณีที่มีตัวอักษรซ้ำกันหลายปุ่ม
+            }
+        }
+    }
+});

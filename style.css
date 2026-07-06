@@ -1,63 +1,31 @@
 @import url('https://fonts.googleapis.com/css2?family=Nunito:wght@700;900&family=Prompt:wght@500;700;900&display=swap');
 
+/* ☁️ Bright Sky Background */
 body {
-    /* 🌌 พื้นหลังสว่างแบบ Block Blast */
-    background: linear-gradient(135deg, #110B29 0%, #220F4C 35%, #0B1930 70%, #150921 100%);
-    background-size: 300% 300%;
-    animation: cosmicPulse 20s ease infinite;
-    color: #FFFFFF;
+    background-color: #58CCFF;
+    background-image: radial-gradient(circle at top, #89E0FF 0%, #31B5FF 100%);
+    color: #0F172A;
     font-family: 'Nunito', 'Prompt', sans-serif;
     overflow: hidden;
     touch-action: manipulation;
-    user-select: none;
+    -webkit-font-smoothing: antialiased;
     -webkit-tap-highlight-color: transparent;
 }
 
-@keyframes cosmicPulse {
-    0% { background-position: 0% 50%; }
-    50% { background-position: 100% 50%; }
-    100% { background-position: 0% 50%; }
-}
-
-/* 🎇 Ambient Glow Orbs */
-.glow-orb {
-    position: absolute;
-    border-radius: 50%;
-    filter: blur(80px);
-    opacity: 0.5;
-    z-index: 0;
-    pointer-events: none;
-    animation: floatOrb 10s ease-in-out infinite alternate;
-}
-.orb-1 { width: 300px; height: 300px; background: #6100FF; top: -100px; left: -100px; }
-.orb-2 { width: 400px; height: 400px; background: #FF005C; bottom: 10%; right: -150px; animation-delay: -3s; }
-.orb-3 { width: 250px; height: 250px; background: #00F0FF; top: 40%; left: 30%; opacity: 0.3; animation-delay: -7s; }
-
-@keyframes floatOrb {
-    0% { transform: translate(0, 0) scale(1); }
-    100% { transform: translate(30px, -50px) scale(1.1); }
-}
-
-/* 🧊 Premium UI Frames (Glass & Metal) */
+/* 🧊 Cartoon Playful UI Frames */
 .ui-frame {
-    background: linear-gradient(180deg, rgba(255,255,255,0.1) 0%, rgba(255,255,255,0.02) 100%);
-    backdrop-filter: blur(24px);
-    -webkit-backdrop-filter: blur(24px);
-    border: 1px solid rgba(255,255,255,0.2);
-    border-top: 2px solid rgba(255,255,255,0.4);
-    box-shadow: 
-        0 15px 35px rgba(0,0,0,0.5),
-        inset 0 2px 20px rgba(255,255,255,0.05);
+    background: #FFFFFF;
+    border: 4px solid #E2E8F0;
+    box-shadow: 0 12px 0 #94A3B8;
 }
 
 .ui-frame-inner {
-    background: rgba(10, 5, 30, 0.4);
-    border: 2px solid rgba(255,255,255,0.05);
-    border-bottom: 2px solid rgba(255,255,255,0.15);
-    box-shadow: inset 0 10px 30px rgba(0,0,0,0.6);
+    background: #F8FAFC;
+    border: 3px solid #E2E8F0;
+    border-radius: 24px;
 }
 
-/* 🧊 Premium UI Frames (Glass & Metal) */
+/* 🍬 Chunky Toy Blocks */
 .block-3d {
     position: relative;
     cursor: pointer;
@@ -66,53 +34,38 @@ body {
     display: flex;
     align-items: center;
     justify-content: center;
-    transition: all 0.15s cubic-bezier(0.34, 1.56, 0.64, 1);
-    color: white;
-    text-shadow: 0 2px 4px rgba(0,0,0,0.4);
     border-radius: 20px;
+    font-family: 'Nunito', sans-serif;
 }
 
-/* Base Shadow & Highlight for all blocks */
-.block-3d::before {
-    content: '';
-    position: absolute;
-    inset: 0;
-    border-radius: inherit;
-    box-shadow: inset 0 6px 0 rgba(255,255,255,0.4), inset 0 -6px 0 rgba(0,0,0,0.3);
-    pointer-events: none;
-}
+/* 🍭 Toy Color Classes */
+.color-pink { background: #FF4B91; box-shadow: 0 8px 0 #D8004B; border: 2px solid #FF8AA9; color: white; }
+.color-mint { background: #00E5FF; box-shadow: 0 8px 0 #00A3CC; border: 2px solid #8BFAFF; color: #0F172A; }
+.color-yellow { background: #FFD166; box-shadow: 0 8px 0 #D97706; border: 2px solid #FFF3C4; color: #0F172A; }
+.color-blue { background: #4D96FF; box-shadow: 0 8px 0 #1D4ED8; border: 2px solid #A6C8FF; color: white; }
+.color-purple { background: #C084FC; box-shadow: 0 8px 0 #7E22CE; border: 2px solid #E9D5FF; color: white; }
+.color-orange { background: #FF9F1C; box-shadow: 0 8px 0 #C26300; border: 2px solid #FFD49E; color: white; }
 
-.block-3d:hover { filter: brightness(1.15); transform: translateY(-3px); }
-.block-3d.disabled {
-    filter: grayscale(100%) opacity(0.5);
-    pointer-events: none;
-    box-shadow: 0 4px 0 rgba(0,0,0,0.3);
-    transform: translateY(6px);
-}
-
-/* Candy Color Classes with Gradients and Deep Drop Shadows */
-.color-pink { background: linear-gradient(145deg, #FF4B91, #D8004B); box-shadow: 0 8px 0 #9E0035, 0 15px 20px rgba(216,0,75,0.4); border: 2px solid #FFA1C5; }
-.color-mint { background: linear-gradient(145deg, #00F0FF, #0080FF); box-shadow: 0 8px 0 #0056B3, 0 15px 20px rgba(0,128,255,0.4); border: 2px solid #8BFAFF; }
-.color-yellow { background: linear-gradient(145deg, #FFE800, #FF8A00); box-shadow: 0 8px 0 #B35F00, 0 15px 20px rgba(255,138,0,0.4); border: 2px solid #FFF399; color: #4A2600; }
-.color-blue { background: linear-gradient(145deg, #4D96FF, #1E40AF); box-shadow: 0 8px 0 #10266B, 0 15px 20px rgba(30,64,175,0.4); border: 2px solid #A6C8FF; }
-.color-purple { background: linear-gradient(145deg, #D442FF, #7000FF); box-shadow: 0 8px 0 #430099, 0 15px 20px rgba(112,0,255,0.4); border: 2px solid #EFACFF; }
-.color-orange { background: linear-gradient(145deg, #FF7A00, #E60000); box-shadow: 0 8px 0 #990000, 0 15px 20px rgba(230,0,0,0.4); border: 2px solid #FFC285; }
-
-/* กดแล้วปุ่มยุบลงสมจริง */
+/* 📉 อนิเมชันตอนกดปุ่ม */
 .block-3d:active:not(.disabled) {
-    transform: translateY(6px) scale(0.95);
-    box-shadow: 0 2px 0 var(--darker-color, rgba(0,0,0,0.5)), 0 5px 10px rgba(0,0,0,0.3);
-}
-.block-3d:active:not(.disabled)::before {
-    box-shadow: inset 0 3px 0 rgba(255,255,255,0.3), inset 0 -3px 0 rgba(0,0,0,0.3);
+    transform: translateY(8px);
+    box-shadow: 0 0px 0 transparent;
 }
 
-/* 🕳️ ช่องว่างเติมคำ (เหมือนถาด 3D ลึกๆ) */
+.block-3d.disabled {
+    background: #E2E8F0 !important;
+    box-shadow: 0 8px 0 #CBD5E1 !important;
+    border-color: #F1F5F9 !important;
+    color: #94A3B8 !important;
+    pointer-events: none;
+}
+
+/* 🕳️ ช่องว่างเติมคำ */
 .slot-empty {
-    background: rgba(0, 0, 0, 0.3);
-    box-shadow: inset 0 8px 15px rgba(0,0,0,0.7), 0 2px 0 rgba(255,255,255,0.1);
-    color: rgba(255,255,255,0.1);
-    border: none !important;
+    background: #F1F5F9;
+    border: 4px dashed #CBD5E1 !important;
+    color: #CBD5E1;
+    box-shadow: none;
     border-radius: 20px;
     display: flex;
     align-items: center;
@@ -120,36 +73,33 @@ body {
     font-weight: 900;
 }
 
-/* 🎇 เอฟเฟกต์ฉลองตอนตอบถูก (Neon Burst) */
+/* 🎇 เอฟเฟกต์ฉลองตอนตอบถูก */
 .blast-flash {
-    background: linear-gradient(180deg, #4ADE80, #22C55E) !important;
-    box-shadow: 0 10px 0 #16A34A, 0 0 50px 20px rgba(74, 222, 128, 0.8) !important;
+    background: #4ADE80 !important;
+    box-shadow: 0 8px 0 #16A34A !important;
     color: white !important;
-    border-color: #86EFAC !important;
-    transform: scale(1.15) !important;
+    border: 2px solid #86EFAC !important;
+    transform: scale(1.1) !important;
     z-index: 20;
-    animation: blastPulse 1s infinite alternate;
+    animation: bouncePop 0.5s ease;
 }
 
-@keyframes blastPulse {
-    0% { filter: brightness(1); box-shadow: 0 10px 0 #16A34A, 0 0 50px 20px rgba(74, 222, 128, 0.6) !important; }
-    100% { filter: brightness(1.3); box-shadow: 0 10px 0 #16A34A, 0 0 80px 30px rgba(74, 222, 128, 1) !important; }
+@keyframes bouncePop {
+    0% { transform: scale(1); }
+    50% { transform: scale(1.2); }
+    100% { transform: scale(1.1); }
 }
 
-/* 🪞 Glassmorphism Meaning Card */
+/* 🪞 Meaning Card */
 .meaning-box {
-    background: linear-gradient(135deg, rgba(255,255,255,0.1) 0%, rgba(255,255,255,0.02) 100%);
-    backdrop-filter: blur(30px);
-    -webkit-backdrop-filter: blur(30px);
-    border: 1px solid rgba(255,255,255,0.2);
-    border-top: 2px solid rgba(255,255,255,0.4);
-    box-shadow: 0 20px 40px rgba(0,0,0,0.5), inset 0 2px 20px rgba(255,255,255,0.1);
-    border-radius: 32px;
+    background: #F8FAFC;
+    border: 4px solid #E2E8F0;
+    border-radius: 28px;
+    box-shadow: 0 8px 0 #E2E8F0;
     position: relative;
 }
 
 .text-stroke {
-    -webkit-text-stroke: 0;
     text-shadow: 
         -2px -2px 0 #1E1B4B,  
          0   -2px 0 #1E1B4B,
