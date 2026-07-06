@@ -281,9 +281,9 @@ function renderSlots(isInitial = false) {
         }
 
         if (guessedLetters.has(char)) {
-            container.innerHTML += `<div class="gsap-slot block-3d color-yellow flex-1 min-w-[24px] max-w-[56px] h-[50px] md:max-w-[76px] md:h-[84px] md:rounded-[20px] text-[24px] md:text-[40px] transition-all">${char}</div>`;
+            container.innerHTML += `<div class="gsap-slot block-3d color-yellow flex-1 size-slot transition-all">${char}</div>`;
         } else {
-            container.innerHTML += `<div class="gsap-slot slot-empty flex-1 min-w-[24px] max-w-[56px] h-[50px] md:max-w-[76px] md:h-[84px] md:rounded-[20px] md:border-[5px] text-[24px] md:text-[40px]">_</div>`;
+            container.innerHTML += `<div class="gsap-slot slot-empty flex-1 size-slot">_</div>`;
             isWon = false;
         }
     }
@@ -315,7 +315,7 @@ function generateLetterPool() {
         const btn = document.createElement('div');
         const randomColor = blockColors[i % blockColors.length];
         
-        btn.className = `gsap-btn block-3d ${randomColor} w-[64px] h-[76px] md:w-[76px] md:h-[84px] md:rounded-[20px] md:border-[4px] text-[32px] md:text-[40px]`;
+        btn.className = `gsap-btn block-3d ${randomColor} size-btn`;
         btn.innerText = letter;
         
         // ถ้าเป็นตัวอักษรที่ถูกใบ้ (เฉลย) ไปแล้ว ให้ปุ่มเป็นสีเทาและกดไม่ได้
@@ -364,7 +364,7 @@ function triggerWin() {
     wordResults.push({ id: wordList[currentIndex].id, isCorrect: true });
     
     const slots = document.querySelectorAll('.gsap-slot');
-    slots.forEach(slot => { slot.className = "gsap-slot block-3d blast-flash flex-1 min-w-[24px] max-w-[56px] h-[50px] md:max-w-[76px] md:h-[84px] md:rounded-[20px] text-[24px] md:text-[40px]"; });
+    slots.forEach(slot => { slot.className = "gsap-slot block-3d blast-flash flex-1 size-slot"; });
 
     confetti({ particleCount: 150, spread: 80, origin: { y: 0.6 }, colors: ['#4ADE80', '#22C55E', '#FFD166', '#FF3366'] });
 
@@ -393,7 +393,7 @@ function triggerLose() {
     const container = document.getElementById('spelling-slots');
     container.innerHTML = '';
     for (let char of targetWord) {
-        container.innerHTML += `<div class="block-3d color-pink flex-1 min-w-[24px] max-w-[56px] h-[50px] md:max-w-[76px] md:h-[84px] md:rounded-[20px] text-[24px] md:text-[40px] opacity-80">${char}</div>`;
+        container.innerHTML += `<div class="block-3d color-pink flex-1 size-slot opacity-80">${char}</div>`;
     }
 
     const msg = document.getElementById('feedback-msg');
@@ -413,7 +413,7 @@ function triggerTimeUp() {
     const container = document.getElementById('spelling-slots');
     container.innerHTML = '';
     for (let char of targetWord) {
-        container.innerHTML += `<div class="block-3d color-orange flex-1 min-w-[24px] max-w-[56px] h-[50px] md:max-w-[76px] md:h-[84px] md:rounded-[20px] text-[24px] md:text-[40px] opacity-80">${char}</div>`;
+        container.innerHTML += `<div class="block-3d color-orange flex-1 size-slot opacity-80">${char}</div>`;
     }
 
     const msg = document.getElementById('feedback-msg');
@@ -435,7 +435,7 @@ function skipWord() {
     const container = document.getElementById('spelling-slots');
     container.innerHTML = '';
     for (let char of targetWord) {
-        container.innerHTML += `<div class="block-3d bg-[#1A4FA3] text-white/50 flex-1 min-w-[24px] max-w-[56px] h-[50px] md:max-w-[76px] md:h-[84px] md:rounded-[20px] text-[24px] md:text-[40px] shadow-[0_10px_0_#103675] md:shadow-[0_15px_20px_rgba(0,0,0,0.4),_0_10px_0_#103675] border-[4px] border-[#103675] opacity-80">${char}</div>`;
+        container.innerHTML += `<div class="block-3d bg-[#1A4FA3] text-white/50 flex-1 size-slot shadow-[inset_0_4px_0_rgba(255,255,255,0.2),_0_6px_0_#0D326C] opacity-80">${char}</div>`;
     }
 
     const msg = document.getElementById('feedback-msg');
@@ -469,12 +469,17 @@ async function saveProgressToGAS() {
         
         const response = await fetch(url);
         
-        const json = await response.json();
-        if (json.status === "success") {
-            meaningDisplay.innerText = "🎉 ยินดีด้วย! บันทึกผลลง Google Sheet สำเร็จแล้ว";
+        let json;
+        try {
+            json = await response.json();
+        } catch (e) {
+            console.error("Server didn't return JSON", e);
+        }
+        
+        if (json && json.status === "success") {
+            meaningDisplay.innerHTML = `<span class="text-3xl md:text-5xl">🎉 <strong>บันทึกคะแนนสำเร็จ</strong></span>`;
         } else {
-            console.error("Save Error:", json);
-            meaningDisplay.innerText = "⚠️ เล่นจบแล้ว แต่บันทึกผลล้มเหลว (เกิดข้อผิดพลาด)";
+            meaningDisplay.innerText = "⚠️ เล่นจบแล้ว แต่บันทึกคะแนนไม่สำเร็จ";
         }
     } catch (err) {
         console.error("Fetch Error:", err);

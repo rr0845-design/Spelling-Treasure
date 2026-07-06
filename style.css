@@ -1,9 +1,11 @@
-@import url('https://fonts.googleapis.com/css2?family=Nunito:wght@700;900&family=Prompt:wght@500;700;900&display=swap');
-
-/* ☁️ Bright Sky Background */
+/* ☁️ Soft Pastel Premium Background */
 body {
-    background-color: #58CCFF;
-    background-image: radial-gradient(circle at top, #89E0FF 0%, #31B5FF 100%);
+    background-color: #A3D8F4;
+    background-image: 
+        radial-gradient(at 0% 0%, #FFFFFF 0px, transparent 50%),
+        radial-gradient(at 100% 0%, #BFE6FF 0px, transparent 50%),
+        radial-gradient(at 100% 100%, #89C2D9 0px, transparent 50%),
+        radial-gradient(at 0% 100%, #61A5C2 0px, transparent 50%);
     color: #0F172A;
     font-family: 'Nunito', 'Prompt', sans-serif;
     overflow: hidden;
@@ -12,20 +14,17 @@ body {
     -webkit-tap-highlight-color: transparent;
 }
 
-/* 🧊 Cartoon Playful UI Frames */
+/* 🧊 3D Clay UI Frames */
 .ui-frame {
     background: #FFFFFF;
-    border: 4px solid #E2E8F0;
-    box-shadow: 0 12px 0 #94A3B8;
+    border-radius: 40px;
+    box-shadow: 
+        inset 0 -8px 0 rgba(226, 232, 240, 0.5), /* Inner bottom shadow */
+        inset 0 8px 0 rgba(255, 255, 255, 1),    /* Inner top highlight */
+        0 15px 30px rgba(15, 23, 42, 0.1);       /* Outer soft drop shadow */
 }
 
-.ui-frame-inner {
-    background: #F8FAFC;
-    border: 3px solid #E2E8F0;
-    border-radius: 24px;
-}
-
-/* 🍬 Chunky Toy Blocks */
+/* 🍬 Bubbly Clay Blocks */
 .block-3d {
     position: relative;
     cursor: pointer;
@@ -34,39 +33,59 @@ body {
     display: flex;
     align-items: center;
     justify-content: center;
-    border-radius: 20px;
+    border-radius: 24px;
     font-family: 'Nunito', sans-serif;
+    color: white;
+    text-shadow: 0 2px 0 rgba(0,0,0,0.2);
 }
 
-/* 🍭 Toy Color Classes */
-.color-pink { background: #FF4B91; box-shadow: 0 8px 0 #D8004B; border: 2px solid #FF8AA9; color: white; }
-.color-mint { background: #00E5FF; box-shadow: 0 8px 0 #00A3CC; border: 2px solid #8BFAFF; color: #0F172A; }
-.color-yellow { background: #FFD166; box-shadow: 0 8px 0 #D97706; border: 2px solid #FFF3C4; color: #0F172A; }
-.color-blue { background: #4D96FF; box-shadow: 0 8px 0 #1D4ED8; border: 2px solid #A6C8FF; color: white; }
-.color-purple { background: #C084FC; box-shadow: 0 8px 0 #7E22CE; border: 2px solid #E9D5FF; color: white; }
-.color-orange { background: #FF9F1C; box-shadow: 0 8px 0 #C26300; border: 2px solid #FFD49E; color: white; }
+/* 🍭 Clay Color Classes (Soft, Matte, Inset Highlight) */
+.color-pink { 
+    background: #FF6B9E; 
+    box-shadow: inset 0 4px 0 rgba(255,255,255,0.4), inset 0 -6px 0 rgba(0,0,0,0.1), 0 8px 0 #D8004B, 0 12px 20px rgba(216,0,75,0.3); 
+}
+.color-mint { 
+    background: #20E3B2; 
+    box-shadow: inset 0 4px 0 rgba(255,255,255,0.5), inset 0 -6px 0 rgba(0,0,0,0.1), 0 8px 0 #047857, 0 12px 20px rgba(4,120,87,0.3); 
+}
+.color-yellow { 
+    background: #FFD166; 
+    color: #451A03; text-shadow: none;
+    box-shadow: inset 0 4px 0 rgba(255,255,255,0.7), inset 0 -6px 0 rgba(0,0,0,0.05), 0 8px 0 #D97706, 0 12px 20px rgba(217,119,6,0.2); 
+}
+.color-blue { 
+    background: #4D96FF; 
+    box-shadow: inset 0 4px 0 rgba(255,255,255,0.4), inset 0 -6px 0 rgba(0,0,0,0.15), 0 8px 0 #1D4ED8, 0 12px 20px rgba(29,78,216,0.3); 
+}
+.color-purple { 
+    background: #B565FF; 
+    box-shadow: inset 0 4px 0 rgba(255,255,255,0.4), inset 0 -6px 0 rgba(0,0,0,0.1), 0 8px 0 #7E22CE, 0 12px 20px rgba(126,34,206,0.3); 
+}
+.color-orange { 
+    background: #FF9F1C; 
+    box-shadow: inset 0 4px 0 rgba(255,255,255,0.4), inset 0 -6px 0 rgba(0,0,0,0.1), 0 8px 0 #C26300, 0 12px 20px rgba(194,99,0,0.3); 
+}
 
-/* 📉 อนิเมชันตอนกดปุ่ม */
+/* 📉 อนิเมชันตอนกดปุ่ม (นุ่มๆ แบบยาง) */
 .block-3d:active:not(.disabled) {
-    transform: translateY(8px);
-    box-shadow: 0 0px 0 transparent;
+    transform: translateY(8px) scale(0.98);
+    box-shadow: inset 0 2px 0 rgba(255,255,255,0.2), inset 0 -2px 0 rgba(0,0,0,0.1), 0 0px 0 transparent, 0 4px 10px rgba(0,0,0,0.2) !important;
 }
 
 .block-3d.disabled {
     background: #E2E8F0 !important;
-    box-shadow: 0 8px 0 #CBD5E1 !important;
-    border-color: #F1F5F9 !important;
+    box-shadow: inset 0 4px 0 rgba(255,255,255,0.6), inset 0 -6px 0 rgba(0,0,0,0.05), 0 8px 0 #CBD5E1 !important;
     color: #94A3B8 !important;
     pointer-events: none;
+    text-shadow: none;
 }
 
-/* 🕳️ ช่องว่างเติมคำ */
+/* 🕳️ ช่องว่างเติมคำ (เหมือนหลุมดินเหนียว) */
 .slot-empty {
     background: #F1F5F9;
-    border: 4px dashed #CBD5E1 !important;
+    box-shadow: inset 0 8px 12px rgba(148, 163, 184, 0.3), inset 0 2px 4px rgba(0,0,0,0.1);
     color: #CBD5E1;
-    box-shadow: none;
-    border-radius: 20px;
+    border-radius: 24px;
     display: flex;
     align-items: center;
     justify-content: center;
@@ -76,27 +95,55 @@ body {
 /* 🎇 เอฟเฟกต์ฉลองตอนตอบถูก */
 .blast-flash {
     background: #4ADE80 !important;
-    box-shadow: 0 8px 0 #16A34A !important;
+    box-shadow: inset 0 4px 0 rgba(255,255,255,0.5), inset 0 -6px 0 rgba(0,0,0,0.1), 0 8px 0 #16A34A, 0 0 30px rgba(74,222,128,0.6) !important;
     color: white !important;
-    border: 2px solid #86EFAC !important;
     transform: scale(1.1) !important;
     z-index: 20;
-    animation: bouncePop 0.5s ease;
+    animation: bouncePop 0.5s cubic-bezier(0.34, 1.56, 0.64, 1);
 }
 
 @keyframes bouncePop {
     0% { transform: scale(1); }
-    50% { transform: scale(1.2); }
+    50% { transform: scale(1.25); }
     100% { transform: scale(1.1); }
 }
 
-/* 🪞 Meaning Card */
+/* 🪞 Meaning Card (Soft Pill) */
 .meaning-box {
     background: #F8FAFC;
-    border: 4px solid #E2E8F0;
-    border-radius: 28px;
-    box-shadow: 0 8px 0 #E2E8F0;
+    border-radius: 36px;
+    box-shadow: 
+        inset 0 -6px 0 rgba(226, 232, 240, 0.8),
+        0 10px 20px rgba(15, 23, 42, 0.05);
     position: relative;
+}
+
+/* 📐 Responsive Auto-Shrink (Scale down UI on short screens to prevent overlap/clipping) */
+.size-btn {
+    width: 64px;
+    height: 76px;
+    font-size: 32px;
+}
+.size-slot {
+    min-width: 24px;
+    max-width: 56px;
+    height: 50px;
+    font-size: 24px;
+}
+
+@media (min-width: 768px) {
+    .size-btn { width: 76px; height: 84px; font-size: 40px; }
+    .size-slot { max-width: 76px; height: 84px; font-size: 40px; }
+}
+
+/* ⚠️ PC / Laptops with short screens (< 800px tall) */
+@media (min-width: 768px) and (max-height: 800px) {
+    .size-btn { width: 60px; height: 64px; font-size: 28px; border-radius: 16px; }
+    .size-slot { max-width: 60px; height: 64px; font-size: 28px; }
+    
+    /* บีบพื้นที่แนวตั้งเพื่อไม่ให้ล้น และไม่ให้ TRANSLATE ไปทับข้างบน */
+    .meaning-box { min-height: 90px !important; padding-top: 2.5rem !important; padding-bottom: 1rem !important; }
+    .ui-frame { margin-bottom: 0 !important; margin-top: 0 !important; }
 }
 
 .text-stroke {
