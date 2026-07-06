@@ -11,7 +11,7 @@
     <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Material+Symbols+Rounded:opsz,wght,FILL,GRAD@24,700,1,0" />
     <link rel="stylesheet" href="style.css">
 </head>
-<body class="flex flex-col h-[100dvh] w-full items-center relative">
+<body class="w-full min-h-screen flex flex-col m-0 p-0 overflow-x-hidden select-none bg-[#0c0c14]">
 
     <!-- 📱 แจ้งเตือนให้หมุนจอ (สำหรับมือถือ/แท็บเล็ตในแนวนอน) -->
     <div id="rotate-overlay" class="fixed inset-0 bg-[#0c0c14] z-[999] flex-col justify-center items-center text-center px-6 hidden">
@@ -20,8 +20,15 @@
         <p class="text-gray-400 text-sm md:text-base">เกมนี้รองรับการเล่นในแนวตั้ง (Portrait) <br> สำหรับหน้าจอมือถือและแท็บเล็ต</p>
     </div>
 
-    <!-- 🎮 Game Container -->
-    <div id="game-container" class="flex flex-col h-full w-full items-center">
+    <!-- 🎮 MAIN CONTAINER -->
+    <div id="game-container" class="relative min-h-screen w-full flex flex-col items-center justify-between overflow-hidden selection:bg-pink-500 selection:text-white">
+        
+        <!-- Background Effect & Ambient Orbs -->
+        <div class="glow-orb orb-1"></div>
+        <div class="glow-orb orb-2"></div>
+        <div class="glow-orb orb-3"></div>
+        <div class="absolute inset-0 bg-[url('data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHdpZHRoPSI4IiBoZWlnaHQ9IjgiPgo8cmVjdCB3aWR0aD0iOCIgaGVpZ2h0PSI4IiBmaWxsPSIjZmZmIiBmaWxsLW9wYWNpdHk9IjAuMDEiLz4KPC9zdmc+')] opacity-50 z-0"></div>
+
         <!-- 🔐 หน้าจอ Login / Sign Up (Block Blast Style) -->
         <div id="login-overlay" class="fixed inset-0 bg-[#1A61D5] z-[50] flex flex-col justify-center items-center px-4 overflow-hidden">
             <!-- Background Effect -->
@@ -107,20 +114,20 @@
     <!-- 🧩 Game Area -->
     <main class="w-full max-w-5xl px-6 flex flex-col items-center flex-grow justify-start z-10">
         
-        <!-- 🔲 Game Zone Frame -->
-        <div class="w-full bg-[#113B82]/50 border-[4px] border-white/10 rounded-[32px] p-4 md:p-8 flex flex-col items-center mb-6 shadow-inner">
+        <!-- 🔲 Premium Game Zone Frame -->
+        <div class="ui-frame w-full rounded-[32px] p-4 md:p-8 flex flex-col items-center mb-6 relative mt-4 z-10">
             
             <!-- ช่องว่างเติมตัวอักษร (Slots) ในบรรทัดเดียว -->
-            <div id="spelling-slots" class="flex flex-nowrap justify-center items-center gap-1.5 md:gap-3 w-full mt-2 mb-4 md:mb-6 px-1 md:px-4"></div>
+            <div id="spelling-slots" class="flex flex-nowrap justify-center items-center gap-1.5 md:gap-3 w-full mt-4 mb-10 md:mb-16 px-1 md:px-4 z-20"></div>
 
-            <!-- โจทย์ (ความหมาย) แบบ 3D Box -->
+            <!-- โจทย์ (ความหมาย) แบบ Glassmorphism -->
             <div class="meaning-box w-full p-6 md:p-10 pt-10 text-center relative flex flex-col items-center justify-center min-h-[140px] md:min-h-[180px]">
                 <!-- Badge -->
-                <div class="absolute -top-6 md:-top-8 left-1/2 -translate-x-1/2 bg-gradient-to-b from-[#FF6B9E] to-[#FF3366] text-white text-sm md:text-xl font-black px-8 md:px-12 py-2 md:py-3 rounded-full tracking-widest border-[4px] md:border-[6px] border-[#C4003E] shadow-lg text-stroke">
+                <div class="absolute -top-6 md:-top-8 left-1/2 -translate-x-1/2 bg-gradient-to-b from-[#FF6B9E] to-[#FF3366] text-white text-sm md:text-xl font-black px-8 md:px-12 py-2 md:py-3 rounded-full tracking-widest border-[4px] md:border-[6px] border-[#C4003E] shadow-[0_10px_20px_rgba(255,51,102,0.4)] text-stroke">
                     TRANSLATE
                 </div>
                 
-                <h2 id="meaning-display" class="text-3xl md:text-5xl font-black text-white tracking-wide leading-tight drop-shadow-md w-full break-words">กำลังโหลดคำศัพท์...</h2>
+                <h2 id="meaning-display" class="text-neon text-3xl md:text-5xl font-black text-white tracking-wide leading-tight w-full break-words">กำลังโหลดคำศัพท์...</h2>
             </div>
         </div>
 
@@ -136,8 +143,8 @@
     </main>
 
     <!-- 🧱 Letter Pool -->
-    <footer class="w-full max-w-5xl px-4 md:px-10 pt-2 md:pt-4 pb-6 md:pb-10 flex-shrink-0 flex flex-col items-center z-10 md:mb-4">
-        <div id="letter-pool" class="flex flex-wrap gap-4 md:gap-5 w-full mx-auto justify-center"></div>
+    <footer class="w-full max-w-2xl px-4 md:px-10 pt-2 md:pt-4 pb-6 md:pb-10 flex-shrink-0 flex flex-col items-center z-10 md:mb-4 mx-auto">
+        <div id="letter-pool" class="flex flex-wrap gap-3 md:gap-5 w-full justify-center"></div>
     </footer>
     </div>
 

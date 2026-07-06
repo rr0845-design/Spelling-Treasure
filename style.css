@@ -2,8 +2,10 @@
 
 body {
     /* 🌌 พื้นหลังสว่างแบบ Block Blast */
-    background: radial-gradient(circle at 50% 0%, #3080FF 0%, #1A61D5 100%);
-    color: white;
+    background: linear-gradient(135deg, #110B29 0%, #220F4C 35%, #0B1930 70%, #150921 100%);
+    background-size: 300% 300%;
+    animation: cosmicPulse 20s ease infinite;
+    color: #FFFFFF;
     font-family: 'Nunito', 'Prompt', sans-serif;
     overflow: hidden;
     touch-action: manipulation;
@@ -11,35 +13,76 @@ body {
     -webkit-tap-highlight-color: transparent;
 }
 
-/* 🟦 สไตล์บล็อก 3D นีออน ยักษ์ */
+@keyframes cosmicPulse {
+    0% { background-position: 0% 50%; }
+    50% { background-position: 100% 50%; }
+    100% { background-position: 0% 50%; }
+}
+
+/* 🎇 Ambient Glow Orbs */
+.glow-orb {
+    position: absolute;
+    border-radius: 50%;
+    filter: blur(80px);
+    opacity: 0.5;
+    z-index: 0;
+    pointer-events: none;
+    animation: floatOrb 10s ease-in-out infinite alternate;
+}
+.orb-1 { width: 300px; height: 300px; background: #6100FF; top: -100px; left: -100px; }
+.orb-2 { width: 400px; height: 400px; background: #FF005C; bottom: 10%; right: -150px; animation-delay: -3s; }
+.orb-3 { width: 250px; height: 250px; background: #00F0FF; top: 40%; left: 30%; opacity: 0.3; animation-delay: -7s; }
+
+@keyframes floatOrb {
+    0% { transform: translate(0, 0) scale(1); }
+    100% { transform: translate(30px, -50px) scale(1.1); }
+}
+
+/* 🧊 Premium UI Frames (Glass & Metal) */
+.ui-frame {
+    background: linear-gradient(180deg, rgba(255,255,255,0.1) 0%, rgba(255,255,255,0.02) 100%);
+    backdrop-filter: blur(24px);
+    -webkit-backdrop-filter: blur(24px);
+    border: 1px solid rgba(255,255,255,0.2);
+    border-top: 2px solid rgba(255,255,255,0.4);
+    box-shadow: 
+        0 15px 35px rgba(0,0,0,0.5),
+        inset 0 2px 20px rgba(255,255,255,0.05);
+}
+
+.ui-frame-inner {
+    background: rgba(10, 5, 30, 0.4);
+    border: 2px solid rgba(255,255,255,0.05);
+    border-bottom: 2px solid rgba(255,255,255,0.15);
+    box-shadow: inset 0 10px 30px rgba(0,0,0,0.6);
+}
+
+/* 🧊 Premium UI Frames (Glass & Metal) */
 .block-3d {
-    border-radius: 20px;
-    box-shadow: 0 10px 0 rgba(0,0,0,0.3), 0 15px 20px rgba(0,0,0,0.4);
+    position: relative;
+    cursor: pointer;
+    font-weight: 900;
+    text-transform: uppercase;
     display: flex;
     align-items: center;
     justify-content: center;
-    font-weight: 900;
+    transition: all 0.15s cubic-bezier(0.34, 1.56, 0.64, 1);
     color: white;
-    cursor: pointer;
-    transition: transform 0.1s, filter 0.2s, box-shadow 0.1s;
-    position: relative;
-    overflow: hidden;
-    text-shadow: 0 3px 0 rgba(0,0,0,0.2);
-    border: 3px solid rgba(255,255,255,0.3);
+    text-shadow: 0 2px 4px rgba(0,0,0,0.4);
+    border-radius: 20px;
 }
-.block-3d:hover { filter: brightness(1.15); transform: translateY(-3px); }
-.block-3d::after {
+
+/* Base Shadow & Highlight for all blocks */
+.block-3d::before {
     content: '';
     position: absolute;
-    top: 0; left: 0; right: 0; height: 35%;
-    background: linear-gradient(to bottom, rgba(255,255,255,0.4), transparent);
-    border-radius: 20px 20px 0 0;
+    inset: 0;
+    border-radius: inherit;
+    box-shadow: inset 0 6px 0 rgba(255,255,255,0.4), inset 0 -6px 0 rgba(0,0,0,0.3);
     pointer-events: none;
 }
-.block-3d:active:not(.disabled) {
-    transform: translateY(10px);
-    box-shadow: 0 0px 0 rgba(0,0,0,0.3), 0 4px 6px rgba(0,0,0,0.4);
-}
+
+.block-3d:hover { filter: brightness(1.15); transform: translateY(-3px); }
 .block-3d.disabled {
     filter: grayscale(100%) opacity(0.5);
     pointer-events: none;
@@ -47,50 +90,81 @@ body {
     transform: translateY(6px);
 }
 
-/* 🌈 สีของบล็อกต่างๆ แบบมีมิติ Gradient หนาๆ */
-.color-pink { background: linear-gradient(180deg, #FF6B9E, #FF3366); box-shadow: 0 10px 0 #C4003E, 0 15px 20px rgba(0,0,0,0.3); border-color: #FFA1C5; }
-.color-mint { background: linear-gradient(180deg, #4ADE80, #22C55E); box-shadow: 0 10px 0 #16A34A, 0 15px 20px rgba(0,0,0,0.3); border-color: #86EFAC; }
-.color-yellow { background: linear-gradient(180deg, #FFD166, #FFB703); box-shadow: 0 10px 0 #D97706, 0 15px 20px rgba(0,0,0,0.3); border-color: #FFE499; }
-.color-blue { background: linear-gradient(180deg, #60A5FA, #3B82F6); box-shadow: 0 10px 0 #1D4ED8, 0 15px 20px rgba(0,0,0,0.3); border-color: #93C5FD; }
-.color-purple { background: linear-gradient(180deg, #C084FC, #A855F7); box-shadow: 0 10px 0 #7E22CE, 0 15px 20px rgba(0,0,0,0.3); border-color: #D8B4FE; }
-.color-orange { background: linear-gradient(180deg, #FB923C, #F97316); box-shadow: 0 10px 0 #C2410C, 0 15px 20px rgba(0,0,0,0.3); border-color: #FDBA74; }
+/* Candy Color Classes with Gradients and Deep Drop Shadows */
+.color-pink { background: linear-gradient(145deg, #FF4B91, #D8004B); box-shadow: 0 8px 0 #9E0035, 0 15px 20px rgba(216,0,75,0.4); border: 2px solid #FFA1C5; }
+.color-mint { background: linear-gradient(145deg, #00F0FF, #0080FF); box-shadow: 0 8px 0 #0056B3, 0 15px 20px rgba(0,128,255,0.4); border: 2px solid #8BFAFF; }
+.color-yellow { background: linear-gradient(145deg, #FFE800, #FF8A00); box-shadow: 0 8px 0 #B35F00, 0 15px 20px rgba(255,138,0,0.4); border: 2px solid #FFF399; color: #4A2600; }
+.color-blue { background: linear-gradient(145deg, #4D96FF, #1E40AF); box-shadow: 0 8px 0 #10266B, 0 15px 20px rgba(30,64,175,0.4); border: 2px solid #A6C8FF; }
+.color-purple { background: linear-gradient(145deg, #D442FF, #7000FF); box-shadow: 0 8px 0 #430099, 0 15px 20px rgba(112,0,255,0.4); border: 2px solid #EFACFF; }
+.color-orange { background: linear-gradient(145deg, #FF7A00, #E60000); box-shadow: 0 8px 0 #990000, 0 15px 20px rgba(230,0,0,0.4); border: 2px solid #FFC285; }
 
-/* กล่องคำแปล 3 มิติยักษ์ */
-.meaning-box {
-    background: #5244D4;
-    border: 8px solid #7265E6;
-    border-radius: 40px;
-    box-shadow: 0 20px 40px rgba(0,0,0,0.5), inset 0 8px 0 rgba(255,255,255,0.1);
-    position: relative;
+/* กดแล้วปุ่มยุบลงสมจริง */
+.block-3d:active:not(.disabled) {
+    transform: translateY(6px) scale(0.95);
+    box-shadow: 0 2px 0 var(--darker-color, rgba(0,0,0,0.5)), 0 5px 10px rgba(0,0,0,0.3);
+}
+.block-3d:active:not(.disabled)::before {
+    box-shadow: inset 0 3px 0 rgba(255,255,255,0.3), inset 0 -3px 0 rgba(0,0,0,0.3);
 }
 
-.text-stroke {
-    -webkit-text-stroke: 2px #1E1B4B;
-}
-
-/* 🕳️ ช่องว่างเติมคำ (เหมือนถาด 3D) */
+/* 🕳️ ช่องว่างเติมคำ (เหมือนถาด 3D ลึกๆ) */
 .slot-empty {
-    background: #1A4FA3;
-    border: 5px solid #103675;
+    background: rgba(0, 0, 0, 0.3);
+    box-shadow: inset 0 8px 15px rgba(0,0,0,0.7), 0 2px 0 rgba(255,255,255,0.1);
+    color: rgba(255,255,255,0.1);
+    border: none !important;
     border-radius: 20px;
-    box-shadow: inset 0 10px 15px rgba(0,0,0,0.5), 0 2px 5px rgba(255,255,255,0.1);
     display: flex;
     align-items: center;
     justify-content: center;
     font-weight: 900;
-    color: transparent;
 }
 
+/* 🎇 เอฟเฟกต์ฉลองตอนตอบถูก (Neon Burst) */
 .blast-flash {
     background: linear-gradient(180deg, #4ADE80, #22C55E) !important;
-    box-shadow: 0 10px 0 #16A34A, 0 0 40px 15px rgba(74, 222, 128, 0.6) !important;
+    box-shadow: 0 10px 0 #16A34A, 0 0 50px 20px rgba(74, 222, 128, 0.8) !important;
     color: white !important;
     border-color: #86EFAC !important;
-    transform: scale(1.1);
-    z-index: 10;
+    transform: scale(1.15) !important;
+    z-index: 20;
+    animation: blastPulse 1s infinite alternate;
 }
 
-/* 🪞 Glassmorphism Card Effect */
+@keyframes blastPulse {
+    0% { filter: brightness(1); box-shadow: 0 10px 0 #16A34A, 0 0 50px 20px rgba(74, 222, 128, 0.6) !important; }
+    100% { filter: brightness(1.3); box-shadow: 0 10px 0 #16A34A, 0 0 80px 30px rgba(74, 222, 128, 1) !important; }
+}
+
+/* 🪞 Glassmorphism Meaning Card */
+.meaning-box {
+    background: linear-gradient(135deg, rgba(255,255,255,0.1) 0%, rgba(255,255,255,0.02) 100%);
+    backdrop-filter: blur(30px);
+    -webkit-backdrop-filter: blur(30px);
+    border: 1px solid rgba(255,255,255,0.2);
+    border-top: 2px solid rgba(255,255,255,0.4);
+    box-shadow: 0 20px 40px rgba(0,0,0,0.5), inset 0 2px 20px rgba(255,255,255,0.1);
+    border-radius: 32px;
+    position: relative;
+}
+
+.text-stroke {
+    -webkit-text-stroke: 0;
+    text-shadow: 
+        -2px -2px 0 #1E1B4B,  
+         0   -2px 0 #1E1B4B,
+         2px -2px 0 #1E1B4B,
+         2px  0   0 #1E1B4B,
+         2px  2px 0 #1E1B4B,
+         0    2px 0 #1E1B4B,
+        -2px  2px 0 #1E1B4B,
+        -2px  0   0 #1E1B4B;
+}
+
+.text-neon {
+    text-shadow: 0 0 10px rgba(255,255,255,0.8), 0 0 20px rgba(0, 240, 255, 0.5);
+}
+
 .glass-card {
     background: rgba(255, 255, 255, 0.05);
     backdrop-filter: blur(16px);
