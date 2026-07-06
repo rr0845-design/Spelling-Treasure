@@ -70,26 +70,26 @@
         </div>
 
         <!-- 🌟 Top Bar -->
-        <header class="w-full max-w-5xl px-6 pt-10 pb-4 flex justify-between items-start z-10">
+        <header class="w-full max-w-6xl px-6 pt-10 pb-4 flex justify-between items-start z-10">
             <!-- Left: Player Name -->
             <div class="flex flex-col items-start w-1/3">
-                <h1 class="text-[10px] md:text-xs font-black text-gray-400 tracking-widest uppercase mb-0.5">Player</h1>
+                <h1 class="text-xs md:text-sm font-black text-[#A6C8FF] tracking-widest uppercase mb-0.5 drop-shadow-sm">Player</h1>
                 <div class="flex items-center gap-1">
-                    <span class="material-symbols-rounded text-[#2EE5B9] text-[16px] md:text-[20px]">person</span>
-                    <p id="player-name-display" class="text-base md:text-xl font-black text-white drop-shadow-md truncate max-w-[100px] md:max-w-[150px]">...</p>
+                    <span class="material-symbols-rounded text-[#FFD166] text-[20px] md:text-[28px] drop-shadow-md">person</span>
+                    <p id="player-name-display" class="text-xl md:text-3xl font-black text-white drop-shadow-md text-stroke truncate max-w-[120px] md:max-w-[200px]">...</p>
                 </div>
             </div>
 
             <!-- Center: Score -->
             <div class="flex flex-col items-center w-1/3">
-                <h1 class="text-[10px] md:text-xs font-black text-gray-400 tracking-widest uppercase mb-0.5">Score</h1>
-                <p id="score-display" class="text-2xl md:text-4xl font-black text-white drop-shadow-md">00<span class="text-sm md:text-xl text-gray-500">/20</span></p>
+                <h1 class="text-xs md:text-sm font-black text-[#A6C8FF] tracking-widest uppercase mb-0.5 drop-shadow-sm">Score</h1>
+                <p id="score-display" class="text-3xl md:text-5xl font-black text-white drop-shadow-md text-stroke">00<span class="text-lg md:text-2xl text-[#81C0FF]">/20</span></p>
             </div>
             
             <!-- Right: Energy -->
             <div class="flex flex-col items-end w-1/3">
-                <h1 class="text-[10px] md:text-xs font-black text-gray-400 tracking-widest uppercase mb-1.5">Energy</h1>
-                <div id="hearts-container" class="flex gap-1 justify-end flex-wrap max-w-[100px]"></div>
+                <h1 class="text-xs md:text-sm font-black text-[#A6C8FF] tracking-widest uppercase mb-2 drop-shadow-sm">Energy</h1>
+                <div id="hearts-container" class="flex gap-1.5 md:gap-2 justify-end flex-wrap max-w-[120px] md:max-w-[150px]"></div>
             </div>
         </header>
 
@@ -107,35 +107,33 @@
     <!-- 🧩 Game Area -->
     <main class="w-full max-w-5xl px-6 flex flex-col items-center flex-grow justify-start z-10">
         
-        <!-- โจทย์ (ความหมาย) แบบ Glassmorphism -->
-        <div class="glass-card w-full rounded-[24px] md:rounded-[32px] p-8 md:p-14 pt-10 text-center relative mb-10 flex flex-col items-center justify-center min-h-[150px] md:min-h-[220px]">
+        <!-- ช่องว่างเติมตัวอักษร (Slots) ย้ายมาด้านบนสุดเพื่อให้เห็นชัดเจน -->
+        <div id="spelling-slots" class="flex flex-wrap justify-center gap-3 md:gap-5 w-full min-h-[80px] md:min-h-[120px] mt-2 mb-8 md:mb-12"></div>
+
+        <!-- โจทย์ (ความหมาย) แบบ 3D Box -->
+        <div class="meaning-box w-full p-8 md:p-16 pt-10 text-center relative mb-8 flex flex-col items-center justify-center min-h-[160px] md:min-h-[260px]">
             <!-- Badge -->
-            <div class="absolute -top-4 md:-top-5 left-1/2 -translate-x-1/2 bg-gradient-to-r from-[#FF3366] to-[#FF0044] text-white text-[11px] md:text-sm font-black px-6 md:px-8 py-1.5 md:py-2.5 rounded-full tracking-widest shadow-[0_4px_12px_rgba(255,51,102,0.6)] border-2 border-[#1E1E32]">
+            <div class="absolute -top-6 md:-top-8 left-1/2 -translate-x-1/2 bg-gradient-to-b from-[#FF6B9E] to-[#FF3366] text-white text-sm md:text-xl font-black px-8 md:px-12 py-2 md:py-3 rounded-full tracking-widest border-[4px] md:border-[6px] border-[#C4003E] shadow-lg text-stroke">
                 TRANSLATE
             </div>
             
-            <h2 id="meaning-display" class="text-2xl md:text-5xl font-black text-white tracking-wide leading-tight drop-shadow-lg">กำลังโหลดคำศัพท์...</h2>
+            <h2 id="meaning-display" class="text-3xl md:text-6xl font-black text-white tracking-wide leading-tight drop-shadow-md">กำลังโหลดคำศัพท์...</h2>
         </div>
 
-        <!-- ⏭️ ปุ่ม Skip -->
-        <div class="w-full flex justify-end mb-4">
-            <button onclick="skipWord()" class="skip-btn flex items-center gap-1 text-[10px] md:text-xs font-bold text-gray-400 hover:text-white bg-white/5 hover:bg-white/15 px-4 py-2 rounded-full border border-white/10 transition-all active:scale-95">
+        <!-- ⏭️ ปุ่ม Skip & Feedback -->
+        <div class="w-full flex justify-between items-center mb-6">
+            <div id="feedback-msg" class="text-3xl md:text-5xl font-black tracking-widest text-left opacity-0 uppercase text-stroke drop-shadow-lg">GREAT!</div>
+            <button onclick="skipWord()" class="skip-btn flex items-center gap-1 text-[12px] md:text-base font-bold text-white hover:text-[#FFD166] bg-black/20 hover:bg-black/30 px-6 py-3 rounded-full border-2 border-white/20 transition-all active:scale-95 shadow-md">
                 <span>SKIP</span>
-                <span class="material-symbols-rounded text-[16px] md:text-[20px]">skip_next</span>
+                <span class="material-symbols-rounded text-[20px] md:text-[24px]">skip_next</span>
             </button>
         </div>
-
-        <!-- ช่องว่างเติมตัวอักษร (Slots) -->
-        <div id="spelling-slots" class="flex flex-wrap justify-center gap-2 md:gap-4 w-full min-h-[72px] md:min-h-[90px]"></div>
-
-        <!-- ข้อความแจ้งเตือน -->
-        <div id="feedback-msg" class="h-8 md:h-12 mt-6 md:mt-10 text-2xl md:text-4xl font-black tracking-widest text-center opacity-0 uppercase">GREAT!</div>
         
     </main>
 
     <!-- 🧱 Letter Pool -->
-    <footer class="w-full max-w-3xl px-5 md:px-10 pt-8 md:pt-10 pb-10 md:pb-12 flex-shrink-0 glass-card rounded-t-[32px] md:rounded-[32px] border-b-0 md:border border-x-0 md:border-x flex flex-col items-center z-10 bg-white/5 md:mb-8">
-        <div id="letter-pool" class="flex flex-wrap gap-3 md:gap-4 w-full mx-auto justify-center"></div>
+    <footer class="w-full max-w-5xl px-4 md:px-10 pt-4 md:pt-8 pb-12 md:pb-16 flex-shrink-0 flex flex-col items-center z-10 md:mb-8">
+        <div id="letter-pool" class="flex flex-wrap gap-4 md:gap-6 w-full mx-auto justify-center"></div>
     </footer>
     </div>
 

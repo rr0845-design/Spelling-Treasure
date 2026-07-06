@@ -1,4 +1,4 @@
-const GAS_URL = "https://script.google.com/macros/s/AKfycbxwMOOFzMKnwiOI6t3vHOA4B8M5PziNM8MXpweYZ-4LInLUydp49y8KKMAMiMm2daOamg/exec";
+const GAS_URL = "https://script.google.com/macros/s/AKfycbwdNyjU1tlQ7tjRvKo08UItDA_WzKcD0GncwoYdVaQuZTRHGgaDiliuYbJNnFN0PJxP/exec";
 
 let wordList = [];
 let wordResults = []; // เก็บประวัติการเล่นแต่ละคำ [{id: 'W001', isCorrect: true}, ...]
@@ -138,7 +138,8 @@ async function fetchWordsFromGAS() {
             wordList = json.data.map(item => ({
                 id: item.id,
                 word: item.v1.toUpperCase(),
-                meaning: item.meaning
+                meaningMain: item.meaningMain || item.meaning, // Fallback for old API format
+                meaningDetail: item.meaningDetail || ""
             }));
             totalWords = wordList.length;
             updateScoreDisplay();
@@ -213,7 +214,38 @@ function loadWord() {
     mistakes = 0;
     isInputLocked = false;
 
-    document.getElementById('meaning-display').innerText = currentObj.meaning;
+    // --- 💡 ระบบคำใบ้ (Dynamic Hint System) ---
+    // นับจำนวนอักษรที่ไม่ใช่ช่องว่าง
+    const pureLength = targetWord.replace(/[\s-]/g, '').length;
+    let hintCount = 0;
+    
+    // คำนวณโควต้าการเปิดตัวอักษรตามความยาวคำ
+    if (pureLength >= 9) hintCount = 3;
+    else if (pureLength >= 6) hintCount = 2;
+    else if (pureLength >= 4) hintCount = 1;
+    else hintCount = 0; // 3 ตัวอักษรลงมา ไม่ใบ้ให้ทายเอง
+
+    // ดึงตัวอักษรที่ไม่ซ้ำกันในคำศัพท์
+    const uniqueLetters = Array.from(new Set(targetWord.split('').filter(c => c !== ' ' && c !== '-')));
+    
+    // ป้องกันกรณีให้คำใบ้เยอะกว่าจำนวนอักษรที่ต่างกัน (ต้องเหลือให้ทายอย่างน้อย 1-2 ตัว)
+    hintCount = Math.min(hintCount, uniqueLetters.length - 2);
+
+    if (hintCount > 0) {
+        // สุ่มตัวอักษรที่จะเฉลย
+        const shuffled = uniqueLetters.sort(() => Math.random() - 0.5);
+        for(let i = 0; i < hintCount; i++) {
+            guessedLetters.add(shuffled[i]);
+        }
+    }
+
+    let displayHTML = currentObj.meaningMain;
+    if (currentObj.meaningDetail) {
+        // เพิ่มคำอธิบายแบบละเอียด (ช่อง F) โดยให้ขนาดเล็กลง สีจางลง และไม่หนาเท่าคำหลัก
+        displayHTML += `<br><span class="text-xl md:text-3xl text-[#C6BFFF] font-bold mt-2 md:mt-3 block text-stroke-0 drop-shadow-none">${currentObj.meaningDetail}</span>`;
+    }
+    
+    document.getElementById('meaning-display').innerHTML = displayHTML;
     gsap.fromTo("#meaning-display", {opacity: 0, scale: 0.95}, {opacity: 1, scale: 1, duration: 0.4, ease: "back.out(1.5)"});
 
     renderHearts();
@@ -249,9 +281,9 @@ function renderSlots(isInitial = false) {
         }
 
         if (guessedLetters.has(char)) {
-            container.innerHTML += `<div class="gsap-slot block-3d color-yellow w-[48px] h-[60px] md:w-[72px] md:h-[84px] text-[30px] md:text-[40px] transition-all">${char}</div>`;
+            container.innerHTML += `<div class="gsap-slot block-3d color-yellow w-[56px] h-[70px] md:w-[90px] md:h-[110px] md:rounded-[24px] text-[36px] md:text-[60px] transition-all">${char}</div>`;
         } else {
-            container.innerHTML += `<div class="gsap-slot slot-empty w-[48px] h-[60px] md:w-[72px] md:h-[84px] text-[30px] md:text-[40px]">_</div>`;
+            container.innerHTML += `<div class="gsap-slot slot-empty w-[56px] h-[70px] md:w-[90px] md:h-[110px] md:rounded-[24px] md:border-[6px] text-[36px] md:text-[60px]">_</div>`;
             isWon = false;
         }
     }
@@ -283,8 +315,13 @@ function generateLetterPool() {
         const btn = document.createElement('div');
         const randomColor = blockColors[i % blockColors.length];
         
-        btn.className = `gsap-btn block-3d ${randomColor} w-[56px] h-[64px] md:w-[76px] md:h-[84px] text-[28px] md:text-[38px]`;
+        btn.className = `gsap-btn block-3d ${randomColor} w-[64px] h-[76px] md:w-[90px] md:h-[100px] md:rounded-[24px] md:border-[5px] text-[32px] md:text-[50px]`;
         btn.innerText = letter;
+        
+        // ถ้าเป็นตัวอักษรที่ถูกใบ้ (เฉลย) ไปแล้ว ให้ปุ่มเป็นสีเทาและกดไม่ได้
+        if (guessedLetters.has(letter)) {
+            btn.classList.add('disabled');
+        }
         
         btn.onclick = () => handleGuess(letter, btn, randomColor);
         pool.appendChild(btn);
@@ -323,13 +360,13 @@ function triggerWin() {
     wordResults.push({ id: wordList[currentIndex].id, isCorrect: true });
     
     const slots = document.querySelectorAll('.gsap-slot');
-    slots.forEach(slot => { slot.className = "gsap-slot block-3d blast-flash w-[48px] h-[60px] md:w-[72px] md:h-[84px] text-[30px] md:text-[40px]"; });
+    slots.forEach(slot => { slot.className = "gsap-slot block-3d blast-flash w-[56px] h-[70px] md:w-[90px] md:h-[110px] md:rounded-[24px] text-[36px] md:text-[60px]"; });
 
     confetti({ particleCount: 150, spread: 80, origin: { y: 0.6 }, colors: ['#FF3366', '#20E3B2', '#FFD166', '#B5179E'] });
 
     const msg = document.getElementById('feedback-msg');
     msg.innerText = "BLAST!";
-    msg.className = "h-8 mt-6 text-3xl font-black tracking-widest text-center text-[#20E3B2] drop-shadow-[0_0_15px_#20E3B2]";
+    msg.className = "text-3xl md:text-5xl font-black tracking-widest text-left uppercase text-stroke text-[#20E3B2] drop-shadow-[0_0_15px_#20E3B2]";
     gsap.fromTo(msg, {scale: 0.5, opacity: 0}, {scale: 1, opacity: 1, duration: 0.4, ease: "back.out(2)"});
 
     score += 1; 
@@ -349,12 +386,12 @@ function triggerLose() {
     const container = document.getElementById('spelling-slots');
     container.innerHTML = '';
     for (let char of targetWord) {
-        container.innerHTML += `<div class="block-3d color-pink w-[48px] h-[60px] md:w-[72px] md:h-[84px] text-[30px] md:text-[40px] opacity-80">${char}</div>`;
+        container.innerHTML += `<div class="block-3d color-pink w-[56px] h-[70px] md:w-[90px] md:h-[110px] md:rounded-[24px] text-[36px] md:text-[60px] opacity-80">${char}</div>`;
     }
 
     const msg = document.getElementById('feedback-msg');
     msg.innerText = "OUT OF MOVES!";
-    msg.className = "h-8 mt-6 text-2xl font-black tracking-widest text-center text-[#FF3366] drop-shadow-[0_0_15px_#FF3366]";
+    msg.className = "text-2xl md:text-4xl font-black tracking-widest text-left uppercase text-stroke text-[#FF3366] drop-shadow-[0_0_15px_#FF3366]";
     gsap.fromTo(msg, {scale: 0.5, opacity: 0}, {scale: 1, opacity: 1, duration: 0.4, ease: "back.out(2)"});
 
     setTimeout(() => { moveToNextWord(msg); }, 2000);
@@ -369,12 +406,12 @@ function triggerTimeUp() {
     const container = document.getElementById('spelling-slots');
     container.innerHTML = '';
     for (let char of targetWord) {
-        container.innerHTML += `<div class="block-3d color-orange w-[48px] h-[60px] md:w-[72px] md:h-[84px] text-[30px] md:text-[40px] opacity-80">${char}</div>`;
+        container.innerHTML += `<div class="block-3d color-orange w-[56px] h-[70px] md:w-[90px] md:h-[110px] md:rounded-[24px] text-[36px] md:text-[60px] opacity-80">${char}</div>`;
     }
 
     const msg = document.getElementById('feedback-msg');
     msg.innerText = "TIME'S UP!";
-    msg.className = "h-8 mt-6 text-2xl font-black tracking-widest text-center text-[#FF9F1C] drop-shadow-[0_0_15px_#FF9F1C]";
+    msg.className = "text-2xl md:text-4xl font-black tracking-widest text-left uppercase text-stroke text-[#FF9F1C] drop-shadow-[0_0_15px_#FF9F1C]";
     gsap.fromTo(msg, {scale: 0.5, opacity: 0}, {scale: 1, opacity: 1, duration: 0.4, ease: "back.out(2)"});
 
     setTimeout(() => { moveToNextWord(msg); }, 2000);
@@ -391,12 +428,12 @@ function skipWord() {
     const container = document.getElementById('spelling-slots');
     container.innerHTML = '';
     for (let char of targetWord) {
-        container.innerHTML += `<div class="block-3d bg-[#2A2A3E] text-gray-400 w-[48px] h-[60px] md:w-[72px] md:h-[84px] text-[30px] md:text-[40px] shadow-[0_6px_0_#181826] border border-white/5">${char}</div>`;
+        container.innerHTML += `<div class="block-3d bg-[#1A4FA3] text-white/50 w-[56px] h-[70px] md:w-[90px] md:h-[110px] md:rounded-[24px] text-[36px] md:text-[60px] shadow-[0_10px_0_#103675] md:shadow-[0_15px_20px_rgba(0,0,0,0.4),_0_10px_0_#103675] border-[4px] border-[#103675] opacity-80">${char}</div>`;
     }
 
     const msg = document.getElementById('feedback-msg');
     msg.innerText = "SKIPPED";
-    msg.className = "h-8 mt-6 text-2xl font-black tracking-widest text-center text-[#8BA1AB] drop-shadow-md";
+    msg.className = "text-2xl md:text-4xl font-black tracking-widest text-left uppercase text-stroke text-[#8BA1AB] drop-shadow-md";
     gsap.fromTo(msg, {scale: 0.5, opacity: 0}, {scale: 1, opacity: 1, duration: 0.4, ease: "back.out(2)"});
 
     setTimeout(() => { moveToNextWord(msg); }, 1200);

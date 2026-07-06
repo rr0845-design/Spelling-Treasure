@@ -1,8 +1,8 @@
 @import url('https://fonts.googleapis.com/css2?family=Nunito:wght@700;900&family=Prompt:wght@500;700;900&display=swap');
 
 body {
-    /* 🌌 พื้นหลังพรีเมียมแบบเรืองแสง */
-    background: radial-gradient(120% 120% at 50% 0%, #1e1e32 0%, #0c0c14 100%);
+    /* 🌌 พื้นหลังสว่างแบบ Block Blast */
+    background: radial-gradient(circle at 50% 0%, #3080FF 0%, #1A61D5 100%);
     color: white;
     font-family: 'Nunito', 'Prompt', sans-serif;
     overflow: hidden;
@@ -11,55 +11,69 @@ body {
     -webkit-tap-highlight-color: transparent;
 }
 
-/* 🟦 สไตล์บล็อก 3D นีออน - ให้ดูฉ่ำขึ้น */
+/* 🟦 สไตล์บล็อก 3D นีออน ยักษ์ */
 .block-3d {
-    border-radius: 14px;
-    box-shadow: 0 6px 0 rgba(0,0,0,0.4), 0 10px 15px rgba(0,0,0,0.5);
+    border-radius: 20px;
+    box-shadow: 0 10px 0 rgba(0,0,0,0.3), 0 15px 20px rgba(0,0,0,0.4);
     display: flex;
     align-items: center;
     justify-content: center;
     font-weight: 900;
-    color: #12121A;
+    color: white;
     cursor: pointer;
     transition: transform 0.1s, filter 0.2s, box-shadow 0.1s;
     position: relative;
     overflow: hidden;
-    text-shadow: 0 1px 2px rgba(255,255,255,0.4);
+    text-shadow: 0 3px 0 rgba(0,0,0,0.2);
+    border: 3px solid rgba(255,255,255,0.3);
 }
-.block-3d:hover { filter: brightness(1.2); transform: translateY(-2px); }
+.block-3d:hover { filter: brightness(1.15); transform: translateY(-3px); }
 .block-3d::after {
     content: '';
     position: absolute;
-    top: 0; left: 0; right: 0; height: 40%;
+    top: 0; left: 0; right: 0; height: 35%;
     background: linear-gradient(to bottom, rgba(255,255,255,0.4), transparent);
-    border-radius: 14px 14px 0 0;
+    border-radius: 20px 20px 0 0;
     pointer-events: none;
 }
 .block-3d:active:not(.disabled) {
-    transform: translateY(6px);
-    box-shadow: 0 0px 0 rgba(0,0,0,0.4), 0 2px 4px rgba(0,0,0,0.5);
+    transform: translateY(10px);
+    box-shadow: 0 0px 0 rgba(0,0,0,0.3), 0 4px 6px rgba(0,0,0,0.4);
 }
 .block-3d.disabled {
-    filter: grayscale(100%) opacity(0.3);
+    filter: grayscale(100%) opacity(0.5);
     pointer-events: none;
-    box-shadow: 0 2px 0 rgba(0,0,0,0.3);
-    transform: translateY(4px);
+    box-shadow: 0 4px 0 rgba(0,0,0,0.3);
+    transform: translateY(6px);
 }
 
-/* 🌈 สีของบล็อกต่างๆ แบบมีมิติ Gradient */
-.color-pink { background: linear-gradient(135deg, #FF4B72, #F71A50); box-shadow: 0 6px 0 #A80D31; }
-.color-mint { background: linear-gradient(135deg, #2EE5B9, #0DBF92); box-shadow: 0 6px 0 #097559; }
-.color-yellow { background: linear-gradient(135deg, #FFDA7A, #F5BB2C); box-shadow: 0 6px 0 #B38212; }
-.color-blue { background: linear-gradient(135deg, #3A9FFF, #0077E6); box-shadow: 0 6px 0 #004D96; color: white; text-shadow: 0 2px 4px rgba(0,0,0,0.4); }
-.color-purple { background: linear-gradient(135deg, #C233AD, #9E0E89); box-shadow: 0 6px 0 #5E0551; color: white; text-shadow: 0 2px 4px rgba(0,0,0,0.4); }
-.color-orange { background: linear-gradient(135deg, #FFAE3D, #F28C00); box-shadow: 0 6px 0 #A65F00; }
+/* 🌈 สีของบล็อกต่างๆ แบบมีมิติ Gradient หนาๆ */
+.color-pink { background: linear-gradient(180deg, #FF6B9E, #FF3366); box-shadow: 0 10px 0 #C4003E, 0 15px 20px rgba(0,0,0,0.3); border-color: #FFA1C5; }
+.color-mint { background: linear-gradient(180deg, #4ADE80, #22C55E); box-shadow: 0 10px 0 #16A34A, 0 15px 20px rgba(0,0,0,0.3); border-color: #86EFAC; }
+.color-yellow { background: linear-gradient(180deg, #FFD166, #FFB703); box-shadow: 0 10px 0 #D97706, 0 15px 20px rgba(0,0,0,0.3); border-color: #FFE499; }
+.color-blue { background: linear-gradient(180deg, #60A5FA, #3B82F6); box-shadow: 0 10px 0 #1D4ED8, 0 15px 20px rgba(0,0,0,0.3); border-color: #93C5FD; }
+.color-purple { background: linear-gradient(180deg, #C084FC, #A855F7); box-shadow: 0 10px 0 #7E22CE, 0 15px 20px rgba(0,0,0,0.3); border-color: #D8B4FE; }
+.color-orange { background: linear-gradient(180deg, #FB923C, #F97316); box-shadow: 0 10px 0 #C2410C, 0 15px 20px rgba(0,0,0,0.3); border-color: #FDBA74; }
 
-/* 🕳️ ช่องว่างเติมคำ */
+/* กล่องคำแปล 3 มิติยักษ์ */
+.meaning-box {
+    background: #5244D4;
+    border: 8px solid #7265E6;
+    border-radius: 40px;
+    box-shadow: 0 20px 40px rgba(0,0,0,0.5), inset 0 8px 0 rgba(255,255,255,0.1);
+    position: relative;
+}
+
+.text-stroke {
+    -webkit-text-stroke: 2px #1E1B4B;
+}
+
+/* 🕳️ ช่องว่างเติมคำ (เหมือนถาด 3D) */
 .slot-empty {
-    background: linear-gradient(180deg, #181824, #222233);
-    border: 2px solid #43435C;
-    border-radius: 14px;
-    box-shadow: inset 0 6px 12px rgba(0,0,0,0.6), 0 2px 0 rgba(255,255,255,0.05);
+    background: #1A4FA3;
+    border: 5px solid #103675;
+    border-radius: 20px;
+    box-shadow: inset 0 10px 15px rgba(0,0,0,0.5), 0 2px 5px rgba(255,255,255,0.1);
     display: flex;
     align-items: center;
     justify-content: center;
@@ -69,10 +83,11 @@ body {
 
 .blast-flash {
     background: white !important;
-    box-shadow: 0 0 30px 10px rgba(255,255,255,0.8) !important;
+    box-shadow: 0 0 50px 20px rgba(255,255,255,1) !important;
     color: transparent !important;
     border-color: white !important;
     text-shadow: none !important;
+    transform: scale(1.1);
 }
 
 /* 🪞 Glassmorphism Card Effect */
