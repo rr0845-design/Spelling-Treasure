@@ -281,9 +281,9 @@ function renderSlots(isInitial = false) {
         }
 
         if (guessedLetters.has(char)) {
-            container.innerHTML += `<div class="gsap-slot block-3d color-yellow w-[56px] h-[70px] md:w-[90px] md:h-[110px] md:rounded-[24px] text-[36px] md:text-[60px] transition-all">${char}</div>`;
+            container.innerHTML += `<div class="gsap-slot block-3d color-yellow w-[56px] h-[70px] md:w-[76px] md:h-[90px] md:rounded-[20px] text-[36px] md:text-[50px] transition-all">${char}</div>`;
         } else {
-            container.innerHTML += `<div class="gsap-slot slot-empty w-[56px] h-[70px] md:w-[90px] md:h-[110px] md:rounded-[24px] md:border-[6px] text-[36px] md:text-[60px]">_</div>`;
+            container.innerHTML += `<div class="gsap-slot slot-empty w-[56px] h-[70px] md:w-[76px] md:h-[90px] md:rounded-[20px] md:border-[5px] text-[36px] md:text-[50px]">_</div>`;
             isWon = false;
         }
     }
@@ -315,7 +315,7 @@ function generateLetterPool() {
         const btn = document.createElement('div');
         const randomColor = blockColors[i % blockColors.length];
         
-        btn.className = `gsap-btn block-3d ${randomColor} w-[64px] h-[76px] md:w-[90px] md:h-[100px] md:rounded-[24px] md:border-[5px] text-[32px] md:text-[50px]`;
+        btn.className = `gsap-btn block-3d ${randomColor} w-[64px] h-[76px] md:w-[76px] md:h-[84px] md:rounded-[20px] md:border-[4px] text-[32px] md:text-[40px]`;
         btn.innerText = letter;
         
         // ถ้าเป็นตัวอักษรที่ถูกใบ้ (เฉลย) ไปแล้ว ให้ปุ่มเป็นสีเทาและกดไม่ได้
@@ -360,9 +360,9 @@ function triggerWin() {
     wordResults.push({ id: wordList[currentIndex].id, isCorrect: true });
     
     const slots = document.querySelectorAll('.gsap-slot');
-    slots.forEach(slot => { slot.className = "gsap-slot block-3d blast-flash w-[56px] h-[70px] md:w-[90px] md:h-[110px] md:rounded-[24px] text-[36px] md:text-[60px]"; });
+    slots.forEach(slot => { slot.className = "gsap-slot block-3d blast-flash w-[56px] h-[70px] md:w-[76px] md:h-[90px] md:rounded-[20px] text-[36px] md:text-[50px]"; });
 
-    confetti({ particleCount: 150, spread: 80, origin: { y: 0.6 }, colors: ['#FF3366', '#20E3B2', '#FFD166', '#B5179E'] });
+    confetti({ particleCount: 150, spread: 80, origin: { y: 0.6 }, colors: ['#4ADE80', '#22C55E', '#FFD166', '#FF3366'] });
 
     const msg = document.getElementById('feedback-msg');
     msg.innerText = "BLAST!";
@@ -373,7 +373,7 @@ function triggerWin() {
     updateScoreDisplay();
     gsap.fromTo("#score-display", {scale: 1.5}, {scale: 1, duration: 0.4});
 
-    setTimeout(() => { moveToNextWord(msg); }, 1500);
+    setTimeout(() => { moveToNextWord(msg); }, 5000);
 }
 
 function triggerLose() {
@@ -386,7 +386,7 @@ function triggerLose() {
     const container = document.getElementById('spelling-slots');
     container.innerHTML = '';
     for (let char of targetWord) {
-        container.innerHTML += `<div class="block-3d color-pink w-[56px] h-[70px] md:w-[90px] md:h-[110px] md:rounded-[24px] text-[36px] md:text-[60px] opacity-80">${char}</div>`;
+        container.innerHTML += `<div class="block-3d color-pink w-[56px] h-[70px] md:w-[76px] md:h-[90px] md:rounded-[20px] text-[36px] md:text-[50px] opacity-80">${char}</div>`;
     }
 
     const msg = document.getElementById('feedback-msg');
@@ -394,7 +394,7 @@ function triggerLose() {
     msg.className = "text-2xl md:text-4xl font-black tracking-widest text-left uppercase text-stroke text-[#FF3366] drop-shadow-[0_0_15px_#FF3366]";
     gsap.fromTo(msg, {scale: 0.5, opacity: 0}, {scale: 1, opacity: 1, duration: 0.4, ease: "back.out(2)"});
 
-    setTimeout(() => { moveToNextWord(msg); }, 2000);
+    setTimeout(() => { moveToNextWord(msg); }, 5000);
 }
 
 function triggerTimeUp() {
@@ -406,7 +406,7 @@ function triggerTimeUp() {
     const container = document.getElementById('spelling-slots');
     container.innerHTML = '';
     for (let char of targetWord) {
-        container.innerHTML += `<div class="block-3d color-orange w-[56px] h-[70px] md:w-[90px] md:h-[110px] md:rounded-[24px] text-[36px] md:text-[60px] opacity-80">${char}</div>`;
+        container.innerHTML += `<div class="block-3d color-orange w-[56px] h-[70px] md:w-[76px] md:h-[90px] md:rounded-[20px] text-[36px] md:text-[50px] opacity-80">${char}</div>`;
     }
 
     const msg = document.getElementById('feedback-msg');
@@ -414,7 +414,7 @@ function triggerTimeUp() {
     msg.className = "text-2xl md:text-4xl font-black tracking-widest text-left uppercase text-stroke text-[#FF9F1C] drop-shadow-[0_0_15px_#FF9F1C]";
     gsap.fromTo(msg, {scale: 0.5, opacity: 0}, {scale: 1, opacity: 1, duration: 0.4, ease: "back.out(2)"});
 
-    setTimeout(() => { moveToNextWord(msg); }, 2000);
+    setTimeout(() => { moveToNextWord(msg); }, 5000);
 }
 
 function skipWord() {
@@ -428,7 +428,7 @@ function skipWord() {
     const container = document.getElementById('spelling-slots');
     container.innerHTML = '';
     for (let char of targetWord) {
-        container.innerHTML += `<div class="block-3d bg-[#1A4FA3] text-white/50 w-[56px] h-[70px] md:w-[90px] md:h-[110px] md:rounded-[24px] text-[36px] md:text-[60px] shadow-[0_10px_0_#103675] md:shadow-[0_15px_20px_rgba(0,0,0,0.4),_0_10px_0_#103675] border-[4px] border-[#103675] opacity-80">${char}</div>`;
+        container.innerHTML += `<div class="block-3d bg-[#1A4FA3] text-white/50 w-[56px] h-[70px] md:w-[76px] md:h-[90px] md:rounded-[20px] text-[36px] md:text-[50px] shadow-[0_10px_0_#103675] md:shadow-[0_15px_20px_rgba(0,0,0,0.4),_0_10px_0_#103675] border-[4px] border-[#103675] opacity-80">${char}</div>`;
     }
 
     const msg = document.getElementById('feedback-msg');
@@ -436,7 +436,7 @@ function skipWord() {
     msg.className = "text-2xl md:text-4xl font-black tracking-widest text-left uppercase text-stroke text-[#8BA1AB] drop-shadow-md";
     gsap.fromTo(msg, {scale: 0.5, opacity: 0}, {scale: 1, opacity: 1, duration: 0.4, ease: "back.out(2)"});
 
-    setTimeout(() => { moveToNextWord(msg); }, 1200);
+    setTimeout(() => { moveToNextWord(msg); }, 5000);
 }
 
 function moveToNextWord(msgElement) {

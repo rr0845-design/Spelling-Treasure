@@ -82,12 +82,12 @@ body {
 }
 
 .blast-flash {
-    background: white !important;
-    box-shadow: 0 0 50px 20px rgba(255,255,255,1) !important;
-    color: transparent !important;
-    border-color: white !important;
-    text-shadow: none !important;
+    background: linear-gradient(180deg, #4ADE80, #22C55E) !important;
+    box-shadow: 0 10px 0 #16A34A, 0 0 40px 15px rgba(74, 222, 128, 0.6) !important;
+    color: white !important;
+    border-color: #86EFAC !important;
     transform: scale(1.1);
+    z-index: 10;
 }
 
 /* 🪞 Glassmorphism Card Effect */
