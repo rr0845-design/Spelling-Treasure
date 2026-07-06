@@ -1,0 +1,180 @@
+/* =========================================
+   Spelling Blast - CSS Stylesheet
+========================================= */
+
+/* 🎨 ตัวแปรจัดการสี (Color Palette) */
+:root {
+    --color-bg: #F9F7F2;       /* สีครีมสว่างพื้นหลัง */
+    --color-text: #12121A;     /* สีดำเทาสำหรับตัวหนังสือ */
+    
+    --color-blue: #465AE1;     /* ปุ่มสีน้ำเงิน */
+    --shadow-blue: #3244BA;
+    
+    --color-yellow: #F7D719;   /* ปุ่มสีเหลือง */
+    --shadow-yellow: #D4B611;
+    
+    --color-orange: #F75B32;   /* ปุ่มสีส้ม (และปุ่ม Skip) */
+    --shadow-orange: #D14420;
+    
+    --color-green: #AFD641;    /* ปุ่มสีเขียว (และแถบเวลา) */
+    --shadow-green: #8BAE2A;
+    
+    --color-red: #FF4B4B;      /* สีแดงสำหรับตอนตอบผิด */
+
+    /* ขนาดเริ่มต้นของบล็อกตัวอักษร */
+    --block-size: 50px;
+}
+
+/* =========================================
+   ปรับแต่งพื้นฐาน
+========================================= */
+* {
+    box-sizing: border-box;
+}
+
+body {
+    -webkit-tap-highlight-color: transparent; /* เอาแถบไฮไลต์ตอนกดในมือถือออก */
+}
+
+/* =========================================
+   🔠 ช่องว่างสำหรับเติมคำ (Spelling Slots)
+========================================= */
+.slot-empty {
+    width: var(--block-size);
+    height: var(--block-size);
+    background-color: rgba(0, 0, 0, 0.05);
+    border: 3px dashed #ccc;
+    border-radius: 12px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1.8rem;
+    font-weight: 900;
+    font-family: 'Nunito', sans-serif;
+    color: var(--color-text);
+    transition: all 0.2s ease;
+}
+
+.slot-filled {
+    background-color: var(--color-green);
+    border: 3px solid var(--color-green);
+    color: white;
+    box-shadow: 0 4px 10px rgba(175, 214, 65, 0.4);
+}
+
+/* =========================================
+   🟦 แป้นตัวอักษร 3D (Letter Pool Blocks)
+========================================= */
+.block-3d {
+    width: 100%;
+    aspect-ratio: 1/1; /* ทำให้กล่องเป็นสี่เหลี่ยมจัตุรัสเสมอ */
+    max-width: 60px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1.8rem;
+    font-weight: 900;
+    font-family: 'Nunito', sans-serif;
+    color: white;
+    border-radius: 12px;
+    cursor: pointer;
+    user-select: none;
+    transition: transform 0.1s cubic-bezier(0.4, 0, 0.2, 1), box-shadow 0.1s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+/* เอฟเฟกต์ตอนกดปุ่ม 3D */
+.block-3d:active {
+    transform: translateY(6px);
+    box-shadow: 0 0px 0 transparent !important;
+}
+
+/* คลาสสีสันต่างๆ สำหรับปุ่ม (เอาไว้สุ่มใน JS ได้) */
+.color-blue { background-color: var(--color-blue); box-shadow: 0 6px 0 var(--shadow-blue); }
+.color-orange { background-color: var(--color-orange); box-shadow: 0 6px 0 var(--shadow-orange); }
+.color-green { background-color: var(--color-green); box-shadow: 0 6px 0 var(--shadow-green); }
+.color-yellow { background-color: var(--color-yellow); box-shadow: 0 6px 0 var(--shadow-yellow); color: var(--color-text); }
+
+/* ปุ่มที่ถูกกดไปแล้ว (ซ่อนไว้แต่ยังจองพื้นที่) */
+.block-hidden {
+    opacity: 0;
+    pointer-events: none;
+    transform: scale(0.5);
+}
+
+/* =========================================
+   ✨ แอนิเมชัน (Animations)
+========================================= */
+/* แอนิเมชันสั่นเมื่อตอบผิด */
+@keyframes shake {
+    0%, 100% { transform: translateX(0); }
+    20%, 60% { transform: translateX(-5px); }
+    40%, 80% { transform: translateX(5px); }
+}
+
+.animate-shake {
+    animation: shake 0.4s ease-in-out;
+    border-color: var(--color-red) !important;
+    background-color: rgba(255, 75, 75, 0.1) !important;
+    color: var(--color-red) !important;
+}
+
+/* แอนิเมชันระเบิดแสงเมื่อตอบถูก */
+@keyframes blast {
+    0% { transform: scale(1); filter: brightness(1); }
+    50% { transform: scale(1.15); filter: brightness(1.2); box-shadow: 0 0 20px var(--color-green); }
+    100% { transform: scale(1); filter: brightness(1); }
+}
+
+.animate-blast {
+    animation: blast 0.5s ease-out;
+}
+
+/* =========================================
+   📱💻 ระบบบังคับทิศทางหน้าจอ (Orientation Lock)
+========================================= */
+/* บังคับสำหรับ Mobile: ถ้าเป็นแนวนอน ให้ขึ้นเตือน */
+@media screen and (max-width: 768px) and (orientation: landscape) {
+    body::before {
+        content: "📱 กรุณาหมุนหน้าจอเป็นแนวตั้งเพื่อเล่นเกม";
+        position: fixed;
+        top: 0; left: 0; width: 100%; height: 100%;
+        background: rgba(18, 18, 26, 0.95);
+        backdrop-filter: blur(5px);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        color: white;
+        font-size: 20px;
+        font-weight: bold;
+        z-index: 9999;
+        text-align: center;
+        padding: 20px;
+    }
+}
+
+/* บังคับสำหรับ Desktop: ถ้าจอแคบไปหรือตั้งเกินไป ให้เตือนแนวนอน */
+@media screen and (min-width: 769px) and (orientation: portrait) {
+    body::before {
+        content: "💻 กรุณาขยายหน้าจอหรือใช้แนวนอนสำหรับ Desktop";
+        position: fixed;
+        top: 0; left: 0; width: 100%; height: 100%;
+        background: rgba(18, 18, 26, 0.95);
+        backdrop-filter: blur(5px);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        color: white;
+        font-size: 24px;
+        font-weight: bold;
+        z-index: 9999;
+        text-align: center;
+        padding: 20px;
+    }
+}
+
+/* Responsive ปรับขนาดบล็อกอัตโนมัติ */
+@media screen and (min-width: 768px) {
+    :root {
+        --block-size: 64px; /* หน้าจอใหญ่ขึ้น บล็อกใหญ่ขึ้น */
+    }
+}
