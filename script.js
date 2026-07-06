@@ -1,4 +1,4 @@
-const GAS_URL = "https://script.google.com/macros/s/AKfycbwoI65Sg-lBn9wn5TDzF_qOl_9SgyIYpIc5tV0PqojESXb_kr51ak5VhB1pKXMt-jJCcg/exec";
+const GAS_URL = https://script.google.com/macros/s/AKfycbwoI65Sg-lBn9wn5TDzF_qOl_9SgyIYpIc5tV0PqojESXb_kr51ak5VhB1pKXMt-jJCcg/exec";
 
 let wordList = [];
 let wordResults = []; // เก็บประวัติการเล่นแต่ละคำ [{id: 'W001', isCorrect: true}, ...]
@@ -364,8 +364,11 @@ function triggerWin() {
 
     confetti({ particleCount: 150, spread: 80, origin: { y: 0.6 }, colors: ['#4ADE80', '#22C55E', '#FFD166', '#FF3366'] });
 
+    const compliments = ["EXCELLENT!", "AMAZING!", "VERY GOOD!", "AWESOME!", "PERFECT!", "BRILLIANT!", "GENIUS!"];
+    const randomCompliment = compliments[Math.floor(Math.random() * compliments.length)];
+
     const msg = document.getElementById('feedback-msg');
-    msg.innerText = "BLAST!";
+    msg.innerText = randomCompliment;
     msg.className = "text-3xl md:text-5xl font-black tracking-widest text-left uppercase text-stroke text-[#20E3B2] drop-shadow-[0_0_15px_#20E3B2]";
     gsap.fromTo(msg, {scale: 0.5, opacity: 0}, {scale: 1, opacity: 1, duration: 0.4, ease: "back.out(2)"});
 
