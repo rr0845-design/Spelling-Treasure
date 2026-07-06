@@ -8,71 +8,136 @@
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/gsap.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.6.0/dist/confetti.browser.min.js"></script> 
-    <!-- Google Material Symbols for icons -->
     <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Material+Symbols+Rounded:opsz,wght,FILL,GRAD@24,700,1,0" />
     <link rel="stylesheet" href="style.css">
 </head>
-<body class="flex flex-col h-[100dvh] w-full max-w-md mx-auto relative">
+<body class="flex flex-col h-[100dvh] w-full items-center relative">
 
-    <!-- 🌟 Top Bar -->
-    <header class="w-full flex justify-between items-center px-6 pt-10 pb-4 flex-shrink-0 z-10">
-        <div class="flex flex-col">
-            <h1 class="text-[10px] font-black text-gray-400 tracking-widest uppercase mb-0.5">Level Score</h1>
-            <div class="flex items-baseline gap-1">
-                <p id="score-display" class="text-3xl font-black text-white drop-shadow-md">00<span class="text-lg text-gray-500">/20</span></p>
+    <!-- 📱 แจ้งเตือนให้หมุนจอ (สำหรับมือถือ/แท็บเล็ตในแนวนอน) -->
+    <div id="rotate-overlay" class="fixed inset-0 bg-[#0c0c14] z-[999] flex-col justify-center items-center text-center px-6 hidden">
+        <span class="material-symbols-rounded text-6xl text-[#FF3366] mb-4 animate-bounce">screen_rotation</span>
+        <h2 class="text-2xl md:text-3xl font-black text-white mb-2 tracking-wide">โปรดหมุนอุปกรณ์</h2>
+        <p class="text-gray-400 text-sm md:text-base">เกมนี้รองรับการเล่นในแนวตั้ง (Portrait) <br> สำหรับหน้าจอมือถือและแท็บเล็ต</p>
+    </div>
+
+    <!-- 🎮 Game Container -->
+    <div id="game-container" class="flex flex-col h-full w-full items-center">
+        <!-- 🔐 หน้าจอ Login / Sign Up (Block Blast Style) -->
+        <div id="login-overlay" class="fixed inset-0 bg-[#1A61D5] z-[50] flex flex-col justify-center items-center px-4 overflow-hidden">
+            <!-- Background Effect -->
+            <div class="absolute inset-0 opacity-30 bg-[radial-gradient(circle_at_center,_#ffffff_0%,_transparent_70%)] mix-blend-overlay"></div>
+            
+            <!-- Game Logo (Mockup for Spelling Blast) -->
+            <div class="mb-10 text-center z-10">
+                <h1 class="text-5xl md:text-6xl font-black text-white drop-shadow-[0_6px_0_#0D47A1] uppercase tracking-wider" style="font-family: 'Nunito', sans-serif; -webkit-text-stroke: 2px #0D47A1;">
+                    <span class="text-[#FFD166]">S</span><span class="text-[#20E3B2]">P</span><span class="text-[#FF3366]">E</span><span class="text-[#B5179E]">L</span><span class="text-[#4D96FF]">L</span>
+                    <br/>
+                    <span class="text-white text-4xl md:text-5xl">BLAST</span>
+                </h1>
+                <p class="text-[#81C0FF] font-bold text-sm md:text-base tracking-widest uppercase mt-2 drop-shadow-md">Vocabulary Master</p>
+            </div>
+
+            <!-- Popup Box -->
+            <div class="relative w-full max-w-sm bg-[#5244D4] border-[6px] border-[#7265E6] rounded-[36px] p-6 text-center flex flex-col items-center shadow-[0_15px_35px_rgba(0,0,0,0.4)] z-10">
+                
+                <!-- Title Badge -->
+                <div class="absolute -top-7 left-1/2 -translate-x-1/2 bg-[#5244D4] px-8 py-2 rounded-full border-[5px] border-[#7265E6] shadow-lg">
+                    <h2 id="auth-title" class="text-2xl font-black text-white drop-shadow-[0_2px_0_#1E1B4B]" style="font-family: 'Nunito', sans-serif; -webkit-text-stroke: 1px #1E1B4B;">LOGIN</h2>
+                </div>
+
+                <!-- Toggle Tabs -->
+                <div class="flex w-full bg-[#372A99] rounded-full p-1.5 mb-5 mt-5 shadow-inner">
+                    <button id="tab-login" onclick="switchTab('login')" class="flex-1 py-2 rounded-full text-white font-black bg-[#23C552] shadow-[0_4px_0_#168F3A] transition-all transform active:translate-y-[2px] active:shadow-[0_2px_0_#168F3A]">Login</button>
+                    <button id="tab-register" onclick="switchTab('register')" class="flex-1 py-2 rounded-full text-[#A59DF6] font-bold hover:text-white transition-all">Sign Up</button>
+                </div>
+
+                <p id="auth-subtitle" class="text-[#C6BFFF] text-sm mb-4 font-bold">เข้าสู่ระบบด้วยอีเมลเดิมของคุณ</p>
+                
+                <!-- Register Only: Name Input -->
+                <div id="name-input-container" class="w-full hidden">
+                    <input type="text" id="name-input" placeholder="Player Name" class="w-full bg-[#372A99] border-[3px] border-[#2A1E7A] rounded-[20px] px-5 py-4 text-white text-lg focus:outline-none focus:border-[#20E3B2] transition-colors mb-3 text-center placeholder:text-[#8376E6] font-black shadow-inner" />
+                </div>
+                
+                <input type="email" id="email-input" placeholder="student@school.edu" class="w-full bg-[#372A99] border-[3px] border-[#2A1E7A] rounded-[20px] px-5 py-4 text-white text-lg focus:outline-none focus:border-[#20E3B2] transition-colors mb-4 text-center placeholder:text-[#8376E6] font-black shadow-inner tracking-wider" />
+                
+                <p id="auth-error" class="text-[#FF4D79] text-sm font-black h-6 mb-2 drop-shadow-md"></p>
+                
+                <!-- Submit Button -->
+                <button id="auth-btn" onclick="submitAuth()" class="w-full bg-gradient-to-b from-[#4ADE80] to-[#22C55E] text-white font-black text-2xl py-4 rounded-[20px] shadow-[0_8px_0_#16A34A] hover:brightness-110 active:translate-y-[8px] active:shadow-none transition-all flex items-center justify-center gap-2 border-[3px] border-[#86EFAC]">
+                    <span id="auth-btn-text" class="drop-shadow-[0_2px_0_#15803D] uppercase tracking-wide">PLAY</span>
+                </button>
             </div>
         </div>
-        
-        <div class="flex flex-col items-end">
-            <h1 class="text-[10px] font-black text-gray-400 tracking-widest uppercase mb-1.5">Energy</h1>
-            <div id="hearts-container" class="flex gap-1.5 justify-end"></div>
-        </div>
-    </header>
+
+        <!-- 🌟 Top Bar -->
+        <header class="w-full max-w-5xl px-6 pt-10 pb-4 flex justify-between items-start z-10">
+            <!-- Left: Player Name -->
+            <div class="flex flex-col items-start w-1/3">
+                <h1 class="text-[10px] md:text-xs font-black text-gray-400 tracking-widest uppercase mb-0.5">Player</h1>
+                <div class="flex items-center gap-1">
+                    <span class="material-symbols-rounded text-[#2EE5B9] text-[16px] md:text-[20px]">person</span>
+                    <p id="player-name-display" class="text-base md:text-xl font-black text-white drop-shadow-md truncate max-w-[100px] md:max-w-[150px]">...</p>
+                </div>
+            </div>
+
+            <!-- Center: Score -->
+            <div class="flex flex-col items-center w-1/3">
+                <h1 class="text-[10px] md:text-xs font-black text-gray-400 tracking-widest uppercase mb-0.5">Score</h1>
+                <p id="score-display" class="text-2xl md:text-4xl font-black text-white drop-shadow-md">00<span class="text-sm md:text-xl text-gray-500">/20</span></p>
+            </div>
+            
+            <!-- Right: Energy -->
+            <div class="flex flex-col items-end w-1/3">
+                <h1 class="text-[10px] md:text-xs font-black text-gray-400 tracking-widest uppercase mb-1.5">Energy</h1>
+                <div id="hearts-container" class="flex gap-1 justify-end flex-wrap max-w-[100px]"></div>
+            </div>
+        </header>
 
     <!-- ⏱️ Timer Bar -->
-    <div class="w-full px-6 flex-shrink-0 mb-6 z-10">
-        <div class="flex justify-between items-center text-[10px] font-black text-gray-400 tracking-widest mb-1.5">
+    <div class="w-full max-w-5xl px-6 flex-shrink-0 mb-8 md:mb-12 z-10">
+        <div class="flex justify-between items-center text-[10px] md:text-xs font-black text-gray-400 tracking-widest mb-1.5">
             <span>TIME LEFT</span>
             <span id="timer-text" class="text-white">60s</span>
         </div>
-        <div class="w-full h-2.5 bg-black/40 rounded-full overflow-hidden border border-white/10 shadow-inner">
+        <div class="w-full h-2.5 md:h-3.5 bg-black/40 rounded-full overflow-hidden border border-white/10 shadow-inner">
             <div id="timer-bar" class="h-full bg-gradient-to-r from-[#FFD166] to-[#FF9F1C] w-full origin-left rounded-full shadow-[0_0_12px_#FFD166]"></div>
         </div>
     </div>
 
     <!-- 🧩 Game Area -->
-    <main class="w-full px-6 flex flex-col items-center flex-grow justify-start z-10">
+    <main class="w-full max-w-5xl px-6 flex flex-col items-center flex-grow justify-start z-10">
         
         <!-- โจทย์ (ความหมาย) แบบ Glassmorphism -->
-        <div class="glass-card w-full rounded-[24px] p-8 pt-10 text-center relative mb-8 flex flex-col items-center justify-center min-h-[150px]">
+        <div class="glass-card w-full rounded-[24px] md:rounded-[32px] p-8 md:p-14 pt-10 text-center relative mb-10 flex flex-col items-center justify-center min-h-[150px] md:min-h-[220px]">
             <!-- Badge -->
-            <div class="absolute -top-4 left-1/2 -translate-x-1/2 bg-gradient-to-r from-[#FF3366] to-[#FF0044] text-white text-[11px] font-black px-5 py-1.5 rounded-full tracking-widest shadow-[0_4px_12px_rgba(255,51,102,0.6)] border-2 border-[#1E1E32]">
+            <div class="absolute -top-4 md:-top-5 left-1/2 -translate-x-1/2 bg-gradient-to-r from-[#FF3366] to-[#FF0044] text-white text-[11px] md:text-sm font-black px-6 md:px-8 py-1.5 md:py-2.5 rounded-full tracking-widest shadow-[0_4px_12px_rgba(255,51,102,0.6)] border-2 border-[#1E1E32]">
                 TRANSLATE
             </div>
             
-            <h2 id="meaning-display" class="text-3xl md:text-4xl font-black text-white tracking-wide leading-tight drop-shadow-lg">กำลังโหลดคำศัพท์...</h2>
+            <h2 id="meaning-display" class="text-2xl md:text-5xl font-black text-white tracking-wide leading-tight drop-shadow-lg">กำลังโหลดคำศัพท์...</h2>
         </div>
 
         <!-- ⏭️ ปุ่ม Skip -->
-        <div class="w-full flex justify-end mb-2">
-            <button onclick="skipWord()" class="skip-btn flex items-center gap-1 text-[10px] font-bold text-gray-400 hover:text-white bg-white/5 hover:bg-white/15 px-3 py-1.5 rounded-full border border-white/10 transition-all active:scale-95">
+        <div class="w-full flex justify-end mb-4">
+            <button onclick="skipWord()" class="skip-btn flex items-center gap-1 text-[10px] md:text-xs font-bold text-gray-400 hover:text-white bg-white/5 hover:bg-white/15 px-4 py-2 rounded-full border border-white/10 transition-all active:scale-95">
                 <span>SKIP</span>
-                <span class="material-symbols-rounded text-[16px]">skip_next</span>
+                <span class="material-symbols-rounded text-[16px] md:text-[20px]">skip_next</span>
             </button>
         </div>
 
         <!-- ช่องว่างเติมตัวอักษร (Slots) -->
-        <div id="spelling-slots" class="flex flex-wrap justify-center gap-2 md:gap-3 w-full min-h-[72px]"></div>
+        <div id="spelling-slots" class="flex flex-wrap justify-center gap-2 md:gap-4 w-full min-h-[72px] md:min-h-[90px]"></div>
 
         <!-- ข้อความแจ้งเตือน -->
-        <div id="feedback-msg" class="h-8 mt-6 text-2xl font-black tracking-widest text-center opacity-0 uppercase">GREAT!</div>
+        <div id="feedback-msg" class="h-8 md:h-12 mt-6 md:mt-10 text-2xl md:text-4xl font-black tracking-widest text-center opacity-0 uppercase">GREAT!</div>
         
     </main>
 
-    <!-- 🧱 Letter Pool (Keyboard Tray แบบ Grid 4 คอลัมน์) -->
-    <footer class="w-full px-5 pt-8 pb-10 flex-shrink-0 glass-card rounded-t-[32px] border-b-0 border-x-0 flex flex-col items-center z-10 bg-white/5">
-        <div id="letter-pool" class="grid grid-cols-4 gap-3 max-w-[340px] w-full mx-auto justify-items-center"></div>
+    <!-- 🧱 Letter Pool -->
+    <footer class="w-full max-w-3xl px-5 md:px-10 pt-8 md:pt-10 pb-10 md:pb-12 flex-shrink-0 glass-card rounded-t-[32px] md:rounded-[32px] border-b-0 md:border border-x-0 md:border-x flex flex-col items-center z-10 bg-white/5 md:mb-8">
+        <div id="letter-pool" class="flex flex-wrap gap-3 md:gap-4 w-full mx-auto justify-center"></div>
     </footer>
+    </div>
 
     <script src="script.js"></script>
 </body>

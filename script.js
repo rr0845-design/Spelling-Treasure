@@ -1,6 +1,9 @@
 const GAS_URL = "https://script.google.com/macros/s/AKfycbwdNyjU1tlQ7tjRvKo08UItDA_WzKcD0GncwoYdVaQuZTRHGgaDiliuYbJNnFN0PJxP/exec";
 
 let wordList = [];
+let wordResults = []; // เก็บประวัติการเล่นแต่ละคำ [{id: 'W001', isCorrect: true}, ...]
+let userEmail = ""; // เก็บอีเมลผู้เล่นที่เข้าสู่ระบบ
+let userName = ""; // เก็บชื่อผู้เล่น
 const blockColors = ['color-pink', 'color-mint', 'color-yellow', 'color-blue', 'color-purple', 'color-orange'];
 
 // 🔊 Sound effects
@@ -18,18 +21,114 @@ let isInputLocked = false;
 let timeLeft = 60;
 let timerInterval;
 
-window.onload = () => {
-    fetchWordsFromGAS();
-};
+let currentAuthMode = "login";
+
+function switchTab(mode) {
+    currentAuthMode = mode;
+    const tabLogin = document.getElementById('tab-login');
+    const tabRegister = document.getElementById('tab-register');
+    const nameInputContainer = document.getElementById('name-input-container');
+    const authTitle = document.getElementById('auth-title');
+    const authSubtitle = document.getElementById('auth-subtitle');
+    const authError = document.getElementById('auth-error');
+    
+    authError.innerText = "";
+    
+    const activeTab = "flex-1 py-2 rounded-full text-white font-black bg-[#23C552] shadow-[0_4px_0_#168F3A] transition-all transform active:translate-y-[2px] active:shadow-[0_2px_0_#168F3A]";
+    const inactiveTab = "flex-1 py-2 rounded-full text-[#A59DF6] font-bold hover:text-white transition-all";
+    
+    if (mode === 'login') {
+        tabLogin.className = activeTab;
+        tabRegister.className = inactiveTab;
+        nameInputContainer.classList.add('hidden');
+        authTitle.innerText = "LOGIN";
+        authSubtitle.innerText = "เข้าสู่ระบบด้วยอีเมลเดิมของคุณ";
+    } else {
+        tabRegister.className = activeTab;
+        tabLogin.className = inactiveTab;
+        nameInputContainer.classList.remove('hidden');
+        authTitle.innerText = "SIGN UP";
+        authSubtitle.innerText = "สมัครสมาชิกใหม่เพื่อเริ่มเล่นเกม";
+    }
+}
+
+async function submitAuth() {
+    const emailInput = document.getElementById('email-input').value.trim();
+    const nameInput = document.getElementById('name-input').value.trim();
+    const authError = document.getElementById('auth-error');
+    const authBtn = document.getElementById('auth-btn');
+    const authBtnText = document.getElementById('auth-btn-text');
+    
+    authError.innerText = "";
+    
+    if (!emailInput) {
+        authError.innerText = "⚠️ กรุณากรอกอีเมล";
+        return;
+    }
+    
+    if (currentAuthMode === 'register' && !nameInput) {
+        authError.innerText = "⚠️ กรุณากรอกชื่อผู้เล่น";
+        return;
+    }
+    
+    // แสดงสถานะโหลด
+    const originalText = authBtnText.innerText;
+    authBtnText.innerText = "กำลังตรวจสอบ...";
+    authBtn.classList.add('opacity-50', 'pointer-events-none');
+    
+    try {
+        const payload = {
+            action: currentAuthMode,
+            email: emailInput,
+            name: currentAuthMode === 'register' ? nameInput : ""
+        };
+        
+        const response = await fetch(GAS_URL, {
+            method: 'POST',
+            body: JSON.stringify(payload),
+            headers: { "Content-Type": "text/plain;charset=utf-8" }
+        });
+        
+        const json = await response.json();
+        
+        if (json.status === "success") {
+            userEmail = emailInput;
+            userName = currentAuthMode === 'register' ? nameInput : json.name;
+            
+            // แสดงชื่อบนมุมซ้ายบน
+            document.getElementById('player-name-display').innerText = userName;
+            
+            // อนิเมชันซ่อนหน้าจอ Login
+            gsap.to("#login-overlay", {
+                opacity: 0, 
+                scale: 1.05,
+                duration: 0.4, 
+                ease: "power2.inOut",
+                onComplete: () => {
+                    document.getElementById('login-overlay').style.display = "none";
+                }
+            });
+            
+            fetchWordsFromGAS();
+        } else {
+            authError.innerText = "❌ " + (json.message || "เกิดข้อผิดพลาด");
+        }
+    } catch (err) {
+        console.error(err);
+        authError.innerText = "❌ ไม่สามารถเชื่อมต่อเซิร์ฟเวอร์ได้";
+    } finally {
+        authBtnText.innerText = originalText;
+        authBtn.classList.remove('opacity-50', 'pointer-events-none');
+    }
+}
 
 async function fetchWordsFromGAS() {
-    const testEmail = "guest.student@school.edu"; // ใช้อีเมลจำลองไปก่อน
     const meaningDisplay = document.getElementById('meaning-display');
     
     try {
         // เพิ่ม t เพื่อป้องกัน Browser Caching
         const timestamp = new Date().getTime();
-        const response = await fetch(`${GAS_URL}?action=getVocab&email=${testEmail}&t=${timestamp}`, {
+        const response = await fetch(`${GAS_URL}?action=getVocab&email=${userEmail}&t=${timestamp}`, {
             cache: "no-store"
         });
         const json = await response.json();
@@ -103,6 +202,7 @@ function loadWord() {
         document.getElementById('spelling-slots').innerHTML = "";
         document.getElementById('letter-pool').innerHTML = "";
         stopTimer();
+        saveProgressToGAS(); // 💾 บันทึกผลการเรียนรู้
         return;
     }
 
@@ -148,9 +248,9 @@ function renderSlots(isInitial = false) {
         }
 
         if (guessedLetters.has(char)) {
-            container.innerHTML += `<div class="gsap-slot block-3d color-yellow w-[52px] h-[64px] text-[30px] transition-all">${char}</div>`;
+            container.innerHTML += `<div class="gsap-slot block-3d color-yellow w-[48px] h-[60px] md:w-[72px] md:h-[84px] text-[30px] md:text-[40px] transition-all">${char}</div>`;
         } else {
-            container.innerHTML += `<div class="gsap-slot slot-empty w-[52px] h-[64px] text-[30px]">_</div>`;
+            container.innerHTML += `<div class="gsap-slot slot-empty w-[48px] h-[60px] md:w-[72px] md:h-[84px] text-[30px] md:text-[40px]">_</div>`;
             isWon = false;
         }
     }
@@ -182,7 +282,7 @@ function generateLetterPool() {
         const btn = document.createElement('div');
         const randomColor = blockColors[i % blockColors.length];
         
-        btn.className = `gsap-btn block-3d ${randomColor} w-full h-[64px] text-[28px]`;
+        btn.className = `gsap-btn block-3d ${randomColor} w-[56px] h-[64px] md:w-[76px] md:h-[84px] text-[28px] md:text-[38px]`;
         btn.innerText = letter;
         
         btn.onclick = () => handleGuess(letter, btn, randomColor);
@@ -218,8 +318,11 @@ function triggerWin() {
     isInputLocked = true;
     stopTimer();
     
+    // บันทึกผลว่าตอบถูก
+    wordResults.push({ id: wordList[currentIndex].id, isCorrect: true });
+    
     const slots = document.querySelectorAll('.gsap-slot');
-    slots.forEach(slot => { slot.className = "gsap-slot block-3d blast-flash w-[52px] h-[64px] text-[30px]"; });
+    slots.forEach(slot => { slot.className = "gsap-slot block-3d blast-flash w-[48px] h-[60px] md:w-[72px] md:h-[84px] text-[30px] md:text-[40px]"; });
 
     confetti({ particleCount: 150, spread: 80, origin: { y: 0.6 }, colors: ['#FF3366', '#20E3B2', '#FFD166', '#B5179E'] });
 
@@ -239,10 +342,13 @@ function triggerLose() {
     isInputLocked = true;
     stopTimer();
     
+    // บันทึกผลว่าตอบผิด
+    wordResults.push({ id: wordList[currentIndex].id, isCorrect: false });
+    
     const container = document.getElementById('spelling-slots');
     container.innerHTML = '';
     for (let char of targetWord) {
-        container.innerHTML += `<div class="block-3d color-pink w-[52px] h-[64px] text-[30px] opacity-80">${char}</div>`;
+        container.innerHTML += `<div class="block-3d color-pink w-[48px] h-[60px] md:w-[72px] md:h-[84px] text-[30px] md:text-[40px] opacity-80">${char}</div>`;
     }
 
     const msg = document.getElementById('feedback-msg');
@@ -256,10 +362,13 @@ function triggerLose() {
 function triggerTimeUp() {
     isInputLocked = true;
     
+    // บันทึกผลว่าตอบผิด (หมดเวลา)
+    wordResults.push({ id: wordList[currentIndex].id, isCorrect: false });
+    
     const container = document.getElementById('spelling-slots');
     container.innerHTML = '';
     for (let char of targetWord) {
-        container.innerHTML += `<div class="block-3d color-orange w-[52px] h-[64px] text-[30px] opacity-80">${char}</div>`;
+        container.innerHTML += `<div class="block-3d color-orange w-[48px] h-[60px] md:w-[72px] md:h-[84px] text-[30px] md:text-[40px] opacity-80">${char}</div>`;
     }
 
     const msg = document.getElementById('feedback-msg');
@@ -275,10 +384,13 @@ function skipWord() {
     isInputLocked = true;
     stopTimer();
 
+    // บันทึกผลว่าข้าม (เท่ากับผิด)
+    wordResults.push({ id: wordList[currentIndex].id, isCorrect: false });
+
     const container = document.getElementById('spelling-slots');
     container.innerHTML = '';
     for (let char of targetWord) {
-        container.innerHTML += `<div class="block-3d bg-[#2A2A3E] text-gray-400 w-[52px] h-[64px] text-[30px] shadow-[0_6px_0_#181826] border border-white/5">${char}</div>`;
+        container.innerHTML += `<div class="block-3d bg-[#2A2A3E] text-gray-400 w-[48px] h-[60px] md:w-[72px] md:h-[84px] text-[30px] md:text-[40px] shadow-[0_6px_0_#181826] border border-white/5">${char}</div>`;
     }
 
     const msg = document.getElementById('feedback-msg');
@@ -296,4 +408,39 @@ function moveToNextWord(msgElement) {
         currentIndex++;
         loadWord();
     }, 400);
+}
+
+// 💾 ฟังก์ชันส่งผลคะแนนกลับไปบันทึกที่ Google Apps Script
+async function saveProgressToGAS() {
+    if (wordResults.length === 0) return;
+    
+    const meaningDisplay = document.getElementById('meaning-display');
+    meaningDisplay.innerText = "⏳ กำลังบันทึกผลการเรียนรู้...";
+    
+    try {
+        const payload = {
+            action: "updateProgress",
+            email: userEmail,
+            updates: wordResults
+        };
+        
+        const response = await fetch(GAS_URL, {
+            method: 'POST',
+            body: JSON.stringify(payload),
+            headers: {
+                "Content-Type": "text/plain;charset=utf-8" // สำคัญ: ใช้ text/plain เพื่อเลี่ยงปัญหา CORS Preflight ใน GAS
+            }
+        });
+        
+        const json = await response.json();
+        if (json.status === "success") {
+            meaningDisplay.innerText = "🎉 ยินดีด้วย! บันทึกผลลง Google Sheet สำเร็จแล้ว";
+        } else {
+            console.error("Save Error:", json);
+            meaningDisplay.innerText = "⚠️ เล่นจบแล้ว แต่บันทึกผลล้มเหลว (เกิดข้อผิดพลาด)";
+        }
+    } catch (err) {
+        console.error("Fetch Error:", err);
+        meaningDisplay.innerText = "❌ เล่นจบแล้ว แต่ไม่สามารถติดต่อเซิร์ฟเวอร์เพื่อบันทึกผลได้";
+    }
 }

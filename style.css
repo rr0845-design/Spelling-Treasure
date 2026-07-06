@@ -83,3 +83,15 @@ body {
     border: 1px solid rgba(255, 255, 255, 0.1);
     box-shadow: 0 10px 30px rgba(0,0,0,0.3);
 }
+
+/* 📱 ล็อกให้มือถือและแท็บเล็ตเล่นในแนวตั้งเท่านั้น (แสดงหน้าต่างแจ้งเตือนเมื่อตะแคงจอ) 
+   - (hover: none) จะครอบคลุมอุปกรณ์ Touch Screen อย่างมือถือและ iPad 
+   - (orientation: landscape) เช็คว่าเครื่องอยู่ในแนวนอน */
+@media screen and (orientation: landscape) and (hover: none) {
+    #rotate-overlay {
+        display: flex !important;
+    }
+    #game-container {
+        display: none !important;
+    }
+}
