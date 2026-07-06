@@ -1,4 +1,4 @@
-const GAS_URL = "https://script.google.com/macros/s/AKfycbwdNyjU1tlQ7tjRvKo08UItDA_WzKcD0GncwoYdVaQuZTRHGgaDiliuYbJNnFN0PJxP/exec";
+const GAS_URL = "https://script.google.com/macros/s/AKfycbwA6DlcWwq4oP0_w2C4zHtwgSfX1L1G5o70kwEbsfp-IPeDymS5C--YMKtErYxLIGY6qw/exec";
 
 let wordList = [];
 let wordResults = []; // เก็บประวัติการเล่นแต่ละคำ [{id: 'W001', isCorrect: true}, ...]
