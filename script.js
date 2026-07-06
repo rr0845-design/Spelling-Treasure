@@ -281,9 +281,9 @@ function renderSlots(isInitial = false) {
         }
 
         if (guessedLetters.has(char)) {
-            container.innerHTML += `<div class="gsap-slot block-3d color-yellow w-[56px] h-[70px] md:w-[76px] md:h-[90px] md:rounded-[20px] text-[36px] md:text-[50px] transition-all">${char}</div>`;
+            container.innerHTML += `<div class="gsap-slot block-3d color-yellow flex-1 min-w-[24px] max-w-[56px] h-[50px] md:max-w-[76px] md:h-[84px] md:rounded-[20px] text-[24px] md:text-[40px] transition-all">${char}</div>`;
         } else {
-            container.innerHTML += `<div class="gsap-slot slot-empty w-[56px] h-[70px] md:w-[76px] md:h-[90px] md:rounded-[20px] md:border-[5px] text-[36px] md:text-[50px]">_</div>`;
+            container.innerHTML += `<div class="gsap-slot slot-empty flex-1 min-w-[24px] max-w-[56px] h-[50px] md:max-w-[76px] md:h-[84px] md:rounded-[20px] md:border-[5px] text-[24px] md:text-[40px]">_</div>`;
             isWon = false;
         }
     }
@@ -360,7 +360,7 @@ function triggerWin() {
     wordResults.push({ id: wordList[currentIndex].id, isCorrect: true });
     
     const slots = document.querySelectorAll('.gsap-slot');
-    slots.forEach(slot => { slot.className = "gsap-slot block-3d blast-flash w-[56px] h-[70px] md:w-[76px] md:h-[90px] md:rounded-[20px] text-[36px] md:text-[50px]"; });
+    slots.forEach(slot => { slot.className = "gsap-slot block-3d blast-flash flex-1 min-w-[24px] max-w-[56px] h-[50px] md:max-w-[76px] md:h-[84px] md:rounded-[20px] text-[24px] md:text-[40px]"; });
 
     confetti({ particleCount: 150, spread: 80, origin: { y: 0.6 }, colors: ['#4ADE80', '#22C55E', '#FFD166', '#FF3366'] });
 
@@ -386,7 +386,7 @@ function triggerLose() {
     const container = document.getElementById('spelling-slots');
     container.innerHTML = '';
     for (let char of targetWord) {
-        container.innerHTML += `<div class="block-3d color-pink w-[56px] h-[70px] md:w-[76px] md:h-[90px] md:rounded-[20px] text-[36px] md:text-[50px] opacity-80">${char}</div>`;
+        container.innerHTML += `<div class="block-3d color-pink flex-1 min-w-[24px] max-w-[56px] h-[50px] md:max-w-[76px] md:h-[84px] md:rounded-[20px] text-[24px] md:text-[40px] opacity-80">${char}</div>`;
     }
 
     const msg = document.getElementById('feedback-msg');
@@ -406,7 +406,7 @@ function triggerTimeUp() {
     const container = document.getElementById('spelling-slots');
     container.innerHTML = '';
     for (let char of targetWord) {
-        container.innerHTML += `<div class="block-3d color-orange w-[56px] h-[70px] md:w-[76px] md:h-[90px] md:rounded-[20px] text-[36px] md:text-[50px] opacity-80">${char}</div>`;
+        container.innerHTML += `<div class="block-3d color-orange flex-1 min-w-[24px] max-w-[56px] h-[50px] md:max-w-[76px] md:h-[84px] md:rounded-[20px] text-[24px] md:text-[40px] opacity-80">${char}</div>`;
     }
 
     const msg = document.getElementById('feedback-msg');
@@ -428,7 +428,7 @@ function skipWord() {
     const container = document.getElementById('spelling-slots');
     container.innerHTML = '';
     for (let char of targetWord) {
-        container.innerHTML += `<div class="block-3d bg-[#1A4FA3] text-white/50 w-[56px] h-[70px] md:w-[76px] md:h-[90px] md:rounded-[20px] text-[36px] md:text-[50px] shadow-[0_10px_0_#103675] md:shadow-[0_15px_20px_rgba(0,0,0,0.4),_0_10px_0_#103675] border-[4px] border-[#103675] opacity-80">${char}</div>`;
+        container.innerHTML += `<div class="block-3d bg-[#1A4FA3] text-white/50 flex-1 min-w-[24px] max-w-[56px] h-[50px] md:max-w-[76px] md:h-[84px] md:rounded-[20px] text-[24px] md:text-[40px] shadow-[0_10px_0_#103675] md:shadow-[0_15px_20px_rgba(0,0,0,0.4),_0_10px_0_#103675] border-[4px] border-[#103675] opacity-80">${char}</div>`;
     }
 
     const msg = document.getElementById('feedback-msg');
