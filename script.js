@@ -13,10 +13,14 @@ async function fetchWordsFromGAS() {
     const meaningDisplay = document.getElementById('meaning-display');
     
     try {
-        const response = await fetch(`${GAS_URL}?action=getVocab&email=${testEmail}`);
+        // เพิ่ม t เพื่อป้องกัน Browser Caching (Cache Buster)
+        const timestamp = new Date().getTime();
+        const response = await fetch(`${GAS_URL}?action=getVocab&email=${testEmail}&t=${timestamp}`, {
+            cache: "no-store"
+        });
         const json = await response.json();
 
-        if (json.status === "success" && json.data.length > 0) {
+        if (json.status === "success" && json.data && json.data.length > 0) {
             wordList = json.data.map(item => ({
                 id: item.id,
                 word: item.v1.toUpperCase(),
@@ -24,11 +28,12 @@ async function fetchWordsFromGAS() {
             }));
             loadWord(); // โหลดคำศัพท์แรกลงในเกม
         } else {
+            console.error("GAS Response API:", json); // ให้ผู้ใช้เห็นว่า API คืนค่าอะไรมา
             meaningDisplay.innerText = "❌ ไม่พบชุดคำศัพท์ประจำวัน";
         }
     } catch (error) {
         meaningDisplay.innerText = "❌ เชื่อมต่อฐานข้อมูลล้มเหลว";
-        console.error(error);
+        console.error("Fetch Error:", error);
     }
 }
 
