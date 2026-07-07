@@ -1,4 +1,9 @@
 <!DOCTYPE html>
+<!--
+  ~ 🚀 Spelling Master (Vivid Wonderland Update)
+  ~ Digital Signature: Antigravity (AI Assistant)
+  ~ Last Modified: July 2026
+-->
 <html lang="th">
 <head>
     <meta charset="utf-8"/>
@@ -11,137 +16,227 @@
     <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Material+Symbols+Rounded:opsz,wght,FILL,GRAD@24,700,1,0" />
     <link rel="stylesheet" href="style.css">
 </head>
-<body class="w-full min-h-screen flex flex-col m-0 p-0 overflow-x-hidden select-none bg-[#0c0c14]">
+<body class="w-full min-h-screen flex flex-col m-0 p-0 overflow-x-hidden select-none">
 
-    <!-- 📱 แจ้งเตือนให้หมุนจอ (สำหรับมือถือ/แท็บเล็ตในแนวนอน) -->
-    <div id="rotate-overlay" class="fixed inset-0 bg-[#0c0c14] z-[999] flex-col justify-center items-center text-center px-6 hidden">
-        <span class="material-symbols-rounded text-6xl text-[#FF3366] mb-4 animate-bounce">screen_rotation</span>
+    <!-- 📱 แจ้งเตือนให้หมุนจอ -->
+    <div id="rotate-overlay" class="fixed inset-0 bg-[#FF3366] z-[999] flex-col justify-center items-center text-center px-6 hidden">
+        <span class="material-symbols-rounded text-6xl text-white mb-4 animate-bounce">screen_rotation</span>
         <h2 class="text-2xl md:text-3xl font-black text-white mb-2 tracking-wide">โปรดหมุนอุปกรณ์</h2>
-        <p class="text-gray-400 text-sm md:text-base">เกมนี้รองรับการเล่นในแนวตั้ง (Portrait) <br> สำหรับหน้าจอมือถือและแท็บเล็ต</p>
+        <p class="text-[#FFE4E6] text-sm md:text-base">เกมนี้รองรับการเล่นในแนวตั้ง (Portrait)</p>
     </div>
 
-    <!-- 🎮 MAIN CONTAINER -->
-    <div id="game-container" class="relative min-h-screen w-full flex flex-col items-center justify-between overflow-x-hidden selection:bg-pink-500 selection:text-white pb-8">
-        
-        <!-- 🔐 หน้าจอ Login / Sign Up -->
-        <div id="login-overlay" class="fixed inset-0 bg-[#31B5FF] z-[50] flex flex-col justify-center items-center px-4 overflow-hidden">
-            <!-- Background Effect -->
-            <div class="absolute inset-0 opacity-30 bg-[radial-gradient(circle_at_center,_#ffffff_0%,_transparent_70%)] mix-blend-overlay"></div>
-            
-            <!-- Game Logo -->
-            <div class="mb-10 text-center z-10">
-                <h1 class="text-5xl md:text-6xl font-black text-white uppercase tracking-wider" style="font-family: 'Nunito', sans-serif; -webkit-text-stroke: 3px #0F172A;">
-                    <span class="text-white text-4xl md:text-5xl">SPELLING</span>
-                    <br/>
-                    <span class="text-[#FFD166]">M</span><span class="text-[#00E5FF]">A</span><span class="text-[#FF4B91]">S</span><span class="text-[#C084FC]">T</span><span class="text-[#4D96FF]">E</span><span class="text-[#FF9F1C]">R</span>
-                </h1>
-                <p class="text-white font-black text-sm md:text-base tracking-widest uppercase mt-4" style="-webkit-text-stroke: 1px #0F172A;">Vocabulary Game</p>
+    <!-- 1️⃣ SPLASH SCREEN -->
+    <div id="splash-screen" class="fixed inset-0 bg-gradient z-[100] flex flex-col justify-center items-center">
+        <div class="animate-pulse flex flex-col items-center">
+            <h1 class="text-5xl md:text-6xl font-black text-white uppercase tracking-wider text-stroke mb-4">SPELLING</h1>
+            <div class="flex gap-2">
+                <div class="w-4 h-4 rounded-full bg-[#FF3366] animate-bounce" style="animation-delay: 0.1s"></div>
+                <div class="w-4 h-4 rounded-full bg-[#00E5FF] animate-bounce" style="animation-delay: 0.2s"></div>
+                <div class="w-4 h-4 rounded-full bg-[#FFD166] animate-bounce" style="animation-delay: 0.3s"></div>
             </div>
+        </div>
+    </div>
 
-            <!-- Popup Box -->
-            <div class="relative w-full max-w-sm bg-[#5244D4] border-[6px] border-[#7265E6] rounded-[36px] p-6 text-center flex flex-col items-center shadow-[0_15px_35px_rgba(0,0,0,0.4)] z-10">
-                
-                <!-- Title Badge -->
-                <div class="absolute -top-7 left-1/2 -translate-x-1/2 bg-[#5244D4] px-8 py-2 rounded-full border-[5px] border-[#7265E6] shadow-lg">
-                    <h2 id="auth-title" class="text-2xl font-black text-white drop-shadow-[0_2px_0_#1E1B4B]" style="font-family: 'Nunito', sans-serif; text-shadow: -1px -1px 0 #1E1B4B, 0 -1px 0 #1E1B4B, 1px -1px 0 #1E1B4B, 1px 0 0 #1E1B4B, 1px 1px 0 #1E1B4B, 0 1px 0 #1E1B4B, -1px 1px 0 #1E1B4B, -1px 0 0 #1E1B4B;">LOGIN</h2>
-                </div>
+    <!-- 2️⃣ HOME SCREEN -->
+    <div id="home-screen" class="fixed inset-0 bg-gradient z-[90] flex flex-col items-center justify-center hidden px-6">
+        
+        <!-- Home Profile Bar -->
+        <div class="absolute top-6 w-full px-6 flex justify-between items-center max-w-sm">
+             <div class="bg-white/20 backdrop-blur-md rounded-full px-4 py-2 flex items-center gap-2 border border-white/40 shadow-sm">
+                 <span class="material-symbols-rounded text-[#FF3366]">local_fire_department</span>
+                 <span id="home-streak-display" class="text-white font-black">0 Days</span>
+             </div>
+             <div class="bg-white/20 backdrop-blur-md rounded-full px-4 py-2 flex items-center gap-2 border border-white/40 shadow-sm">
+                 <span class="material-symbols-rounded text-[#FFD166]">person</span>
+                 <span id="home-player-name" class="text-white font-bold max-w-[100px] truncate">Player</span>
+             </div>
+        </div>
 
-                <!-- Toggle Tabs -->
-                <div class="flex w-full bg-[#372A99] rounded-full p-1.5 mb-5 mt-5 shadow-inner">
-                    <button id="tab-login" onclick="switchTab('login')" class="flex-1 py-2 rounded-full text-white font-black bg-[#23C552] shadow-[0_4px_0_#168F3A] transition-all transform active:translate-y-[2px] active:shadow-[0_2px_0_#168F3A]">Login</button>
-                    <button id="tab-register" onclick="switchTab('register')" class="flex-1 py-2 rounded-full text-[#A59DF6] font-bold hover:text-white transition-all">Sign Up</button>
-                </div>
-
-                <p id="auth-subtitle" class="text-[#C6BFFF] text-sm mb-4 font-bold">เข้าสู่ระบบด้วยอีเมลเดิมของคุณ</p>
-                
-                <!-- Register Only: Name Input -->
-                <div id="name-input-container" class="w-full hidden">
-                    <input type="text" id="name-input" placeholder="Player Name" class="w-full bg-[#372A99] border-[3px] border-[#2A1E7A] rounded-[20px] px-5 py-4 text-white text-lg focus:outline-none focus:border-[#20E3B2] transition-colors mb-3 text-center placeholder:text-[#8376E6] font-black shadow-inner" />
-                </div>
-                
-                <input type="email" id="email-input" placeholder="student@school.edu" class="w-full bg-[#372A99] border-[3px] border-[#2A1E7A] rounded-[20px] px-5 py-4 text-white text-lg focus:outline-none focus:border-[#20E3B2] transition-colors mb-4 text-center placeholder:text-[#8376E6] font-black shadow-inner tracking-wider" />
-                
-                <p id="auth-error" class="text-[#FF4D79] text-sm font-black h-6 mb-2 drop-shadow-md"></p>
-                
-                <!-- Submit Button -->
-                <button id="auth-btn" onclick="submitAuth()" class="w-full bg-gradient-to-b from-[#4ADE80] to-[#22C55E] text-white font-black text-2xl py-4 rounded-[20px] shadow-[0_8px_0_#16A34A] hover:brightness-110 active:translate-y-[8px] active:shadow-none transition-all flex items-center justify-center gap-2 border-[3px] border-[#86EFAC]">
-                    <span id="auth-btn-text" class="drop-shadow-[0_2px_0_#15803D] uppercase tracking-wide">PLAY</span>
+        <h1 class="text-6xl md:text-7xl font-black text-white uppercase tracking-wider text-stroke mb-12 text-center leading-tight mt-12">
+            <span class="block text-4xl mb-2 text-[#3B82F6]">WORD</span>MASTER
+        </h1>
+        
+        <div class="flex flex-col gap-4 w-full max-w-sm">
+            <button onclick="startGameFlow()" class="block-3d color-pink py-5 text-2xl w-full shadow-lg">PLAY NOW</button>
+            <button onclick="openTestRoom()" class="block-3d bg-white text-[#3B82F6] py-4 text-lg w-full border-2 border-[#93C5FD] shadow-sm">TEST ROOM</button>
+            <div class="flex gap-4">
+                <button onclick="openLeaderboard()" class="block-3d bg-white text-[#3B82F6] py-4 text-lg w-1/2 border-2 border-[#93C5FD] shadow-sm flex items-center justify-center gap-2">
+                    <span class="material-symbols-rounded">leaderboard</span>
+                </button>
+                <button onclick="openSettings()" class="block-3d bg-white text-[#3B82F6] py-4 text-lg w-1/2 border-2 border-[#93C5FD] shadow-sm flex items-center justify-center gap-2">
+                    <span class="material-symbols-rounded">settings</span>
                 </button>
             </div>
         </div>
+    </div>
 
-        <!-- 🌟 Floating Pill Top Bar -->
-        <div class="w-full max-w-4xl px-4 md:px-6 pt-4 md:pt-6 z-20">
-            <header class="w-full bg-white rounded-full shadow-[0_8px_20px_rgba(15,23,42,0.08)] px-6 py-3 md:py-4 flex justify-between items-center border-[3px] border-white">
-                <!-- Left: Player Name -->
-                <div class="flex flex-col items-start w-1/3">
-                    <h1 class="text-[9px] md:text-[10px] font-black text-gray-400 tracking-widest uppercase mb-0.5">Player</h1>
-                    <div class="flex items-center gap-1 md:gap-2">
-                        <span class="material-symbols-rounded text-[#FFD166] text-[20px] md:text-[28px]">person</span>
-                        <p id="player-name-display" class="text-base md:text-xl font-black text-[#0F172A] truncate max-w-[80px] md:max-w-[150px]">...</p>
-                    </div>
-                </div>
-
-                <!-- Center: Score -->
-                <div class="flex flex-col items-center w-1/3">
-                    <h1 class="text-[9px] md:text-[10px] font-black text-gray-400 tracking-widest uppercase mb-0.5">Score</h1>
-                    <p id="score-display" class="text-2xl md:text-3xl font-black text-[#0F172A]">00<span class="text-sm md:text-base text-gray-400">/20</span></p>
-                </div>
-                
-                <!-- Right: Energy -->
-                <div class="flex flex-col items-end w-1/3">
-                    <h1 class="text-[9px] md:text-[10px] font-black text-gray-400 tracking-widest uppercase mb-1">Energy</h1>
-                    <div id="hearts-container" class="flex gap-1 md:gap-1.5 justify-end flex-nowrap"></div>
-                </div>
-            </header>
-        </div>
-
-    <!-- ⏱️ Timer Bar -->
-    <div class="w-full max-w-5xl px-6 flex-shrink-0 mt-4 mb-3 md:mb-6 z-10">
-        <div class="flex justify-between items-center text-[10px] md:text-xs font-black text-sky-800 tracking-widest mb-1.5">
-            <span>TIME LEFT</span>
-            <span id="timer-text" class="text-[#0F172A] font-black">60s</span>
-        </div>
-        <div class="w-full h-3 md:h-4 bg-white/50 rounded-full overflow-hidden shadow-inner">
-            <div id="timer-bar" class="h-full bg-[#FFD166] w-full origin-left rounded-full"></div>
+    <!-- 3️⃣ LOGIN OVERLAY -->
+    <div id="login-overlay" class="fixed inset-0 bg-[#00E5FF] z-[80] flex flex-col justify-center items-center px-4 hidden">
+        <div class="relative w-full max-w-sm bg-[#FFFFFF] border-[6px] border-[#93C5FD] rounded-[36px] p-6 text-center flex flex-col items-center shadow-[0_15px_35px_rgba(0,184,212,0.4)] z-10">
+            <div class="absolute -top-7 left-1/2 -translate-x-1/2 bg-[#FFFFFF] px-8 py-2 rounded-full border-[5px] border-[#93C5FD]">
+                <h2 id="auth-title" class="text-2xl font-black text-[#1E3A8A]">LOGIN</h2>
+            </div>
+            <div class="flex w-full bg-[#E0F2FE] rounded-full p-1.5 mb-5 mt-5 shadow-inner">
+                <button id="tab-login" onclick="switchTab('login')" class="flex-1 py-2 rounded-full text-white font-black bg-[#3B82F6] shadow-[0_4px_0_#2563EB]">Login</button>
+                <button id="tab-register" onclick="switchTab('register')" class="flex-1 py-2 rounded-full text-[#60A5FA] font-bold">Sign Up</button>
+            </div>
+            <p id="auth-subtitle" class="text-[#3B82F6] text-sm mb-4 font-bold">เข้าสู่ระบบด้วยอีเมลเดิมของคุณ</p>
+            <div id="name-input-container" class="w-full hidden">
+                <input type="text" id="name-input" placeholder="Player Name" class="w-full bg-[#F0F9FF] border-[3px] border-[#BAE6FD] rounded-[20px] px-5 py-4 text-[#1E3A8A] text-lg mb-3 text-center placeholder:text-[#93C5FD] font-black" />
+            </div>
+            <input type="email" id="email-input" placeholder="student@school.edu" class="w-full bg-[#F0F9FF] border-[3px] border-[#BAE6FD] rounded-[20px] px-5 py-4 text-[#1E3A8A] text-lg mb-4 text-center placeholder:text-[#93C5FD] font-black" />
+            <p id="auth-error" class="text-[#FF3366] text-sm font-black h-6 mb-2"></p>
+            <button id="auth-btn" onclick="submitAuth()" class="w-full bg-[#22C55E] text-white font-black text-2xl py-4 rounded-[20px] shadow-[0_8px_0_#16A34A] border-[3px] border-[#86EFAC]">
+                <span id="auth-btn-text">PLAY</span>
+            </button>
         </div>
     </div>
 
-    <!-- 🧩 Game Area -->
-    <main class="w-full max-w-5xl px-4 md:px-6 flex flex-col items-center flex-grow justify-start z-10">
-        
-        <!-- 🔲 Premium Game Zone Frame (3D Clay Style) -->
-        <div class="ui-frame w-full p-4 md:p-6 flex flex-col items-center mb-4 relative mt-2 z-10">
+    <!-- ⚙️ SETTINGS MODAL -->
+    <div id="settings-modal" class="fixed inset-0 bg-white/60 backdrop-blur-sm z-[200] flex justify-center items-center hidden">
+        <div class="bg-white rounded-[36px] p-8 w-11/12 max-w-sm flex flex-col items-center shadow-[0_20px_50px_rgba(59,130,246,0.2)] border-4 border-[#DBEAFE] relative">
+            <button onclick="closeSettings()" class="absolute top-4 right-4 text-[#93C5FD] hover:text-[#3B82F6]"><span class="material-symbols-rounded text-3xl">close</span></button>
+            <h2 class="text-3xl font-black text-[#1E3A8A] mb-6 uppercase tracking-widest">SETTINGS</h2>
             
-            <!-- ช่องว่างเติมตัวอักษร (Slots) ในบรรทัดเดียว -->
-            <div id="spelling-slots" class="flex flex-nowrap justify-center items-center gap-1.5 md:gap-2 w-full mt-2 mb-8 md:mb-12 px-1 md:px-4 z-20"></div>
-
-            <!-- โจทย์ (ความหมาย) แบบ Soft Pill -->
-            <div class="meaning-box w-full p-4 md:p-8 pt-8 text-center relative flex flex-col items-center justify-center min-h-[100px] md:min-h-[140px]">
-                <!-- 3D Badge -->
-                <div class="absolute -top-5 md:-top-6 left-1/2 -translate-x-1/2 bg-[#FF6B9E] text-white text-sm md:text-base font-black px-6 md:px-10 py-1.5 md:py-2 rounded-full tracking-widest shadow-[inset_0_-4px_0_rgba(0,0,0,0.1),_0_6px_10px_rgba(216,0,75,0.2)]">
-                    TRANSLATE
+            <div class="w-full flex flex-col gap-4">
+                <div class="flex justify-between items-center bg-[#F0F9FF] p-4 rounded-2xl border-2 border-[#E0F2FE]">
+                    <span class="font-black text-[#3B82F6] flex items-center gap-2"><span class="material-symbols-rounded">music_note</span> BGM (Music)</span>
+                    <label class="switch"><input type="checkbox" id="toggle-bgm" onchange="toggleBGM()"><span class="slider round"></span></label>
                 </div>
-                
-                <h2 id="meaning-display" class="text-3xl md:text-5xl font-black text-[#0F172A] tracking-wide leading-tight w-full break-words">กำลังโหลดคำศัพท์...</h2>
+                <div class="flex justify-between items-center bg-[#F0F9FF] p-4 rounded-2xl border-2 border-[#E0F2FE]">
+                    <span class="font-black text-[#3B82F6] flex items-center gap-2"><span class="material-symbols-rounded">volume_up</span> SFX (Sound)</span>
+                    <label class="switch"><input type="checkbox" id="toggle-sfx" onchange="toggleSFX()" checked><span class="slider round"></span></label>
+                </div>
+                <div class="flex justify-between items-center bg-[#FFF1F2] p-4 rounded-2xl border-2 border-[#FFE4E6]">
+                    <span class="font-black text-[#FF3366] flex items-center gap-2"><span class="material-symbols-rounded">speed</span> HARD MODE</span>
+                    <label class="switch"><input type="checkbox" id="toggle-hard" onchange="toggleHardMode()"><span class="slider round slider-red"></span></label>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- 🎮 MAIN GAME CONTAINER -->
+    <div id="game-container" class="relative min-h-screen w-full flex flex-col items-center justify-between overflow-x-hidden pb-8 hidden">
+        
+        <!-- 🌟 Top Bar -->
+        <div class="w-full max-w-4xl px-4 md:px-6 pt-4 md:pt-6 z-20 flex gap-2">
+            <button onclick="togglePause()" class="w-[50px] h-[50px] bg-white rounded-2xl shadow-[0_4px_10px_rgba(59,130,246,0.15)] flex items-center justify-center active:scale-95 transition-transform text-[#3B82F6] border-2 border-[#DBEAFE]">
+                <span class="material-symbols-rounded text-3xl">pause</span>
+            </button>
+            
+            <header class="flex-1 bg-white rounded-full shadow-[0_8px_20px_rgba(59,130,246,0.1)] px-4 py-1.5 flex justify-between items-center border-[3px] border-[#DBEAFE]">
+                <div class="flex flex-col items-start w-1/3">
+                    <p id="player-name-display" class="text-sm md:text-base font-black text-[#1E3A8A] truncate max-w-[80px]">Guest</p>
+                </div>
+                <div class="flex flex-col items-center w-1/3 relative">
+                    <p id="score-display" class="text-xl md:text-2xl font-black text-[#1E3A8A] leading-tight">00<span class="text-xs text-[#93C5FD]">/20</span></p>
+                    <div id="streak-badge" class="absolute -bottom-4 bg-gradient-to-r from-[#FF8A00] to-[#FF3366] text-white text-[9px] px-2 py-0.5 rounded-full font-black tracking-widest hidden shadow-md border border-[#FFF1F2] whitespace-nowrap">STREAK x2 🔥</div>
+                </div>
+                <div class="flex flex-col items-end w-1/3">
+                    <div id="hearts-container" class="flex gap-1 justify-end flex-nowrap"></div>
+                </div>
+            </header>
+
+            <button onclick="useHint()" class="w-[60px] h-[50px] bg-white rounded-2xl shadow-[0_4px_10px_rgba(245,158,11,0.15)] flex items-center justify-center gap-1 active:scale-95 transition-transform text-[#F59E0B] font-black border-2 border-[#FEF3C7]">
+                <span class="material-symbols-rounded text-2xl">lightbulb</span>
+                <span id="hint-count" class="text-lg">3</span>
+            </button>
+        </div>
+
+        <!-- ⏱️ Timer -->
+        <div class="w-full max-w-5xl px-6 flex-shrink-0 mt-5 mb-2 z-10">
+            <div class="w-full h-3 md:h-4 bg-white rounded-full overflow-hidden shadow-inner border-2 border-[#DBEAFE]">
+                <div id="timer-bar" class="h-full bg-[#00E5FF] w-full origin-left rounded-full"></div>
             </div>
         </div>
 
-        <!-- ⏭️ ปุ่ม Skip & Feedback -->
-        <div class="w-full flex justify-between items-center mb-4 md:mb-6">
-            <div id="feedback-msg" class="text-3xl md:text-5xl font-black tracking-widest text-left opacity-0 uppercase text-stroke drop-shadow-lg">GREAT!</div>
-            <button onclick="skipWord()" class="skip-btn flex items-center gap-1 text-[12px] md:text-base font-bold text-white hover:text-[#FFD166] bg-black/20 hover:bg-black/30 px-6 py-3 rounded-full border-2 border-white/20 transition-all active:scale-95 shadow-md">
-                <span>SKIP</span>
-                <span class="material-symbols-rounded text-[20px] md:text-[24px]">skip_next</span>
-            </button>
-        </div>
-        
-    </main>
+        <!-- 🧩 Game Area -->
+        <main class="w-full max-w-5xl px-4 md:px-6 flex flex-col items-center flex-grow justify-start z-10">
+            <div class="ui-frame w-full p-4 md:p-6 flex flex-col items-center mb-4 relative mt-2 z-10">
+                <div id="spelling-slots" class="flex flex-nowrap justify-center items-center gap-1.5 md:gap-2 w-full mt-2 mb-8 md:mb-12 px-1 z-20"></div>
+                <div class="meaning-box w-full p-4 md:p-8 pt-8 text-center relative flex flex-col items-center justify-center min-h-[100px]">
+                    <div class="absolute -top-5 left-1/2 -translate-x-1/2 bg-[#FF3366] text-white text-sm md:text-base font-black px-6 py-1.5 rounded-full shadow-md">MEANING</div>
+                    <h2 id="meaning-display" class="text-3xl md:text-4xl font-black text-[#1E3A8A] tracking-wide leading-tight">...</h2>
+                </div>
+            </div>
+        </main>
 
-    <!-- 🧱 Letter Pool -->
-    <footer class="w-full max-w-2xl px-2 md:px-8 pt-2 pb-8 flex-shrink-0 flex flex-col items-center z-10 mx-auto">
-        <div id="letter-pool" class="flex flex-wrap gap-2 md:gap-4 w-full justify-center"></div>
-    </footer>
+        <!-- 🧱 Letter Pool -->
+        <footer class="w-full max-w-2xl px-2 md:px-8 pb-8 flex-shrink-0 flex flex-col items-center z-10 mx-auto">
+            <div id="letter-pool" class="flex flex-wrap gap-2 md:gap-4 w-full justify-center"></div>
+        </footer>
+    </div>
+
+    <!-- ⏸️ PAUSE MODAL -->
+    <div id="pause-modal" class="fixed inset-0 bg-white/60 backdrop-blur-sm z-[200] flex justify-center items-center hidden">
+        <div class="bg-white rounded-[36px] p-8 w-11/12 max-w-sm flex flex-col items-center shadow-[0_20px_50px_rgba(59,130,246,0.2)] border-4 border-[#DBEAFE] relative">
+            <h2 class="text-4xl font-black text-[#1E3A8A] mb-8 uppercase tracking-widest">PAUSED</h2>
+            <div class="flex flex-col gap-4 w-full">
+                <button onclick="togglePause()" class="block-3d color-blue py-4 text-xl w-full">CONTINUE</button>
+                <button onclick="openSettings()" class="block-3d color-mint py-4 text-xl w-full">SETTINGS</button>
+                <button onclick="restartGame()" class="block-3d color-orange py-4 text-xl w-full">RESTART</button>
+                <button onclick="returnToHome()" class="block-3d bg-[#F8FAFC] text-[#3B82F6] py-4 text-xl w-full shadow-none border-2 border-[#BFDBFE]">HOME</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- 🏆 RESULT MODAL (Win/Lose) -->
+    <div id="result-modal" class="fixed inset-0 bg-white/60 backdrop-blur-md z-[200] flex justify-center items-center hidden">
+        <div class="bg-white rounded-[36px] p-8 w-11/12 max-w-sm flex flex-col items-center text-center shadow-[0_20px_50px_rgba(59,130,246,0.2)] border-4 border-[#DBEAFE] relative overflow-hidden">
+            <div id="result-bg" class="absolute inset-0 bg-gradient-to-b from-[#4ADE80] to-white opacity-20 z-0"></div>
+            
+            <div class="relative z-10 w-full flex flex-col items-center">
+                <div id="result-icon" class="text-7xl mb-2">🎉</div>
+                <h2 id="result-title" class="text-4xl font-black text-[#1E3A8A] mb-2 uppercase">VICTORY!</h2>
+                <div id="result-streak" class="text-[#FF8A00] font-black text-sm mb-2 hidden">🔥 PERFECT STREAK x2!</div>
+                
+                <div class="bg-[#F0F9FF] border-2 border-[#E0F2FE] w-full rounded-2xl p-4 mb-6 shadow-inner">
+                    <p class="text-sm text-[#60A5FA] font-bold mb-1">THE WORD WAS</p>
+                    <p id="result-word" class="text-3xl font-black text-[#1E3A8A] tracking-widest">APPLE</p>
+                </div>
+
+                <div id="result-actions" class="flex flex-col gap-3 w-full">
+                    <button onclick="proceedNextWord()" class="block-3d color-mint py-4 text-xl w-full">NEXT LEVEL</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- 🚧 COMING SOON MODAL -->
+    <div id="coming-soon-modal" class="fixed inset-0 bg-white/60 backdrop-blur-sm z-[250] flex justify-center items-center hidden">
+        <div class="bg-white rounded-[36px] p-8 w-11/12 max-w-sm flex flex-col items-center text-center shadow-[0_20px_50px_rgba(59,130,246,0.2)] border-4 border-[#DBEAFE] relative">
+            <button onclick="closeComingSoon()" class="absolute top-4 right-4 text-[#93C5FD] hover:text-[#3B82F6]"><span class="material-symbols-rounded text-3xl">close</span></button>
+            <div class="text-6xl mb-4">🚧</div>
+            <h2 class="text-3xl font-black text-[#1E3A8A] mb-2 uppercase">COMING SOON</h2>
+            <p id="coming-soon-text" class="text-[#3B82F6] font-bold mb-6">ฟีเจอร์นี้กำลังอยู่ระหว่างการพัฒนา</p>
+        </div>
+    </div>
+
+    <!-- 🏆 LEADERBOARD MODAL -->
+    <div id="leaderboard-modal" class="fixed inset-0 bg-white/60 backdrop-blur-sm z-[250] flex justify-center items-center hidden">
+        <div class="bg-white rounded-[36px] p-8 w-11/12 max-w-sm flex flex-col items-center text-center shadow-[0_20px_50px_rgba(59,130,246,0.2)] border-4 border-[#DBEAFE] relative">
+            <button onclick="closeLeaderboard()" class="absolute top-4 right-4 text-[#93C5FD] hover:text-[#3B82F6]"><span class="material-symbols-rounded text-3xl">close</span></button>
+            <div class="text-5xl mb-2">👑</div>
+            <h2 class="text-3xl font-black text-[#1E3A8A] mb-4 uppercase">TOP PLAYERS</h2>
+            <div id="leaderboard-list" class="w-full flex flex-col gap-2 max-h-[300px] overflow-y-auto mb-4 p-2 bg-[#F0F9FF] rounded-2xl border-2 border-[#E0F2FE]">
+                <!-- ข้อมูลจะถูกโหลดมาใส่ตรงนี้ -->
+                <p class="text-[#60A5FA] font-bold py-4">⏳ Loading...</p>
+            </div>
+        </div>
+    </div>
+
+    <!-- 📝 TEST ROOM MODAL -->
+    <div id="test-room-modal" class="fixed inset-0 bg-white/60 backdrop-blur-sm z-[250] flex justify-center items-center hidden">
+        <div class="bg-white rounded-[36px] p-8 w-11/12 max-w-sm flex flex-col items-center text-center shadow-[0_20px_50px_rgba(59,130,246,0.2)] border-4 border-[#DBEAFE] relative">
+            <button onclick="closeTestRoom()" class="absolute top-4 right-4 text-[#93C5FD] hover:text-[#3B82F6]"><span class="material-symbols-rounded text-3xl">close</span></button>
+            <div class="text-6xl mb-4">🎓</div>
+            <h2 class="text-3xl font-black text-[#1E3A8A] mb-2 uppercase">TEST ROOM</h2>
+            <p class="text-[#3B82F6] font-bold mb-6">เลือกแบบทดสอบที่ต้องการ</p>
+            <div class="flex flex-col gap-3 w-full">
+                <button onclick="startTestMode('PRE-TEST')" class="block-3d color-orange py-4 text-xl w-full">PRE-TEST</button>
+                <button onclick="startTestMode('POST-TEST')" class="block-3d color-mint py-4 text-xl w-full">POST-TEST</button>
+            </div>
+        </div>
     </div>
 
     <script src="script.js"></script>

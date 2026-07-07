@@ -1,15 +1,31 @@
-const GAS_URL = "https://script.google.com/macros/s/AKfycbwoI65Sg-lBn9wn5TDzF_qOl_9SgyIYpIc5tV0PqojESXb_kr51ak5VhB1pKXMt-jJCcg/exec";
+/**
+ * 🚀 Spelling Master (Vivid Wonderland Update)
+ * Digital Signature: Antigravity (AI Assistant)
+ * Last Modified: July 2026
+ * Features: Auth, Audio, GSAP Animations, Auto-Shrink Responsive, Physical Keyboard Feedback
+ */
+// 🔗 เชื่อมต่อกับ Google Apps Script ของคุณครู
+const GAS_URL = 'https://script.google.com/macros/s/AKfycbxa9HhI_ddfU6kPD76FDbWoIejWgsh2NU9qbfDkfVn1RG80nKV9UltGnLKe3ofXtDUMJA/exec';
 
 let wordList = [];
-let wordResults = []; // เก็บประวัติการเล่นแต่ละคำ [{id: 'W001', isCorrect: true}, ...]
-let userEmail = ""; // เก็บอีเมลผู้เล่นที่เข้าสู่ระบบ
-let userName = ""; // เก็บชื่อผู้เล่น
+let wordResults = []; 
+let userEmail = ""; 
+let userName = ""; 
+let dailyStreak = 0;
 const blockColors = ['color-pink', 'color-mint', 'color-yellow', 'color-blue', 'color-purple', 'color-orange'];
 
-// 🔊 Sound effects
+// 🎵 Audio System (10/10 Upgrade)
 const soundCorrect = new Audio('https://assets.mixkit.co/sfx/preview/mixkit-video-game-quest-completed-notification-206.wav');
 const soundWrong = new Audio('https://assets.mixkit.co/sfx/preview/mixkit-interface-click-soft-2575.wav');
+const bgmMusic = new Audio('https://assets.mixkit.co/music/preview/mixkit-game-level-music-689.mp3');
+bgmMusic.loop = true;
+bgmMusic.volume = 0.2;
 
+let sfxEnabled = true;
+let bgmEnabled = false; 
+let hardModeEnabled = false;
+
+// 🎮 Game State
 let currentIndex = 0;
 let targetWord = "";
 let guessedLetters = new Set();
@@ -18,193 +34,439 @@ const MAX_MISTAKES = 5;
 let score = 0;
 let totalWords = 20; 
 let isInputLocked = false;
+let currentStreak = 0; // 🔥 Streak System
+
+// 📝 Test Room State
+let isTestMode = false;
+let currentTestType = "";
+let testScore = 0;
+
+// ⏱️ Timer State
 let timeLeft = 60;
 let timerInterval;
+let timerTween;
+let isPaused = false;
+let hintsLeft = 3; 
 
+// --- 💾 LocalStorage Buffer (Save locally, sync to GAS only on complete/HOME) ---
+const LS_KEY = 'spellingmaster_pending';
+
+function saveToLocalBuffer() {
+    if (!userEmail || wordResults.length === 0) return;
+    const pending = {
+        email: userEmail,
+        results: [...wordResults],
+        savedAt: Date.now()
+    };
+    localStorage.setItem(LS_KEY, JSON.stringify(pending));
+    // ❌ ไม่ส่ง GAS ที่นี่ — ส่งเฉพาะตอนจบ 20 คำ หรือกด HOME เท่านั้น
+}
+
+// --- 📱 Screen Flow & Settings ---
+window.onload = () => {
+    // ตรวจสอบ pending buffer จากเซสชันก่อนหน้า (กรณีปิดหน้าก่อน sync เสร็จ)
+    const pending = localStorage.getItem(LS_KEY);
+    if (pending) {
+        try {
+            const data = JSON.parse(pending);
+            // ถ้าข้อมูลค้างไม่เกิน 24 ชั่วโมง ให้ลอง sync ใหม่
+            if (data && data.savedAt && (Date.now() - data.savedAt) < 86400000) {
+                console.log('📦 Found pending buffer from last session, retrying sync...');
+                fetch(`${GAS_URL}?action=updateProgress&email=${encodeURIComponent(data.email)}&updates=${encodeURIComponent(JSON.stringify(data.results))}&t=${Date.now()}`)
+                    .then(r => r.json())
+                    .then(json => { if (json && json.status === 'success') localStorage.removeItem(LS_KEY); })
+                    .catch(() => {});
+            } else {
+                localStorage.removeItem(LS_KEY); // ข้อมูลเก่าเกินไป ลบทิ้ง
+            }
+        } catch(e) { 
+            // JSON เสียหาย ไม่สามารถ sync ได้ แต่ไม่ลบตามกฎ localStorage โดยไม่ผ่าน GAS
+            console.warn('⚠️ localStorage buffer corrupted, cannot recover.');
+        }
+    }
+
+    setTimeout(() => {
+        gsap.to("#splash-screen", { opacity: 0, duration: 0.5, onComplete: () => {
+            document.getElementById('splash-screen').classList.add('hidden');
+            if (!userEmail) {
+                document.getElementById('login-overlay').classList.remove('hidden');
+                gsap.from("#login-overlay", { opacity: 0, duration: 0.3 });
+            } else {
+                document.getElementById('home-screen').classList.remove('hidden');
+                gsap.from("#home-screen", { opacity: 0, scale: 0.9, duration: 0.5 });
+            }
+        }});
+    }, 2000);
+};
+
+function startGameFlow() {
+    isTestMode = false;
+    document.getElementById('home-screen').classList.add('hidden');
+    document.getElementById('game-container').classList.remove('hidden');
+    resetGameStats();
+    loadWord();
+    if(bgmEnabled) bgmMusic.play().catch(()=>{});
+}
+
+function startTestMode(type) {
+    if (!userEmail) {
+        document.getElementById('test-room-modal').classList.add('hidden');
+        document.getElementById('home-screen').classList.add('hidden');
+        document.getElementById('login-overlay').classList.remove('hidden');
+        gsap.from("#login-overlay", { opacity: 0, duration: 0.3 });
+        return;
+    }
+    
+    currentTestType = type;
+    isTestMode = true;
+    testScore = 0;
+    
+    document.getElementById('test-room-modal').classList.add('hidden');
+    document.getElementById('home-screen').classList.add('hidden');
+    document.getElementById('game-container').classList.remove('hidden');
+    
+    resetGameStats();
+    loadWord();
+    if(bgmEnabled) bgmMusic.play().catch(()=>{});
+}
+
+function returnToHome() {
+    // หยุด timer และ lock input ทันทีเพื่อป้องกัน triggerLose ซ้อนระหว่าง save
+    stopTimer();
+    isInputLocked = true;
+    isPaused = true;
+
+    if (wordResults.length > 0) {
+        document.getElementById('pause-modal').classList.add('hidden');
+        document.getElementById('result-modal').classList.add('hidden');
+        if (isTestMode) submitTestScoreToGAS();
+        else saveProgressToGAS();
+        return;
+    }
+
+    isPaused = false;
+    isInputLocked = false;
+    bgmMusic.pause();
+    document.getElementById('pause-modal').classList.add('hidden');
+    document.getElementById('result-modal').classList.add('hidden');
+    document.getElementById('game-container').classList.add('hidden');
+    document.getElementById('home-screen').classList.remove('hidden');
+    gsap.from("#home-screen", { opacity: 0, y: 20, duration: 0.4 });
+}
+
+async function restartGame() {
+    document.getElementById('pause-modal').classList.add('hidden');
+    document.getElementById('result-modal').classList.add('hidden');
+    isPaused = false;
+
+    // ถ้ามี progress ค้างอยู่ → ส่ง GAS แบบ fire-and-forget (ไม่รอ) ลบ localStorage หลัง GAS ยืนยันเท่านั้น
+    if (wordResults.length > 0) {
+        saveToLocalBuffer();
+        const payload = [...wordResults];
+        const email = userEmail;
+        fetch(`${GAS_URL}?action=updateProgress&email=${encodeURIComponent(email)}&updates=${encodeURIComponent(JSON.stringify(payload))}&t=${Date.now()}`)
+            .then(r => r.json())
+            .then(json => { 
+                if (json && json.status === 'success') {
+                    localStorage.removeItem(LS_KEY); // ✅ ลบหลัง GAS ยืนยันแล้วเท่านั้น
+                }
+            })
+            .catch(() => {}); // ถ้าล้ม buffer ยังอยู่ retry ตอนเปิดเกมใหม่
+    }
+
+    resetGameStats();
+    loadWord();
+}
+
+function resetGameStats() {
+    currentIndex = 0;
+    score = 0;
+    currentStreak = 0;
+    wordResults = [];
+    hintsLeft = 3;
+    updateScoreDisplay();
+    updateHintDisplay();
+    updateStreakDisplay();
+}
+
+// --- ⚙️ Settings Logic (10/10 Upgrade) ---
+function openSettings() {
+    document.getElementById('settings-modal').classList.remove('hidden');
+    gsap.fromTo("#settings-modal > div", { scale: 0.8, opacity: 0 }, { scale: 1, opacity: 1, duration: 0.3, ease: "back.out(1.5)" });
+}
+
+function closeSettings() {
+    document.getElementById('settings-modal').classList.add('hidden');
+}
+
+function toggleBGM() {
+    bgmEnabled = document.getElementById('toggle-bgm').checked;
+    if(bgmEnabled && document.getElementById('game-container').classList.contains('hidden') === false) {
+        bgmMusic.play().catch(()=>{});
+    } else {
+        bgmMusic.pause();
+    }
+}
+
+function toggleSFX() {
+    sfxEnabled = document.getElementById('toggle-sfx').checked;
+}
+
+function toggleHardMode() {
+    hardModeEnabled = document.getElementById('toggle-hard').checked;
+}
+
+function playSound(audio) {
+    if (sfxEnabled) {
+        audio.currentTime = 0; 
+        audio.play().catch(e=>{});
+    }
+}
+
+// --- 🚧 Coming Soon Logic ---
+function openComingSoon(featureName) {
+    document.getElementById('coming-soon-text').innerText = featureName + " กำลังอยู่ระหว่างการพัฒนา รอติดตามได้เลย!";
+    const modal = document.getElementById('coming-soon-modal');
+    modal.classList.remove('hidden');
+    gsap.fromTo(modal.children[0], { scale: 0.8, opacity: 0 }, { scale: 1, opacity: 1, duration: 0.3, ease: "back.out(1.5)" });
+}
+
+function closeComingSoon() {
+    document.getElementById('coming-soon-modal').classList.add('hidden');
+}
+
+// --- 🏆 Leaderboard Logic ---
+function openLeaderboard() {
+    const modal = document.getElementById('leaderboard-modal');
+    modal.classList.remove('hidden');
+    gsap.fromTo(modal.children[0], { scale: 0.8, opacity: 0 }, { scale: 1, opacity: 1, duration: 0.3, ease: "back.out(1.5)" });
+    fetchLeaderboard();
+}
+
+function closeLeaderboard() {
+    document.getElementById('leaderboard-modal').classList.add('hidden');
+}
+
+async function fetchLeaderboard() {
+    const list = document.getElementById('leaderboard-list');
+    list.innerHTML = `<p class="text-[#60A5FA] font-bold py-4 text-center">⏳ Loading...</p>`;
+    try {
+        const res = await fetch(`${GAS_URL}?action=getLeaderboard&t=${Date.now()}`);
+        const json = await res.json();
+        if (json.status === "success") {
+            list.innerHTML = "";
+            json.data.forEach((player, idx) => {
+                let rankDisplay = idx === 0 ? "🥇" : idx === 1 ? "🥈" : idx === 2 ? "🥉" : `#${idx+1}`;
+                list.innerHTML += `
+                    <div class="flex justify-between items-center bg-white p-3 rounded-xl shadow-sm border border-[#E0F2FE]">
+                        <div class="flex items-center gap-3">
+                            <span class="text-2xl w-8 text-center">${rankDisplay}</span>
+                            <span class="font-black text-[#1E3A8A] truncate max-w-[120px]">${player.name}</span>
+                        </div>
+                        <span class="font-black text-[#FF3366] text-xl">${player.score} <span class="text-xs text-[#93C5FD]">PTS</span></span>
+                    </div>
+                `;
+            });
+            if (json.data.length === 0) list.innerHTML = `<p class="text-center text-[#93C5FD] font-bold py-4">ยังไม่มีข้อมูล</p>`;
+        } else {
+            list.innerHTML = `<p class="text-center text-[#FF3366] font-bold py-4">❌ ${json.message}</p>`;
+        }
+    } catch (err) {
+        list.innerHTML = `<p class="text-center text-[#FF3366] font-bold py-4">❌ โหลดข้อมูลล้มเหลว กรุณาลองใหม่</p>`;
+    }
+}
+
+// --- 📝 Test Room Logic ---
+function openTestRoom() {
+    const modal = document.getElementById('test-room-modal');
+    modal.classList.remove('hidden');
+    gsap.fromTo(modal.children[0], { scale: 0.8, opacity: 0 }, { scale: 1, opacity: 1, duration: 0.3, ease: "back.out(1.5)" });
+}
+
+function closeTestRoom() {
+    document.getElementById('test-room-modal').classList.add('hidden');
+}
+
+// --- 🔐 ระบบล็อกอิน (Auth) ---
 let currentAuthMode = "login";
-
 function switchTab(mode) {
     currentAuthMode = mode;
     const tabLogin = document.getElementById('tab-login');
     const tabRegister = document.getElementById('tab-register');
     const nameInputContainer = document.getElementById('name-input-container');
     const authTitle = document.getElementById('auth-title');
-    const authSubtitle = document.getElementById('auth-subtitle');
-    const authError = document.getElementById('auth-error');
-    
-    authError.innerText = "";
-    
-    const activeTab = "flex-1 py-2 rounded-full text-white font-black bg-[#23C552] shadow-[0_4px_0_#168F3A] transition-all transform active:translate-y-[2px] active:shadow-[0_2px_0_#168F3A]";
-    const inactiveTab = "flex-1 py-2 rounded-full text-[#A59DF6] font-bold hover:text-white transition-all";
     
     if (mode === 'login') {
-        tabLogin.className = activeTab;
-        tabRegister.className = inactiveTab;
+        tabLogin.className = "flex-1 py-2 rounded-full text-white font-black bg-[#3B82F6] shadow-[0_4px_0_#2563EB]";
+        tabRegister.className = "flex-1 py-2 rounded-full text-[#60A5FA] font-bold";
         nameInputContainer.classList.add('hidden');
         authTitle.innerText = "LOGIN";
-        authSubtitle.innerText = "เข้าสู่ระบบด้วยอีเมลเดิมของคุณ";
     } else {
-        tabRegister.className = activeTab;
-        tabLogin.className = inactiveTab;
+        tabRegister.className = "flex-1 py-2 rounded-full text-white font-black bg-[#3B82F6] shadow-[0_4px_0_#2563EB]";
+        tabLogin.className = "flex-1 py-2 rounded-full text-[#60A5FA] font-bold";
         nameInputContainer.classList.remove('hidden');
         authTitle.innerText = "SIGN UP";
-        authSubtitle.innerText = "สมัครสมาชิกใหม่เพื่อเริ่มเล่นเกม";
     }
 }
 
 async function submitAuth() {
     const emailInput = document.getElementById('email-input').value.trim();
     const nameInput = document.getElementById('name-input').value.trim();
-    const authError = document.getElementById('auth-error');
-    const authBtn = document.getElementById('auth-btn');
-    const authBtnText = document.getElementById('auth-btn-text');
-    
-    authError.innerText = "";
-    
     if (!emailInput) {
-        authError.innerText = "⚠️ กรุณากรอกอีเมล";
+        document.getElementById('auth-error').innerText = "⚠️ กรุณากรอกอีเมล";
         return;
     }
     
-    if (currentAuthMode === 'register' && !nameInput) {
-        authError.innerText = "⚠️ กรุณากรอกชื่อผู้เล่น";
-        return;
-    }
-    
-    // แสดงสถานะโหลด
-    const originalText = authBtnText.innerText;
-    authBtnText.innerText = "กำลังตรวจสอบ...";
-    authBtn.classList.add('opacity-50', 'pointer-events-none');
-    
+    document.getElementById('auth-error').innerText = "";
+    document.getElementById('auth-btn-text').innerText = "...";
     try {
-        const timestamp = new Date().getTime();
-        const url = `${GAS_URL}?action=${currentAuthMode}&email=${encodeURIComponent(emailInput)}&name=${encodeURIComponent(currentAuthMode === 'register' ? nameInput : "")}&t=${timestamp}`;
-        
+        const url = `${GAS_URL}?action=${currentAuthMode}&email=${encodeURIComponent(emailInput)}&name=${encodeURIComponent(nameInput)}&t=${Date.now()}`;
         const response = await fetch(url);
-        
-        let json;
-        try {
-            json = await response.json();
-        } catch (e) {
-            // ถ้าพังตรงนี้ แปลว่า GAS ไม่ได้ตอบกลับมาเป็น JSON (อาจจะตอบกลับมาเป็นหน้าเว็บ Error ของ Google)
-            console.error("Server didn't return JSON. Please check GAS deployment.");
-            authError.innerText = "❌ ลืมกด New Deployment หรือเปล่าครับ?";
-            return;
-        }
+        const json = await response.json();
         
         if (json.status === "success") {
             userEmail = emailInput;
             userName = currentAuthMode === 'register' ? nameInput : json.name;
+            dailyStreak = json.streak || 0;
             
-            // แสดงชื่อบนมุมซ้ายบน
             document.getElementById('player-name-display').innerText = userName;
+            document.getElementById('home-player-name').innerText = userName;
+            document.getElementById('home-streak-display').innerText = `${dailyStreak} Days`;
             
-            // อนิเมชันซ่อนหน้าจอ Login
-            gsap.to("#login-overlay", {
-                opacity: 0, 
-                scale: 1.05,
-                duration: 0.4, 
-                ease: "power2.inOut",
-                onComplete: () => {
-                    document.getElementById('login-overlay').style.display = "none";
-                }
-            });
-            
+            gsap.to("#login-overlay", { opacity: 0, scale: 1.05, duration: 0.4, onComplete: () => {
+                document.getElementById('login-overlay').classList.add('hidden');
+                document.getElementById('home-screen').classList.remove('hidden');
+                gsap.from("#home-screen", { opacity: 0, scale: 0.9, duration: 0.5 });
+            }});
             fetchWordsFromGAS();
         } else {
-            authError.innerText = "❌ " + (json.message || "เกิดข้อผิดพลาด");
+            document.getElementById('auth-error').innerText = "❌ " + (json.message || "เกิดข้อผิดพลาด");
         }
     } catch (err) {
+        document.getElementById('auth-error').innerText = "❌ ไม่สามารถเชื่อมต่อเซิร์ฟเวอร์ได้";
         console.error(err);
-        authError.innerText = "❌ ไม่สามารถเชื่อมต่อเซิร์ฟเวอร์ได้";
     } finally {
-        authBtnText.innerText = originalText;
-        authBtn.classList.remove('opacity-50', 'pointer-events-none');
+        document.getElementById('auth-btn-text').innerText = "PLAY";
     }
 }
 
 async function fetchWordsFromGAS() {
-    const meaningDisplay = document.getElementById('meaning-display');
-    
     try {
-        // เพิ่ม t เพื่อป้องกัน Browser Caching
-        const timestamp = new Date().getTime();
-        const response = await fetch(`${GAS_URL}?action=getVocab&email=${userEmail}&t=${timestamp}`, {
-            cache: "no-store"
-        });
+        const response = await fetch(`${GAS_URL}?action=getVocab&email=${userEmail}&hardMode=${hardModeEnabled}&t=${Date.now()}`);
         const json = await response.json();
-
-        if (json.status === "success" && json.data && json.data.length > 0) {
+        if (json.status === "success" && json.data.length > 0) {
             wordList = json.data.map(item => ({
-                id: item.id,
-                word: item.v1.toUpperCase(),
-                meaningMain: item.meaningMain || item.meaning, // Fallback for old API format
-                meaningDetail: item.meaningDetail || ""
+                id: item.id, word: item.v1.toUpperCase(), meaningMain: item.meaningMain || item.meaning
             }));
             totalWords = wordList.length;
             updateScoreDisplay();
-            loadWord(); // โหลดคำศัพท์แรกลงในเกม
-        } else {
-            console.error("GAS Response API:", json); // ให้ผู้ใช้เห็นว่า API คืนค่าอะไรมา
-            meaningDisplay.innerText = "❌ ไม่พบชุดคำศัพท์ประจำวัน";
         }
-    } catch (error) {
-        meaningDisplay.innerText = "❌ เชื่อมต่อฐานข้อมูลล้มเหลว";
-        console.error("Fetch Error:", error);
-    }
+    } catch (error) { console.error("Fetch Error:", error); }
 }
 
 function updateScoreDisplay() {
-    let displayScore = score.toString().padStart(2, '0');
-    let displayTotal = totalWords.toString().padStart(2, '0');
-    document.getElementById('score-display').innerHTML = `${displayScore}<span class="text-lg text-gray-500">/${displayTotal}</span>`;
+    document.getElementById('score-display').innerHTML = `${score.toString().padStart(2, '0')}<span class="text-xs text-[#93C5FD]">/${totalWords.toString().padStart(2, '0')}</span>`;
 }
 
-// ⏳ เริ่มระบบจับเวลา
+// --- 🔥 Streak System (10/10 Upgrade) ---
+function updateStreakDisplay() {
+    const badge = document.getElementById('streak-badge');
+    if (currentStreak >= 2) {
+        badge.innerText = `STREAK x${currentStreak} 🔥`;
+        badge.classList.remove('hidden');
+        badge.classList.add('animate-fire');
+        gsap.fromTo(badge, {scale: 0}, {scale: 1, duration: 0.4, ease: "elastic.out(1, 0.5)"});
+    } else {
+        badge.classList.add('hidden');
+        badge.classList.remove('animate-fire');
+    }
+}
+
+// --- 💡 ระบบช่วยเหลือ (Hint System) ---
+function updateHintDisplay() { document.getElementById('hint-count').innerText = hintsLeft; }
+
+function useHint() {
+    if (isTestMode) {
+        alert("ไม่อนุญาตให้ใช้ตัวช่วยในห้องสอบ!");
+        return;
+    }
+    if (isInputLocked || isPaused || hintsLeft <= 0) return;
+    
+    let unrevealed = [];
+    for (let char of targetWord) {
+        if (char !== ' ' && char !== '-' && !guessedLetters.has(char)) unrevealed.push(char);
+    }
+
+    if (unrevealed.length > 0) {
+        hintsLeft--;
+        updateHintDisplay();
+        
+        let randomChar = unrevealed[Math.floor(Math.random() * unrevealed.length)];
+        guessedLetters.add(randomChar);
+        currentStreak = 0; // ใช้ Hint สตรีคจะขาดทันที
+        updateStreakDisplay();
+        
+        const buttons = document.querySelectorAll('.gsap-btn');
+        buttons.forEach(btn => { if (btn.innerText === randomChar) btn.classList.add('disabled'); });
+        renderSlots();
+    }
+}
+
+// --- ⏸️ ระบบ Pause ---
+function togglePause() {
+    if (isInputLocked && !isPaused) return; 
+    
+    isPaused = !isPaused;
+    const modal = document.getElementById('pause-modal');
+    
+    if (isPaused) {
+        clearInterval(timerInterval);
+        if (timerTween) timerTween.pause();
+        saveToLocalBuffer(); // 💾 กด Pause → เซฟลง localStorage ทันที
+        modal.classList.remove('hidden');
+        gsap.fromTo(modal.children[0], { scale: 0.8, opacity: 0 }, { scale: 1, opacity: 1, duration: 0.3, ease: "back.out(1.5)" });
+    } else {
+        modal.classList.add('hidden');
+        clearInterval(timerInterval); // บังคับล้างเวลาเก่าทิ้งให้หมดชัวร์ๆ
+        timerInterval = setInterval(() => {
+            timeLeft--;
+            if (timeLeft <= 0) { stopTimer(); triggerLose(true); }
+        }, 1000);
+        if (timerTween) timerTween.resume();
+    }
+}
+
+// --- ⏱️ Timer Logic (Hard Mode Included) ---
 function startTimer() {
-    clearInterval(timerInterval);
-    timeLeft = 60;
-    document.getElementById('timer-text').innerText = timeLeft + 's';
+    stopTimer();
+    timeLeft = isTestMode ? 20 : (hardModeEnabled ? 30 : 60); 
+    let duration = timeLeft;
     
-    gsap.killTweensOf("#timer-bar");
-    gsap.set("#timer-bar", {width: "100%", backgroundImage: "linear-gradient(to right, #FFD166, #FF9F1C)", boxShadow: "0 0 12px #FFD166"});
+    gsap.set("#timer-bar", {width: "100%", backgroundImage: "linear-gradient(to right, #00E5FF, #3B82F6)"});
     
-    gsap.to("#timer-bar", {
-        width: "0%", 
-        duration: 60, 
-        ease: "none",
+    timerTween = gsap.to("#timer-bar", {
+        width: "0%", duration: duration, ease: "none",
         onUpdate: function() {
             let progress = this.progress();
-            if (progress > 0.75) { 
-                gsap.to("#timer-bar", {backgroundImage: "linear-gradient(to right, #FF3366, #FF0044)", boxShadow: "0 0 12px #FF3366", duration: 0.5, overwrite: "auto"});
-            } else if (progress > 0.5) { 
-                gsap.to("#timer-bar", {backgroundImage: "linear-gradient(to right, #FF9F1C, #FF6B00)", boxShadow: "0 0 12px #FF9F1C", duration: 0.5, overwrite: "auto"});
-            }
+            if (progress > 0.75) { gsap.to("#timer-bar", {backgroundImage: "linear-gradient(to right, #FF3366, #FF9A9E)", duration: 0.5, overwrite: "auto"}); }
         }
     });
 
     timerInterval = setInterval(() => {
         timeLeft--;
-        document.getElementById('timer-text').innerText = timeLeft + 's';
-        if (timeLeft <= 0) {
-            stopTimer();
-            triggerTimeUp();
-        }
+        if (timeLeft <= 0) { stopTimer(); triggerLose(true); } 
     }, 1000);
 }
 
 function stopTimer() {
     clearInterval(timerInterval);
-    gsap.killTweensOf("#timer-bar");
+    if (timerTween) timerTween.kill();
 }
 
 function loadWord() {
     if (currentIndex >= wordList.length) {
-        document.getElementById('meaning-display').innerText = "🎉 ยินดีด้วย! คุณเล่นจบแล้ว";
-        document.getElementById('spelling-slots').innerHTML = "";
-        document.getElementById('letter-pool').innerHTML = "";
-        stopTimer();
-        saveProgressToGAS(); // 💾 บันทึกผลการเรียนรู้
+        if (isTestMode) submitTestScoreToGAS();
+        else saveProgressToGAS(); 
         return;
     }
 
@@ -214,44 +476,29 @@ function loadWord() {
     mistakes = 0;
     isInputLocked = false;
 
-    // --- 💡 ระบบคำใบ้ (Dynamic Hint System) ---
-    // นับจำนวนอักษรที่ไม่ใช่ช่องว่าง
+    // Hard Mode หรือ Test Mode จะไม่มีคำใบ้ตัวอักษรให้เลย
     const pureLength = targetWord.replace(/[\s-]/g, '').length;
-    let hintCount = 0;
-    
-    // คำนวณโควต้าการเปิดตัวอักษรตามความยาวคำ
-    if (pureLength >= 9) hintCount = 3;
-    else if (pureLength >= 6) hintCount = 2;
-    else if (pureLength >= 4) hintCount = 1;
-    else hintCount = 0; // 3 ตัวอักษรลงมา ไม่ใบ้ให้ทายเอง
-
-    // ดึงตัวอักษรที่ไม่ซ้ำกันในคำศัพท์
+    let autoHintCount = 0;
+    if (!hardModeEnabled && !isTestMode) {
+        if (pureLength >= 10) autoHintCount = 4;
+        else if (pureLength >= 8) autoHintCount = 3;
+        else if (pureLength >= 6) autoHintCount = 2;
+        else if (pureLength >= 5) autoHintCount = 1;
+    }
     const uniqueLetters = Array.from(new Set(targetWord.split('').filter(c => c !== ' ' && c !== '-')));
-    
-    // ป้องกันกรณีให้คำใบ้เยอะกว่าจำนวนอักษรที่ต่างกัน (ต้องเหลือให้ทายอย่างน้อย 1-2 ตัว)
-    hintCount = Math.min(hintCount, uniqueLetters.length - 2);
+    autoHintCount = Math.min(autoHintCount, uniqueLetters.length - 2);
 
-    if (hintCount > 0) {
-        // สุ่มตัวอักษรที่จะเฉลย
+    if (autoHintCount > 0) {
         const shuffled = uniqueLetters.sort(() => Math.random() - 0.5);
-        for(let i = 0; i < hintCount; i++) {
-            guessedLetters.add(shuffled[i]);
-        }
+        for(let i = 0; i < autoHintCount; i++) guessedLetters.add(shuffled[i]);
     }
 
-    let displayHTML = currentObj.meaningMain;
-    if (currentObj.meaningDetail) {
-        // เพิ่มคำอธิบายแบบละเอียด (ช่อง F) สีเข้มเพื่อให้อ่านง่ายบนการ์ดสว่าง
-        displayHTML += `<br><span class="text-xl md:text-3xl text-[#64748B] font-bold mt-2 md:mt-3 block drop-shadow-sm">${currentObj.meaningDetail}</span>`;
-    }
-    
-    document.getElementById('meaning-display').innerHTML = displayHTML;
-    gsap.fromTo("#meaning-display", {opacity: 0, scale: 0.95}, {opacity: 1, scale: 1, duration: 0.4, ease: "back.out(1.5)"});
+    document.getElementById('meaning-display').innerHTML = currentObj.meaningMain.trim();
+    gsap.fromTo("#meaning-display", {opacity: 0, y: 10}, {opacity: 1, y: 0, duration: 0.4});
 
-    renderHearts();
+    renderHearts(); 
     renderSlots(true);
     generateLetterPool();
-    
     startTimer(); 
 }
 
@@ -259,11 +506,8 @@ function renderHearts() {
     const container = document.getElementById('hearts-container');
     let html = '';
     for(let i = 0; i < MAX_MISTAKES; i++) {
-        if(i < mistakes) {
-            html += `<span class="text-[20px] filter grayscale opacity-20 transition-all duration-300">❤️</span>`;
-        } else {
-            html += `<span class="gsap-heart text-[20px] drop-shadow-[0_0_8px_#FF3366] text-[#FF3366] transition-all">❤️</span>`;
-        }
+        if(i < mistakes) html += `<span class="text-[20px] filter grayscale opacity-20 transition-all duration-300">❤️</span>`;
+        else html += `<span class="text-[20px] drop-shadow-[0_0_8px_#FF3366] text-[#FF3366] transition-all">❤️</span>`;
     }
     container.innerHTML = html;
 }
@@ -271,30 +515,26 @@ function renderHearts() {
 function renderSlots(isInitial = false) {
     const container = document.getElementById('spelling-slots');
     container.innerHTML = '';
-    
     let isWon = true;
 
     for (let char of targetWord) {
         if (char === ' ' || char === '-') {
-            container.innerHTML += `<div class="w-4 flex items-end justify-center pb-2 text-white/30 font-black">-</div>`;
+            container.innerHTML += `<div class="w-4 flex items-end justify-center pb-2 text-[#93C5FD] font-black">-</div>`;
             continue;
         }
 
         if (guessedLetters.has(char)) {
-            container.innerHTML += `<div class="gsap-slot block-3d color-yellow flex-1 size-slot transition-all">${char}</div>`;
+            container.innerHTML += `<div class="gsap-slot block-3d color-yellow flex-1 size-slot">${char}</div>`;
         } else {
             container.innerHTML += `<div class="gsap-slot slot-empty flex-1 size-slot">_</div>`;
             isWon = false;
         }
     }
 
-    if (isInitial) {
-        gsap.fromTo(".gsap-slot", {scale: 0.5, opacity: 0}, {scale: 1, opacity: 1, duration: 0.4, stagger: 0.05, ease: "back.out(1.5)"});
-    }
-
+    if (isInitial) gsap.fromTo(".gsap-slot", {scale: 0.5, opacity: 0}, {scale: 1, opacity: 1, duration: 0.4, stagger: 0.05, ease: "back.out(1.5)"});
     if (!isInitial) {
         if (isWon) triggerWin();
-        else if (mistakes >= MAX_MISTAKES) triggerLose();
+        else if (mistakes >= MAX_MISTAKES) triggerLose(false);
     }
 }
 
@@ -304,50 +544,40 @@ function generateLetterPool() {
 
     let letters = Array.from(new Set(targetWord.split('')));
     const alphabet = "ABCDEFGHIJKLMNOPQRSTUVWXYZ";
-    
     while(letters.length < 12) {
-        let randomChar = alphabet[Math.floor(Math.random() * alphabet.length)];
-        if(!letters.includes(randomChar)) letters.push(randomChar);
+        let r = alphabet[Math.floor(Math.random() * alphabet.length)];
+        if(!letters.includes(r)) letters.push(r);
     }
     letters.sort(() => Math.random() - 0.5);
 
     letters.forEach((letter, i) => {
         const btn = document.createElement('div');
-        const randomColor = blockColors[i % blockColors.length];
-        
-        btn.className = `gsap-btn block-3d ${randomColor} size-btn`;
+        const color = blockColors[i % blockColors.length];
+        btn.className = `gsap-btn block-3d ${color} size-btn`;
         btn.innerText = letter;
-        
-        // ถ้าเป็นตัวอักษรที่ถูกใบ้ (เฉลย) ไปแล้ว ให้ปุ่มเป็นสีเทาและกดไม่ได้
-        if (guessedLetters.has(letter)) {
-            btn.classList.add('disabled');
-        }
-        
-        btn.onclick = () => handleGuess(letter, btn, randomColor);
+        if (guessedLetters.has(letter)) btn.classList.add('disabled');
+        btn.onclick = () => handleGuess(letter, btn);
         pool.appendChild(btn);
     });
-
     gsap.fromTo(".gsap-btn", {y: 40, opacity: 0}, {y: 0, opacity: 1, duration: 0.4, stagger: 0.03, ease: "back.out(1.5)"});
 }
 
-function handleGuess(letter, btnElement, colorClass) {
-    if (isInputLocked || guessedLetters.has(letter)) return;
-    
+function handleGuess(letter, btnElement) {
+    if (isInputLocked || isPaused || guessedLetters.has(letter)) return;
     guessedLetters.add(letter);
-    
     btnElement.classList.add('disabled');
 
     if (targetWord.includes(letter)) {
-        soundCorrect.currentTime = 0;
-        soundCorrect.play().catch(e => console.log('Audio error:', e));
+        playSound(soundCorrect);
         renderSlots();
     } else {
-        soundWrong.currentTime = 0;
-        soundWrong.play().catch(e => console.log('Audio error:', e));
+        playSound(soundWrong);
         mistakes++;
+        currentStreak = 0; // ผิดปุ๊บ สตรีคขาดปั๊บ
+        updateStreakDisplay();
         renderHearts();
         
-        // แก้ไขอนิเมชันสั่นหน้าจอให้สมูทและไม่ค้าง
+        // เคลียร์อนิเมชันเก่าทิ้งก่อนเริ่มสั่นรอบใหม่ ป้องกันหน้าจอค้างเยื้องศูนย์กลาง
         gsap.killTweensOf("main");
         gsap.set("main", {x: 0});
         gsap.fromTo("main", {x: -10}, {x: 10, duration: 0.05, yoyo: true, repeat: 5, onComplete: () => gsap.set("main", {x: 0})});
@@ -356,156 +586,158 @@ function handleGuess(letter, btnElement, colorClass) {
     }
 }
 
+// --- 🏆 ระบบแสดงผลลัพธ์ (Modal) ---
+function showResultModal(isWin, isTimeUp) {
+    const modal = document.getElementById('result-modal');
+    const title = document.getElementById('result-title');
+    const icon = document.getElementById('result-icon');
+    const wordDisplay = document.getElementById('result-word');
+    const actions = document.getElementById('result-actions');
+    const bg = document.getElementById('result-bg');
+    const streakDisplay = document.getElementById('result-streak');
+
+    wordDisplay.innerText = targetWord;
+    modal.classList.remove('hidden');
+
+    if (isWin) {
+        let isLastWord = currentIndex >= wordList.length - 1;
+        let nextBtnText = isTestMode ? (isLastWord ? "SUBMIT TEST" : "NEXT QUESTION") : "NEXT LEVEL";
+        
+        icon.innerText = "🎉";
+        title.innerText = isTestMode ? "CORRECT!" : "EXCELLENT!";
+        title.className = "text-4xl font-black text-[#22C55E] mb-2 uppercase";
+        bg.className = "absolute inset-0 bg-gradient-to-b from-[#4ADE80] to-white opacity-20 z-0";
+        actions.innerHTML = `<button onclick="proceedNextWord()" class="block-3d color-mint py-4 text-xl w-full">${nextBtnText}</button>`;
+        
+        if (currentStreak >= 2) {
+            streakDisplay.innerText = `🔥 PERFECT STREAK x${currentStreak}!`;
+            streakDisplay.classList.remove('hidden');
+            // ถ้ายิ่งสตรีคเยอะ พลุยิ่งอลังการ
+            confetti({ particleCount: 150 + (currentStreak * 50), spread: 100, origin: { y: 0.6 }, colors: ['#FF8A00', '#FF3366', '#FFD166'] });
+        } else {
+            streakDisplay.classList.add('hidden');
+            confetti({ particleCount: 150, spread: 80, origin: { y: 0.6 }, colors: ['#00E5FF', '#FF3366', '#FFD166', '#A855F7'] });
+        }
+    } else {
+        let isLastWord = currentIndex >= wordList.length - 1;
+        let nextBtnText = isTestMode ? (isLastWord ? "SUBMIT TEST" : "NEXT QUESTION") : "CONTINUE ANYWAY";
+        
+        icon.innerText = isTimeUp ? "⏱️" : "💔";
+        title.innerText = isTimeUp ? "TIME'S UP!" : "GAME OVER";
+        title.className = "text-4xl font-black text-[#FF3366] mb-2 uppercase";
+        bg.className = "absolute inset-0 bg-gradient-to-b from-[#FF9A9E] to-white opacity-20 z-0";
+        streakDisplay.classList.add('hidden');
+        actions.innerHTML = `
+            <button onclick="proceedNextWord()" class="block-3d color-orange py-4 text-xl w-full">${nextBtnText}</button>
+            ${!isTestMode ? `<button onclick="returnToHome()" class="block-3d bg-[#F8FAFC] text-[#3B82F6] py-4 text-xl w-full shadow-none border-2 border-[#BFDBFE] mt-2">HOME</button>` : ''}
+        `;
+    }
+    
+    gsap.fromTo(modal.children[0], { scale: 0.8, opacity: 0, y: 50 }, { scale: 1, opacity: 1, y: 0, duration: 0.5, ease: "back.out(1.5)" });
+}
+
 function triggerWin() {
     isInputLocked = true;
     stopTimer();
-    
-    // บันทึกผลว่าตอบถูก
     wordResults.push({ id: wordList[currentIndex].id, isCorrect: true });
+    saveToLocalBuffer(); // 💾 บันทึกลง localStorage ทันที
     
-    const slots = document.querySelectorAll('.gsap-slot');
-    slots.forEach(slot => { slot.className = "gsap-slot block-3d blast-flash flex-1 size-slot"; });
-
-    confetti({ particleCount: 150, spread: 80, origin: { y: 0.6 }, colors: ['#4ADE80', '#22C55E', '#FFD166', '#FF3366'] });
-
-    const compliments = ["EXCELLENT!", "AMAZING!", "VERY GOOD!", "AWESOME!", "PERFECT!", "BRILLIANT!", "GENIUS!"];
-    const randomCompliment = compliments[Math.floor(Math.random() * compliments.length)];
-
-    const msg = document.getElementById('feedback-msg');
-    msg.innerText = randomCompliment;
-    msg.className = "text-3xl md:text-5xl font-black tracking-widest text-left uppercase text-white drop-shadow-[0_6px_0_#10B981] text-stroke";
-    gsap.fromTo(msg, {scale: 0.5, opacity: 0}, {scale: 1, opacity: 1, duration: 0.4, ease: "back.out(2)"});
-
+    document.querySelectorAll('.gsap-slot').forEach(slot => slot.className = "gsap-slot block-3d blast-flash flex-1 size-slot");
+    
+    // อัปเดตสตรีค (ถ้าไม่ผิดเลยในตานี้)
+    if (mistakes === 0) currentStreak++;
+    updateStreakDisplay();
+    
     score += 1; 
+    if (isTestMode) testScore += 1;
     updateScoreDisplay();
-    gsap.fromTo("#score-display", {scale: 1.5}, {scale: 1, duration: 0.4});
-
-    setTimeout(() => { moveToNextWord(msg); }, 5000);
+    
+    setTimeout(() => { showResultModal(true, false); }, 1000);
 }
 
-function triggerLose() {
+function triggerLose(isTimeUp) {
     isInputLocked = true;
     stopTimer();
-    
-    // บันทึกผลว่าตอบผิด
     wordResults.push({ id: wordList[currentIndex].id, isCorrect: false });
+    saveToLocalBuffer(); // 💾 บันทึกลง localStorage ทันที
+    
+    currentStreak = 0; // แพ้แล้วสตรีคขาด
+    updateStreakDisplay();
     
     const container = document.getElementById('spelling-slots');
     container.innerHTML = '';
     for (let char of targetWord) {
-        container.innerHTML += `<div class="block-3d color-pink flex-1 size-slot opacity-80">${char}</div>`;
+        if(char === ' ' || char === '-') container.innerHTML += `<div class="w-4"></div>`;
+        else container.innerHTML += `<div class="block-3d ${isTimeUp ? 'color-orange' : 'color-pink'} flex-1 size-slot opacity-90">${char}</div>`;
     }
 
-    const msg = document.getElementById('feedback-msg');
-    msg.innerText = "OUT OF MOVES!";
-    msg.className = "text-2xl md:text-4xl font-black tracking-widest text-left uppercase text-white drop-shadow-[0_6px_0_#E11D48] text-stroke";
-    gsap.fromTo(msg, {scale: 0.5, opacity: 0}, {scale: 1, opacity: 1, duration: 0.4, ease: "back.out(2)"});
-
-    setTimeout(() => { moveToNextWord(msg); }, 5000);
+    setTimeout(() => { showResultModal(false, isTimeUp); }, 1000);
 }
 
-function triggerTimeUp() {
-    isInputLocked = true;
-    
-    // บันทึกผลว่าตอบผิด (หมดเวลา)
-    wordResults.push({ id: wordList[currentIndex].id, isCorrect: false });
-    
-    const container = document.getElementById('spelling-slots');
-    container.innerHTML = '';
-    for (let char of targetWord) {
-        container.innerHTML += `<div class="block-3d color-orange flex-1 size-slot opacity-80">${char}</div>`;
-    }
-
-    const msg = document.getElementById('feedback-msg');
-    msg.innerText = "TIME'S UP!";
-    msg.className = "text-2xl md:text-4xl font-black tracking-widest text-left uppercase text-white drop-shadow-[0_6px_0_#EA580C] text-stroke";
-    gsap.fromTo(msg, {scale: 0.5, opacity: 0}, {scale: 1, opacity: 1, duration: 0.4, ease: "back.out(2)"});
-
-    setTimeout(() => { moveToNextWord(msg); }, 5000);
-}
-
-function skipWord() {
-    if (isInputLocked) return;
-    isInputLocked = true;
-    stopTimer();
-
-    // บันทึกผลว่าข้าม (เท่ากับผิด)
-    wordResults.push({ id: wordList[currentIndex].id, isCorrect: false });
-
-    const container = document.getElementById('spelling-slots');
-    container.innerHTML = '';
-    for (let char of targetWord) {
-        container.innerHTML += `<div class="block-3d bg-[#1A4FA3] text-white/50 flex-1 size-slot shadow-[inset_0_4px_0_rgba(255,255,255,0.2),_0_6px_0_#0D326C] opacity-80">${char}</div>`;
-    }
-
-    const msg = document.getElementById('feedback-msg');
-    msg.innerText = "SKIPPED";
-    msg.className = "text-2xl md:text-4xl font-black tracking-widest text-left uppercase text-white drop-shadow-[0_6px_0_#475569] text-stroke";
-    gsap.fromTo(msg, {scale: 0.5, opacity: 0}, {scale: 1, opacity: 1, duration: 0.4, ease: "back.out(2)"});
-
-    setTimeout(() => { moveToNextWord(msg); }, 5000);
-}
-
-function moveToNextWord(msgElement) {
-    gsap.to(".block-3d, .gsap-btn, .gsap-slot", {scale: 0, opacity: 0, duration: 0.3, stagger: 0.02});
-    gsap.to(msgElement, {opacity: 0, duration: 0.3});
+function proceedNextWord() {
+    document.getElementById('result-modal').classList.add('hidden');
+    gsap.to(".gsap-btn, .gsap-slot", {scale: 0, opacity: 0, duration: 0.2});
     setTimeout(() => {
         currentIndex++;
         loadWord();
-    }, 400);
+    }, 300);
 }
 
-// 💾 ฟังก์ชันส่งผลคะแนนกลับไปบันทึกที่ Google Apps Script
 async function saveProgressToGAS() {
     if (wordResults.length === 0) return;
+    let payload = [...wordResults];
+    wordResults = []; // clear it so returnToHome doesn't loop
     
-    const meaningDisplay = document.getElementById('meaning-display');
-    meaningDisplay.innerText = "⏳ กำลังบันทึกผลการเรียนรู้...";
-    
+    document.getElementById('meaning-display').innerText = "⏳ กำลังบันทึกผลการเรียนรู้...";
     try {
-        const timestamp = new Date().getTime();
-        const updatesStr = encodeURIComponent(JSON.stringify(wordResults));
-        const url = `${GAS_URL}?action=updateProgress&email=${encodeURIComponent(userEmail)}&updates=${updatesStr}&t=${timestamp}`;
-        
-        const response = await fetch(url);
-        
-        let json;
-        try {
-            json = await response.json();
-        } catch (e) {
-            console.error("Server didn't return JSON", e);
-        }
-        
+        const url = `${GAS_URL}?action=updateProgress&email=${encodeURIComponent(userEmail)}&updates=${encodeURIComponent(JSON.stringify(payload))}&t=${Date.now()}`;
+        const res = await fetch(url);
+        const json = await res.json();
         if (json && json.status === "success") {
-            meaningDisplay.innerHTML = `<span class="text-3xl md:text-5xl">🎉 <strong>บันทึกคะแนนสำเร็จ</strong></span>`;
+            localStorage.removeItem(LS_KEY); // ✅ sync สำเร็จ ลบ buffer ทิ้ง
+            document.getElementById('meaning-display').innerHTML = `<span class="text-[#22C55E]">🎉 <strong>บันทึกคะแนนสำเร็จ</strong></span>`;
         } else {
-            meaningDisplay.innerText = "⚠️ เล่นจบแล้ว แต่บันทึกคะแนนไม่สำเร็จ";
+            document.getElementById('meaning-display').innerHTML = `<span class="text-[#FF3366]">❌ เกิดข้อผิดพลาดในการบันทึก</span>`;
         }
-    } catch (err) {
-        console.error("Fetch Error:", err);
-        meaningDisplay.innerText = "❌ เล่นจบแล้ว แต่ไม่สามารถติดต่อเซิร์ฟเวอร์เพื่อบันทึกผลได้";
+    } catch (err) { 
+        console.error(err);
+        document.getElementById('meaning-display').innerHTML = `<span class="text-[#FF3366]">❌ ไม่สามารถเชื่อมต่อได้ (ข้อมูลบันทึกไว้ชั่วคราวแล้ว)</span>`;
     }
+    setTimeout(() => returnToHome(), 2500);
 }
 
-// ⌨️ ระบบรองรับการพิมพ์จากแป้นพิมพ์ (Physical Keyboard Support)
+async function submitTestScoreToGAS() {
+    document.getElementById('meaning-display').innerText = "⏳ กำลังส่งกระดาษคำตอบ...";
+    wordResults = []; // clear to prevent loop
+    try {
+        const url = `${GAS_URL}?action=submitTestScore&email=${encodeURIComponent(userEmail)}&testType=${encodeURIComponent(currentTestType)}&score=${testScore}&maxScore=${wordList.length}&t=${Date.now()}`;
+        const res = await fetch(url);
+        const json = await res.json();
+        if (json && json.status === "success") {
+            document.getElementById('meaning-display').innerHTML = `<span class="text-[#22C55E]">🎉 <strong>ส่งข้อสอบเรียบร้อย! ได้ ${testScore}/${wordList.length} คะแนน</strong></span>`;
+        } else {
+            document.getElementById('meaning-display').innerText = "❌ เกิดข้อผิดพลาดในการส่งข้อสอบ";
+        }
+    } catch (err) { console.error(err); }
+    setTimeout(() => returnToHome(), 3500);
+}
+
 document.addEventListener('keydown', (e) => {
-    // ป้องกันการทำงานซ้อนทับถ้ากำลังโหลด, โดนล็อกหน้าจอ, หรือพิมพ์ในช่อง Login
-    if (isInputLocked) return;
+    if (isInputLocked || isPaused) return;
     if (document.activeElement && document.activeElement.tagName === 'INPUT') return;
-    
-    // ตรวจสอบว่าเป็นตัวอักษรภาษาอังกฤษ A-Z เท่านั้น (ไม่เอาปุ่มพิเศษ)
     if (/^[a-zA-Z]$/.test(e.key)) {
         const letter = e.key.toUpperCase();
-        
-        // ค้นหาปุ่มใน Letter Pool ที่ตรงกับตัวอักษรและยังไม่ถูกกด (ไม่ติดคลาส disabled)
         const pool = document.getElementById('letter-pool');
         if (!pool) return;
-        
         const buttons = pool.querySelectorAll('.gsap-btn:not(.disabled)');
         for (let btn of buttons) {
-            if (btn.innerText === letter) {
-                btn.click(); // สั่งให้ปุ่มถูกกดเสมือนใช้นิ้วจิ้ม
-                break; // กดแค่ปุ่มเดียวในกรณีที่มีตัวอักษรซ้ำกันหลายปุ่ม
+            if (btn.innerText === letter) { 
+                // สร้างเอฟเฟกต์ปุ่มบุ๋มลงไปเมื่อกดคีย์บอร์ด
+                btn.classList.add('active-simulate');
+                setTimeout(() => btn.classList.remove('active-simulate'), 100);
+                
+                btn.click(); 
+                break; 
             }
         }
     }

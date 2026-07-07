@@ -1,12 +1,13 @@
-/* ☁️ Soft Pastel Premium Background */
+/*
+ * 🚀 Spelling Master (Vivid Wonderland Update)
+ * Digital Signature: Antigravity (AI Assistant)
+ * Last Modified: July 2026
+ * Features: Auto-Shrink Responsive Layout, CSS Animations, Custom Sizing
+ */
+/* ☀️ Bright & Vivid Wonderland Background */
 body {
-    background-color: #A3D8F4;
-    background-image: 
-        radial-gradient(at 0% 0%, #FFFFFF 0px, transparent 50%),
-        radial-gradient(at 100% 0%, #BFE6FF 0px, transparent 50%),
-        radial-gradient(at 100% 100%, #89C2D9 0px, transparent 50%),
-        radial-gradient(at 0% 100%, #61A5C2 0px, transparent 50%);
-    color: #0F172A;
+    background-color: #FFFFFF;
+    color: #1E3A8A;
     font-family: 'Nunito', 'Prompt', sans-serif;
     overflow: hidden;
     touch-action: manipulation;
@@ -14,17 +15,34 @@ body {
     -webkit-tap-highlight-color: transparent;
 }
 
-/* 🧊 3D Clay UI Frames */
-.ui-frame {
-    background: #FFFFFF;
-    border-radius: 40px;
-    box-shadow: 
-        inset 0 -8px 0 rgba(226, 232, 240, 0.5), /* Inner bottom shadow */
-        inset 0 8px 0 rgba(255, 255, 255, 1),    /* Inner top highlight */
-        0 15px 30px rgba(15, 23, 42, 0.1);       /* Outer soft drop shadow */
+/* 🌈 พื้นหลังระเบิดสีสันสุดป๊อป (Moving Aurora Background) */
+body {
+    background: linear-gradient(-45deg, #FF9A9E, #FECFEF, #B6FCFF, #C2E9FB, #FFD166, #FF6B9E);
+    background-size: 400% 400%;
+    animation: aurora-glow 8s ease infinite;
 }
 
-/* 🍬 Bubbly Clay Blocks */
+@keyframes aurora-glow { 0% { background-position: 0% 50%; } 50% { background-position: 100% 50%; } 100% { background-position: 0% 50%; } }
+
+.bg-gradient {
+    /* Keep for compatibility if used elsewhere */
+    background-color: transparent;
+}
+
+/* 🧊 UI Frame (Ultra Bright Candy Pop) */
+/* 🔮 Liquid Glass Frame */
+.ui-frame {
+    background: rgba(255, 255, 255, 0.45);
+    backdrop-filter: blur(24px);
+    -webkit-backdrop-filter: blur(24px);
+    border-radius: 40px;
+    border: 2px solid rgba(255, 255, 255, 0.6);
+    box-shadow: inset 0 -8px 0 rgba(0,0,0,0.05), inset 0 8px 0 rgba(255,255,255,0.8), 0 20px 40px rgba(59,130,246,0.15);
+    position: relative;
+    margin-bottom: 20px; 
+}
+
+/* 🍬 Bubbly Candy Blocks */
 .block-3d {
     position: relative;
     cursor: pointer;
@@ -34,150 +52,47 @@ body {
     align-items: center;
     justify-content: center;
     border-radius: 24px;
-    font-family: 'Nunito', sans-serif;
     color: white;
-    text-shadow: 0 2px 0 rgba(0,0,0,0.2);
+    text-shadow: 0 2px 0 rgba(0,0,0,0.15);
+    transition: transform 0.1s, box-shadow 0.1s;
 }
 
-/* 🍭 Clay Color Classes (Soft, Matte, Inset Highlight) */
-.color-pink { 
-    background: #FF6B9E; 
-    box-shadow: inset 0 4px 0 rgba(255,255,255,0.4), inset 0 -6px 0 rgba(0,0,0,0.1), 0 8px 0 #D8004B, 0 12px 20px rgba(216,0,75,0.3); 
-}
-.color-mint { 
-    background: #20E3B2; 
-    box-shadow: inset 0 4px 0 rgba(255,255,255,0.5), inset 0 -6px 0 rgba(0,0,0,0.1), 0 8px 0 #047857, 0 12px 20px rgba(4,120,87,0.3); 
-}
-.color-yellow { 
-    background: #FFD166; 
-    color: #451A03; text-shadow: none;
-    box-shadow: inset 0 4px 0 rgba(255,255,255,0.7), inset 0 -6px 0 rgba(0,0,0,0.05), 0 8px 0 #D97706, 0 12px 20px rgba(217,119,6,0.2); 
-}
-.color-blue { 
-    background: #4D96FF; 
-    box-shadow: inset 0 4px 0 rgba(255,255,255,0.4), inset 0 -6px 0 rgba(0,0,0,0.15), 0 8px 0 #1D4ED8, 0 12px 20px rgba(29,78,216,0.3); 
-}
-.color-purple { 
-    background: #B565FF; 
-    box-shadow: inset 0 4px 0 rgba(255,255,255,0.4), inset 0 -6px 0 rgba(0,0,0,0.1), 0 8px 0 #7E22CE, 0 12px 20px rgba(126,34,206,0.3); 
-}
-.color-orange { 
-    background: #FF9F1C; 
-    box-shadow: inset 0 4px 0 rgba(255,255,255,0.4), inset 0 -6px 0 rgba(0,0,0,0.1), 0 8px 0 #C26300, 0 12px 20px rgba(194,99,0,0.3); 
-}
+.color-pink { background: #FF3366; box-shadow: inset 0 4px 0 rgba(255,255,255,0.5), inset 0 -6px 0 rgba(0,0,0,0.1), 0 8px 0 #D8004B; }
+.color-mint { background: #00E5FF; box-shadow: inset 0 4px 0 rgba(255,255,255,0.6), inset 0 -6px 0 rgba(0,0,0,0.1), 0 8px 0 #00B8D4; text-shadow: 0 2px 0 rgba(0,0,0,0.2); }
+.color-yellow { background: #FFD166; color: #D97706; text-shadow: none; box-shadow: inset 0 4px 0 rgba(255,255,255,0.8), inset 0 -6px 0 rgba(0,0,0,0.05), 0 8px 0 #F59E0B; }
+.color-blue { background: #3B82F6; box-shadow: inset 0 4px 0 rgba(255,255,255,0.5), inset 0 -6px 0 rgba(0,0,0,0.1), 0 8px 0 #2563EB; }
+.color-purple { background: #A855F7; box-shadow: inset 0 4px 0 rgba(255,255,255,0.5), inset 0 -6px 0 rgba(0,0,0,0.1), 0 8px 0 #7E22CE; }
+.color-orange { background: #FF8A00; box-shadow: inset 0 4px 0 rgba(255,255,255,0.5), inset 0 -6px 0 rgba(0,0,0,0.1), 0 8px 0 #E65100; }
 
-/* 📉 อนิเมชันตอนกดปุ่ม (นุ่มๆ แบบยาง) */
-.block-3d:active:not(.disabled) {
-    transform: translateY(8px) scale(0.98);
-    box-shadow: inset 0 2px 0 rgba(255,255,255,0.2), inset 0 -2px 0 rgba(0,0,0,0.1), 0 0px 0 transparent, 0 4px 10px rgba(0,0,0,0.2) !important;
-}
+.block-3d:active:not(.disabled), .block-3d.active-simulate:not(.disabled) { transform: translateY(6px) scale(0.96); box-shadow: inset 0 2px 0 rgba(255,255,255,0.4), inset 0 -2px 0 rgba(0,0,0,0.05), 0 2px 0 transparent !important; }
+.block-3d.disabled { background: #FFFFFF !important; box-shadow: inset 0 4px 0 rgba(255,255,255,0.8), inset 0 -6px 0 rgba(0,0,0,0.02), 0 8px 0 #DBEAFE !important; color: #93C5FD !important; pointer-events: none; text-shadow: none; border: 2px solid #EFF6FF; }
 
-.block-3d.disabled {
-    background: #E2E8F0 !important;
-    box-shadow: inset 0 4px 0 rgba(255,255,255,0.6), inset 0 -6px 0 rgba(0,0,0,0.05), 0 8px 0 #CBD5E1 !important;
-    color: #94A3B8 !important;
-    pointer-events: none;
-    text-shadow: none;
-}
+/* 🕳️ ช่องว่างเติมคำ */
+.slot-empty { background: #FFFFFF; border: 2px dashed #93C5FD; box-shadow: inset 0 4px 8px rgba(147, 197, 253, 0.2); color: #93C5FD; border-radius: 24px; display: flex; align-items: center; justify-content: center; font-weight: 900; }
 
-/* 🕳️ ช่องว่างเติมคำ (เหมือนหลุมดินเหนียว) */
-.slot-empty {
-    background: #F1F5F9;
-    box-shadow: inset 0 8px 12px rgba(148, 163, 184, 0.3), inset 0 2px 4px rgba(0,0,0,0.1);
-    color: #CBD5E1;
-    border-radius: 24px;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    font-weight: 900;
-}
+.blast-flash { background: #22C55E !important; box-shadow: inset 0 4px 0 rgba(255,255,255,0.6), inset 0 -6px 0 rgba(0,0,0,0.1), 0 8px 0 #16A34A, 0 0 20px rgba(34, 197, 94, 0.8) !important; color: white !important; transform: scale(1.1) !important; z-index: 20; animation: bouncePop 0.5s cubic-bezier(0.34, 1.56, 0.64, 1); }
+@keyframes bouncePop { 0% { transform: scale(1); } 50% { transform: scale(1.25); } 100% { transform: scale(1.1); } }
 
-/* 🎇 เอฟเฟกต์ฉลองตอนตอบถูก */
-.blast-flash {
-    background: #4ADE80 !important;
-    box-shadow: inset 0 4px 0 rgba(255,255,255,0.5), inset 0 -6px 0 rgba(0,0,0,0.1), 0 8px 0 #16A34A, 0 0 30px rgba(74,222,128,0.6) !important;
-    color: white !important;
-    transform: scale(1.1) !important;
-    z-index: 20;
-    animation: bouncePop 0.5s cubic-bezier(0.34, 1.56, 0.64, 1);
-}
+/* 🪞 Meaning Card */
+.meaning-box { background: #FFFFFF; border-radius: 36px; border: 3px solid #FFF1F2; box-shadow: inset 0 -6px 0 #FFE4E6, 0 8px 0 #FECDD3, 0 15px 20px rgba(255, 138, 161, 0.1); position: relative; transition: transform 0.3s cubic-bezier(0.34, 1.56, 0.64, 1); }
+.meaning-box h2 { color: #1E3A8A !important; }
 
-@keyframes bouncePop {
-    0% { transform: scale(1); }
-    50% { transform: scale(1.25); }
-    100% { transform: scale(1.1); }
-}
+/* ⚙️ Toggle Switch CSS */
+.switch { position: relative; display: inline-block; width: 50px; height: 28px; }
+.switch input { opacity: 0; width: 0; height: 0; }
+.slider { position: absolute; cursor: pointer; top: 0; left: 0; right: 0; bottom: 0; background-color: #CBD5E1; transition: .4s; border-radius: 34px; box-shadow: inset 0 2px 4px rgba(0,0,0,0.1); }
+.slider:before { position: absolute; content: ""; height: 20px; width: 20px; left: 4px; bottom: 4px; background-color: white; transition: .4s; border-radius: 50%; box-shadow: 0 2px 5px rgba(0,0,0,0.2); }
+input:checked + .slider { background-color: #22C55E; }
+input:checked + .slider-red { background-color: #FF3366; }
+input:checked + .slider:before { transform: translateX(22px); }
 
-/* 🪞 Meaning Card (Soft Pill) */
-.meaning-box {
-    background: #F8FAFC;
-    border-radius: 36px;
-    box-shadow: 
-        inset 0 -6px 0 rgba(226, 232, 240, 0.8),
-        0 10px 20px rgba(15, 23, 42, 0.05);
-    position: relative;
-}
+/* 🔥 Streak Animation */
+.animate-fire { animation: fire-flicker 1s infinite alternate; }
+@keyframes fire-flicker { 0% { transform: scale(1); filter: brightness(1); } 100% { transform: scale(1.05); filter: brightness(1.2); } }
 
-/* 📐 Responsive Auto-Shrink (Scale down UI on short screens to prevent overlap/clipping) */
-.size-btn {
-    width: 64px;
-    height: 76px;
-    font-size: 32px;
-}
-.size-slot {
-    min-width: 24px;
-    max-width: 56px;
-    height: 50px;
-    font-size: 24px;
-}
-
-@media (min-width: 768px) {
-    .size-btn { width: 76px; height: 84px; font-size: 40px; }
-    .size-slot { max-width: 76px; height: 84px; font-size: 40px; }
-}
-
-/* ⚠️ PC / Laptops with short screens (< 800px tall) */
-@media (min-width: 768px) and (max-height: 800px) {
-    .size-btn { width: 60px; height: 64px; font-size: 28px; border-radius: 16px; }
-    .size-slot { max-width: 60px; height: 64px; font-size: 28px; }
-    
-    /* บีบพื้นที่แนวตั้งเพื่อไม่ให้ล้น และไม่ให้ TRANSLATE ไปทับข้างบน */
-    .meaning-box { min-height: 90px !important; padding-top: 2.5rem !important; padding-bottom: 1rem !important; }
-    .ui-frame { margin-bottom: 0 !important; margin-top: 0 !important; }
-}
-
-.text-stroke {
-    text-shadow: 
-        -2px -2px 0 #1E1B4B,  
-         0   -2px 0 #1E1B4B,
-         2px -2px 0 #1E1B4B,
-         2px  0   0 #1E1B4B,
-         2px  2px 0 #1E1B4B,
-         0    2px 0 #1E1B4B,
-        -2px  2px 0 #1E1B4B,
-        -2px  0   0 #1E1B4B;
-}
-
-.text-neon {
-    text-shadow: 0 0 10px rgba(255,255,255,0.8), 0 0 20px rgba(0, 240, 255, 0.5);
-}
-
-.glass-card {
-    background: rgba(255, 255, 255, 0.05);
-    backdrop-filter: blur(16px);
-    -webkit-backdrop-filter: blur(16px);
-    border: 1px solid rgba(255, 255, 255, 0.1);
-    box-shadow: 0 10px 30px rgba(0,0,0,0.3);
-}
-
-/* 📱 ล็อกให้มือถือและแท็บเล็ตเล่นในแนวตั้งเท่านั้น (แสดงหน้าต่างแจ้งเตือนเมื่อตะแคงจอ) 
-   - (hover: none) จะครอบคลุมอุปกรณ์ Touch Screen อย่างมือถือและ iPad 
-   - (orientation: landscape) เช็คว่าเครื่องอยู่ในแนวนอน */
-@media screen and (orientation: landscape) and (hover: none) {
-    #rotate-overlay {
-        display: flex !important;
-    }
-    #game-container {
-        display: none !important;
-    }
-}
+/* Responsive */
+.size-btn { width: 56px; height: 68px; font-size: 28px; }
+.size-slot { min-width: 24px; max-width: 50px; height: 50px; font-size: 24px; }
+@media (min-width: 768px) { .size-btn { width: 70px; height: 80px; font-size: 36px; } .size-slot { max-width: 60px; height: 70px; font-size: 36px; } }
+.text-stroke { text-shadow: -2px -2px 0 #1E3A8A, 0 -2px 0 #1E3A8A, 2px -2px 0 #1E3A8A, 2px 0 0 #1E3A8A, 2px 2px 0 #1E3A8A, 0 2px 0 #1E3A8A, -2px 2px 0 #1E3A8A, -2px 0 0 #1E3A8A; }
+@media screen and (orientation: landscape) and (hover: none) { #rotate-overlay { display: flex !important; background: #FF3366 !important; } }
