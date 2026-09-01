@@ -212,6 +212,42 @@ button, .stamp-btn, .key-btn, .home-card, .category-card, .section-tab, .audio-b
 
 .hidden { display: none !important; }
 
+/* ── Section Tab (Login / Register toggle) ──────────────── */
+.section-tab {
+  position: relative;
+  padding: 8px 18px;
+  border-radius: 999px;
+  font-size: 0.82rem;
+  font-weight: 700;
+  color: #7A6677;
+  background: rgba(255,255,255,0.55);
+  border: 2px solid rgba(180,160,175,0.35);
+  box-shadow: 0 1px 4px rgba(0,0,0,0.06);
+  transition: all 0.25s ease;
+  letter-spacing: 0.01em;
+}
+
+.section-tab:hover {
+  background: rgba(255,255,255,0.85);
+  border-color: #C26754;
+  color: #C26754;
+  box-shadow: 0 2px 8px rgba(194,103,84,0.18);
+  transform: translateY(-1px);
+}
+
+.section-tab.active {
+  background: linear-gradient(135deg, #C26754, #d4816e);
+  color: #fff;
+  border-color: #C26754;
+  box-shadow: 0 3px 12px rgba(194,103,84,0.35);
+}
+
+.section-tab.active:hover {
+  background: linear-gradient(135deg, #b35a49, #C26754);
+  color: #fff;
+  transform: translateY(-1px);
+}
+
 /* ── 3. Spatial Glass Container ────────────────────────────── */
 .paper-wrap {
   position: relative;

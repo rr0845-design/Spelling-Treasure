@@ -1236,14 +1236,20 @@ function skipWord() {
   sessionWordsPlayed++;
   comboCount = 0;
   renderComboBadge();
-  const srsResult = updateWordSRS(secretWord, false);
-  checkAndProcessDailyStreak();
-  updateScoreBoard();
-  syncScoreToGAS();
+  const srsResult = isTestMode ? { box: 0, nextReview: '' } : updateWordSRS(secretWord, false);
+  if (!isTestMode) {
+    checkAndProcessDailyStreak();
+    updateScoreBoard();
+    syncScoreToGAS();
+  }
   playSound("wrong");
   updateHangmanSVG(MAX_MISTAKES, true);
-  logActivityToGAS({ word: secretWord, isWon: false, mistakes, score, streak, maxStreak, box: srsResult.box, nextReview: srsResult.nextReview, action: "skip", category: (currentItem && currentItem.category) || activeSection });
-  document.getElementById("status").innerHTML = '<span class="stamp-banner stamp-neutral"><svg class="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><line x1="12" y1="16" x2="12" y2="12"/><line x1="12" y1="8" x2="12.01" y2="8"/></svg>ข้ามคำ! (Box ' + srsResult.box + ' · ทบทวนใน 1 วัน) คำตอบคือ ' + secretWord + '</span>';
+  if (!isTestMode) {
+    logActivityToGAS({ word: secretWord, isWon: false, mistakes, score, streak, maxStreak, box: srsResult.box, nextReview: srsResult.nextReview, action: "skip", category: (currentItem && currentItem.category) || activeSection });
+    document.getElementById("status").innerHTML = '<span class="stamp-banner stamp-neutral"><svg class="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><line x1="12" y1="16" x2="12" y2="12"/><line x1="12" y1="8" x2="12.01" y2="8"/></svg>ข้ามคำ! (Box ' + srsResult.box + ' · ทบทวนใน 1 วัน) คำตอบคือ ' + secretWord + '</span>';
+  } else {
+    document.getElementById("status").innerHTML = '<span class="stamp-banner stamp-neutral"><svg class="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><line x1="12" y1="16" x2="12" y2="12"/><line x1="12" y1="8" x2="12.01" y2="8"/></svg>ข้ามคำ! คำตอบคือ ' + secretWord + '</span>';
+  }
   
   // Staggered 3D flip for all remaining tiles
   flipAllTilesSequentially(true);
@@ -1410,25 +1416,31 @@ function checkGameEnd() {
 
   if (isWon) {
     const pts = Math.max(10, 20 - mistakes * 2) + Math.min(15, comboCount * 3);
-    score += pts;
+    if (!isTestMode) {
+      score += pts;
+    }
     sessionWordsWon++;
-    const srsResult = updateWordSRS(secretWord, true);
-    checkAndProcessDailyStreak();
-    updateScoreBoard();
-    syncScoreToGAS();
+    const srsResult = isTestMode ? { box: 0, nextReview: '' } : updateWordSRS(secretWord, true);
+    if (!isTestMode) {
+      checkAndProcessDailyStreak();
+      updateScoreBoard();
+      syncScoreToGAS();
+    }
     playSound("stamp");
     setTimeout(() => playSound("win"), 120);
     speakCurrentWord();
     triggerConfetti();
     flipAllTilesSequentially(false);
     updateHangmanSVG(mistakes, false);
-    logActivityToGAS({ word: secretWord, isWon: true, mistakes, score, streak, maxStreak, box: srsResult.box, nextReview: srsResult.nextReview, action: "win", category: (currentItem && currentItem.category) || activeSection });
+    if (!isTestMode) {
+      logActivityToGAS({ word: secretWord, isWon: true, mistakes, score, streak, maxStreak, box: srsResult.box, nextReview: srsResult.nextReview, action: "win", category: (currentItem && currentItem.category) || activeSection });
+      const stampLabel = srsResult.box >= 4 ? "MASTERED ✨" : streak >= 3 ? "HOT STREAK 🔥" : "CORRECT! ✓";
+      document.getElementById("status").innerHTML = '<div class="stamp-banner stamp-win"><svg class="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6 9 17l-5-5"/></svg><span>' + stampLabel + ' (+' + pts + ' · Box ' + srsResult.box + ')</span></div>';
+    } else {
+      document.getElementById("status").innerHTML = '<div class="stamp-banner stamp-win"><svg class="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6 9 17l-5-5"/></svg><span>CORRECT! ✓ สะกดถูกต้อง</span></div>';
+    }
     
-    const stampLabel = srsResult.box >= 4 ? "MASTERED ✨" : streak >= 3 ? "HOT STREAK 🔥" : "CORRECT! ✓";
-    
-    document.getElementById("status").innerHTML = '<div class="stamp-banner stamp-win"><svg class="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6 9 17l-5-5"/></svg><span>' + stampLabel + ' (+' + pts + ' · Box ' + srsResult.box + ')</span></div>';
-    
-    if (window.gsap) {
+    if (!isTestMode && window.gsap) {
       gsap.fromTo("#score-val", { scale: 1.4, color: "#3D8B6E" }, { scale: 1, color: "inherit", duration: 0.4, ease: "back.out(2)" });
       gsap.fromTo("#streak-val", { scale: 1.4, color: "#E5AD7A" }, { scale: 1, color: "inherit", duration: 0.4, ease: "back.out(2)" });
     }
@@ -1472,19 +1484,24 @@ function checkGameEnd() {
   } else {
     comboCount = 0;
     renderComboBadge();
-    const srsResult = updateWordSRS(secretWord, false);
-    checkAndProcessDailyStreak();
-    updateScoreBoard();
-    syncScoreToGAS();
+    const srsResult = isTestMode ? { box: 0, nextReview: '' } : updateWordSRS(secretWord, false);
+    if (!isTestMode) {
+      checkAndProcessDailyStreak();
+      updateScoreBoard();
+      syncScoreToGAS();
+    }
     playSound("stamp");
     setTimeout(() => playSound("lose"), 120);
     speakCurrentWord();
     updateHangmanSVG(MAX_MISTAKES, true);
     updateDisplay(true);
     flipAllTilesSequentially(true);
-    logActivityToGAS({ word: secretWord, isWon: false, mistakes, score, streak, maxStreak, box: srsResult.box, nextReview: srsResult.nextReview, action: isTestMode ? "test_lose" : "lose", category: (currentItem && currentItem.category) || activeSection });
-    
-    document.getElementById("status").innerHTML = '<div class="stamp-banner stamp-lose"><svg class="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><line x1="15" y1="9" x2="9" y2="15"/><line x1="9" y1="9" x2="15" y2="15"/></svg><span>หมดหัวใจ! (Box ' + srsResult.box + ') — ' + secretWord + '</span></div>';
+    if (!isTestMode) {
+      logActivityToGAS({ word: secretWord, isWon: false, mistakes, score, streak, maxStreak, box: srsResult.box, nextReview: srsResult.nextReview, action: "lose", category: (currentItem && currentItem.category) || activeSection });
+      document.getElementById("status").innerHTML = '<div class="stamp-banner stamp-lose"><svg class="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><line x1="15" y1="9" x2="9" y2="15"/><line x1="9" y1="9" x2="15" y2="15"/></svg><span>หมดหัวใจ! (Box ' + srsResult.box + ') — ' + secretWord + '</span></div>';
+    } else {
+      document.getElementById("status").innerHTML = '<div class="stamp-banner stamp-lose"><svg class="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><line x1="15" y1="9" x2="9" y2="15"/><line x1="9" y1="9" x2="15" y2="15"/></svg><span>หมดหัวใจ! คำตอบคือ ' + secretWord + '</span></div>';
+    }
 
     updateSessionProgress();
 
@@ -2606,6 +2623,23 @@ function startAssessmentTest() {
   });
 }
 
+function updateTestFooterButtons() {
+  if (!isTestMode || !testQuestionsState) return;
+  const answeredCount = testQuestionsState.filter(q => q.isCompleted).length;
+  const allDone = answeredCount >= testQuestionsState.length;
+  const prevBtn = document.getElementById("test-prev-btn");
+  const nextBtn = document.getElementById("test-next-btn");
+  if (allDone) {
+    // Hide prev/next when all 20 questions are answered
+    if (prevBtn) prevBtn.classList.add("hidden");
+    if (nextBtn) nextBtn.classList.add("hidden");
+  } else {
+    // Show prev/next when there are still unanswered questions
+    if (prevBtn) prevBtn.classList.remove("hidden");
+    if (nextBtn) nextBtn.classList.remove("hidden");
+  }
+}
+
 function loadTestQuestion(index) {
   if (!testQuestionsState || !testQuestionsState[index]) return;
   const q = testQuestionsState[index];
@@ -2738,6 +2772,9 @@ function renderTestPalette() {
   const ansCount = testQuestionsState.filter(item => item.isCompleted).length;
   const ansCountEl = document.getElementById("test-answered-count");
   if (ansCountEl) ansCountEl.textContent = `(ตอบแล้ว ${ansCount}/20)`;
+
+  // Update footer buttons: hide prev/next when all 20 are done
+  updateTestFooterButtons();
 }
 
 function confirmSubmitTest() {
