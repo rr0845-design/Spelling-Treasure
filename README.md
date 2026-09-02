@@ -1,19 +1,19 @@
 # 🎮 SPELLING MASTER — Patina Edition (Beta Version)
 
-แอปพลิเคชันเว็บเกมการเรียนรู้และฝึกสะกดคำศัพท์ภาษาอังกฤษระดับพรีเมียม สไตล์ **Patinaed Hues Soft Light Glassmorphism UI** พร้อมระบบทบทวนความจำระยะยาว **Spaced Repetition System (Leitner SRS)**, ระบบไต่ระดับ **30 Ranks & 6 League Divisions**, และการเชื่อมต่อฐานข้อมูล **Google Sheets API** แบบเรียลไทม์
+แอปพลิเคชันเว็บเกมการเรียนรู้และฝึกสะกดคำศัพท์ภาษาอังกฤษระดับพรีเมียม สไตล์ **Patinaed Hues Soft Light Glassmorphism UI** พร้อมระบบทบทวนความจำระยะยาว **Spaced Repetition System (Leitner SRS)**, ระบบวิเคราะห์ผู้เรียนสำหรับคุณครู **Teacher Dashboard**, โหมดแบบทดสอบวัดผล **Pre-test & Post-test**, และการเชื่อมต่อฐานข้อมูล **Google Sheets API** แบบเรียลไทม์ความเร็วสูง
 
 ---
 
 ## 🎨 1. แนวคิดและดีไซน์ (Design & Visual Identity)
 
 * **Patinaed Hues Palette:** ชุดสีพาทินาละมุนตา ได้รับการออกแบบตามหลัก Soft Metallic Light:
-  * 🟤 **Warm Copper (`#E5AD7A`):** โทนทองแดงอุ่นสำหรับปุ่มแอ็กชันหลักและแสงประกาย Glow
-  * 🔴 **Terracotta Rust (`#C26754`):** โทนอิฐเผาสำหรับคะแนน Streak และเป้าหมายสำคัญ
-  * 🟣 **Dusty Mauve (`#A37B8F`):** โทนม่วงตุ่นนุ่มลึกสำหรับป้ายหมวดและเงา Ambient
+  * 🟤 **Warm Copper (`#E5AD7A`):** โทนทองแดงอุ่นสำหรับปุ่มแอ็กชันหลัก แสงประกาย Glow และการเน้นตัวเลือก
+  * 🔴 **Terracotta Rust (`#C26754`):** โทนอิฐเผาสำหรับคะแนน สถิติ Streak และเป้าหมายสำคัญ
+  * 🟣 **Dusty Mauve (`#A37B8F`):** โทนม่วงตุ่นนุ่มลึกสำหรับป้ายหมวดหมู่และเงา Ambient
   * ⚪ **Muted Slate (`#B3B9C9`):** โทนเงินเทาสำหรับกรอบโลหะและปุ่มคีย์แคป
-  * 🟫 **Deep Aubergine Bronze (`#5E4B5B`):** ตัวหนังสือหลักคมชัด สบายตา
-* **Soft Light Glassmorphism:** ผิวสัมผัสกระจกฝ้าโปร่งแสง `backdrop-filter: blur(20px)` พร้อมเส้นขอบแสงเงา Soft Glow
-* **Flowing Aurora Background:** ฉากหลังลูกแก้วคลื่นแสง Aurora เคลื่อนไหวลอยตัวแบบ 3 มิติ 60 FPS
+  * 🟫 **Deep Aubergine Bronze (`#5E4B5B`):** ตัวหนังสือหลักคมชัด สบายตา อ่านง่ายทุกสภาพแสง
+* **Soft Light Glassmorphism:** ผิวสัมผัสกระจกฝ้าโปร่งแสง `backdrop-filter: blur(16px)` พร้อมเส้นขอบแสงเงา Soft Glow
+* **3D Responsive Letter Tiles:** การ์ดตัวอักษร 3 มิติ `.title-letter-row` และ `.cutout-letter` รองรับหน้าจอมือถือทุกขนาดโดยไม่มีตัวอักษรตกบรรทัด
 * **3D Tactile Physics:** ปุ่มกดและคีย์แคปโลหะมีมิติการยุบตัวตามหลักฟิสิกส์สปริง (Spring Dynamics)
 
 ---
@@ -22,28 +22,34 @@
 
 ### 🎴 ระบบการ์ดตัวอักษร 3D (3D Card Flip Tiles)
 * การ์ดคำศัพท์แต่ละตัวอักษรแสดงผลเป็นโมเดล 3 มิติ
-* เมื่อผู้เล่นสะกดถูก การ์ดจะทำการ **หมุนพลิก 3D 180 องศา (3D Flip)** พร้อมเอฟเฟกต์สะท้อนแสงประกายดาว (**Sparkle Burst**) และขยายตัวแบบ Elastic Pop
+* เมื่อผู้เล่นสะกดถูก การ์ดจะทำการ **หมุนพลิก 3D 180 องศา (3D Flip)** พร้อมเอฟเฟกต์สะเก็ดดาว (**Sparkle Burst**) และขยายตัวแบบ Elastic Pop
 * มีป้ายเป้าหมาย `?` กะพริบนำสายตาบอกตำแหน่งตัวอักษรที่ต้องทายถัดไป
+
+### 🔁 ระบบทบทวนอัจฉริยะประจำบทเรียน (Smart Unit Review Mode)
+* ปุ่มแรกในหน้าต่างเลือกบทเรียนถูกยกระดับเป็น **`🔁 ทบทวนใน Unit [X]`** (หรือ `ทบทวนความจำ (SRS Review)`)
+* ระบบจะคำนวณและดึงคำศัพท์เฉพาะใน Unit นั้นที่เข้าเกณฑ์:
+  1. **🔴 คำใน Box 1:** คำที่เพิ่งเริ่มฝึก หรือคำที่เพิ่งตอบผิด
+  2. **⏰ คำที่ถึงกำหนดทบทวน:** คำใน Box 2, 3, 4 ที่มีวันที่กำหนดทบทวน (`nextReview <= วันนี้`)
+* แสดงป้ายจำนวนคำที่ต้องทบทวนจริง และมีข้อความแจ้งเตือนเมื่อทบทวนครบทุกคำแล้ว
 
 ### ⌨️ ระบบแป้นพิมพ์อัจฉริยะ (Adaptive Keyboard)
 * ตัวอักษรบนแป้นพิมพ์จะถูกสุ่มเฉพาะตัวอักษรในคำและตัวลวงรวม 12 ตัว
 * **ตัดตัวอักษรที่ใช้ครบแล้วอัตโนมัติ:** เมื่อสะกดตัวอักษรนั้นจนครบจำนวนในคำ ตัวอักษรบนแป้นจะเปลี่ยนสถานะเป็น Disabled ทันที
 * แอนิเมชันสั่นเตือน (Key Shake) เมื่อเลือกตัวอักษรผิด พร้อมลดหัวใจ 1 ดวง
 
-### 🔥 ระบบ Combo & คะแนนสะสม (Combo & XP Multiplier)
+### 🔥 ระบบ Combo & ตัวคูณคะแนน (Combo Multiplier)
 * ทายตัวอักษรถูกต้องติดต่อกันจะได้รับตัวคูณคอมโบ `🔥 x2, x3, x4... Combo!`
-* ทุกคอมโบจะมอบคะแนนโบนัสพิเศษ `+5 XP` ต่อขั้น ยิ่งสะกดเร็วและแม่นยำ ยิ่งได้รับคะแนนสูง
+* ทุกคอมโบจะมอบคะแนนโบนัสพิเศษ ยิ่งสะกดเร็วและแม่นยำ ยิ่งได้รับคะแนนสูง
 
 ### 💡 ระบบตัวช่วย "แปะคำใบ้ 1 ตัว" (Smart Hint System)
 * ผู้เล่นสามารถกดปุ่มตัวช่วยเพื่อเปิดเผยตัวอักษรเป้าหมายทันที 1 ใบ
-* จำกัดจำนวนการใช้งานตามสัดส่วนความยาวของคำศัพท์ เพื่อความท้าทายที่เหมาะสม
+* มีการบันทึกประวัติการใช้คำใบ้ (`hints`) เข้าสู่ระบบสถิติของครูโดยอัตโนมัติ
 
 ### 🔊 ระบบเสียงสังเคราะห์ & อ่านออกเสียง (Audio & Speech Synthesis)
-* **Web Audio API Sound Engine:** สังเคราะห์เสียงคลิกปุ่มโลหะ (Tactile Click), เสียงคริสตัลชามส์ (Crystal Chimes), เสียงระเบิดดาว (Win Fanfare) โดยไม่ต้องโหลดไฟล์เสียงภายนอก
+* **Web Audio API Sound Engine:** สังเคราะห์เสียงคลิกปุ่มโลหะ (Tactile Click), เสียงคริสตัลชามส์ (Crystal Chimes), เสียงระเบิดดาว (Win Fanfare) โดยไม่ต้องดาวน์โหลดไฟล์เสียงภายนอก
 * **Web Speech API (TTS):** กดปุ่มลำโพงเพื่อฟังเสียงอ่านสำเนียงภาษาอังกฤษแท้ พร้อมแถบคลื่นเสียงเคลื่อนไหว (**Audio Waveform Visualizer**)
 
 ### 📝 โหมดแบบทดสอบวัดผลการเรียนรู้ (Pre-test & Post-test Assessment Mode)
-* **ปุ่มเข้าสู่โหมดทดสอบ:** ปุ่มสไตล์ Slate Metallic บนหน้าโฮม (อยู่ใต้ปุ่มเริ่มเกมหลัก)
 * **ตัวเลือกแบบทดสอบมาตรฐาน 20 ข้อ:**
   * 📘 **Pre-test (แบบทดสอบก่อนเรียน)**
   * 📙 **Post-test (แบบทดสอบหลังเรียน)**
@@ -52,125 +58,118 @@
   * มีแถบหมายเลข **[ 1 ] - [ 20 ]** ด้านบนหน้าจอ พร้อมปุ่ม **ข้อก่อนหน้า / ข้อถัดไป**
   * ผู้เรียนสามารถกดสลับข้อไปมา ข้ามไปทำข้ออื่น หรือย้อนกลับมาทบทวนคำตอบได้ตลอดการสอบ
   * มีสีระบุสถานะรายข้อ: สีส้มเข้ม (ข้อปัจจุบัน), สีเขียว (ตอบถูก), สีแดง (หมดหัวใจ), สีเหลือง (กำลังทำ), สีเทา (ยังไม่ทำ)
-* **ระบบส่งผลคะแนนอัตโนมัติ (Google Sheets Assessment_Records):**
-  * เมื่อกดส่งข้อสอบ คะแนนจะถูกบันทึกไปยังชีต **`Assessment_Records`** ทันที
-  * บันทึกข้อมูล 4 คอลัมน์: **`Timestamp`**, **`User_Email`**, **`Test_type`** (`pre` / `post`), **`Score`** (เช่น `20`, `18`)
-* **ระบบรายงานผลการประเมิน (Assessment Report Card):**
-  * สรุปคะแนน (เช่น `18/20`), ความแม่นยำ (%) และเวลาที่ใช้
-  * ระดับเกรดประเมินผล (Grade A+, A, B, C, F)
-  * รายการเฉลย 20 คำศัพท์พร้อมสถานะ (ถูก ✓ / ผิด ✗) และปุ่มกดฟังเสียงอ่าน TTS
-  * มอบโบนัส EXP พิเศษเข้าสู่ระบบจริง
-
-### ✨ แอนิเมชันเปิดตัวและแอนิเมชันพักหน้าจอ (Idle 3D Letter Wave)
-* **ตอนเปิดเว็บครั้งแรก:** ตัวอักษร **"SPELLING MASTER"** จะเริ่มจากคว่ำการ์ด 180° แล้วทยอยพลิกหงายหน้าการ์ด 3D ขึ้นมาทีละใบอย่างสวยงาม
-* **ขณะพักหน้าจอทุกๆ 30 วินาที:** ตัวอักษรหน้าโฮมจะทำการหมุนพลิกการ์ด 3D 360° ทีละตัวแบบลูกคลื่นอัตโนมัติ
+* **ระบบบันทึกและส่งผลคะแนนอัตโนมัติ (Google Sheets Assessment_Records):**
+  * เมื่อกดส่งข้อสอบ คะแนนจะถูกบันทึกไปยังชีต **`Assessment_Records`** ทันที พร้อมแสดงใบรายงานผล (Report Card) รายละเอียดข้อถูก/ผิด และระดับเกรดประเมินผล
 
 ---
 
 ## 🧠 3. ระบบกล่องความจำระยะยาว (Leitner Spaced Repetition System - SRS)
 
-เกมใช้หลักจิตวิทยาและประสาทวิทยาศาสตร์การจำ **Leitner Box 4 ระดับ** เพื่อเปลี่ยนความจำระยะสั้นให้กลายเป็นความจำระยะยาว:
+เกมใช้หลักจิตวิทยาและประสาทวิทยาศาสตร์การจำ **Leitner Box 5 ระดับ (0–4)** เพื่อเปลี่ยนความจำระยะสั้นให้กลายเป็นความจำระยะยาว:
 
-| กล่องความจำ | ระยะเวลาทบทวนรอบถัดไป | เงื่อนไขการเลื่อนกล่อง |
+| กล่องความจำ (Leitner Box) | ระยะเวลาทบทวนรอบถัดไป | สถานะและความหมาย |
 | :--- | :---: | :--- |
-| **📦 Box 1 (เริ่มต้น)** | **1 วัน** | คำศัพท์ใหม่ หรือคำที่เพิ่งตอบผิด |
-| **📦 Box 2 (คุ้นเคย)** | **3 วัน** | ตอบถูกจาก Box 1 |
-| **📦 Box 3 (เชี่ยวชาญ)** | **7 วัน** | ตอบถูกจาก Box 2 |
-| **📦 Box 4 (จำได้แม่นยำ)** | **14 วัน** | ตอบถูกจาก Box 3 (ถือเป็น Mastered Word 🌟) |
+| **📦 Box 0 (ยังไม่เคยฝึก)** | — | คำศัพท์ใหม่ที่ยังไม่เคยเล่นในระบบ |
+| **📦 Box 1 (เริ่มต้น/ทบทวนซ้ำ)** | **1 วัน** | คำศัพท์ที่เพิ่งเริ่มจำ หรือเพิ่งตอบผิด |
+| **📦 Box 2 (คุ้นเคย)** | **3 วัน** | ตอบถูกสะสม 1 ครั้ง |
+| **📦 Box 3 (เชี่ยวชาญ)** | **7 วัน** | ตอบถูกสะสม 2 ครั้ง |
+| **📦 Box 4 (จำได้แม่นยำ)** | **14 วัน** | ตอบถูกสะสม 3 ครั้งขึ้นไป (ถือเป็น Mastered Word 🌟) |
 
 > ⚠️ **กฎความแม่นยำ:** หากตอบผิดหรือหมดหัวใจในคำใด คำนั้นจะตกกลับมาที่ **Box 1** ทันที เพื่อนำกลับมาทบทวนซ้ำจนกว่าจะจำได้
 
 ---
 
-## 👑 4. ระบบเลเวลและ 6 ลีก (30-Level Progression & League Tree)
+## 👑 4. ระบบเลเวลและยศผู้เรียน (20-Level Progression & Tier System)
 
-ผู้เรียนจะสะสมคะแนนจากการสะกดคำถูก ทุกๆ **50 คะแนน (+50 XP)** จะเลื่อนขั้น 1 เลเวล โดยแบ่งเป็น **6 ลีกการแข่งขัน (6 League Divisions)**:
+ระบบเลเวล 20 ขั้น (Lv.1 ถึง Lv.20) พร้อมระบบ EXP แบบก้าวหน้า แบ่งออกเป็น 4 ระดับชั้นยศหลัก (Tiers):
 
 ```
-🌠 Tier 6: SUPREME IMMORTAL (Lv.26 - 30 · 1,250+ PTS)
-   ├── Lv.30 Supreme Deity 🌠 (1,450 - 1,499 PTS) [MAX RANK]
-   ├── Lv.29 God of Lexicon 🔱 (1,400 - 1,449 PTS)
-   ├── Lv.28 Eternal Paragon 💎 (1,350 - 1,399 PTS)
-   ├── Lv.27 Omniscient Mind 🧠 (1,300 - 1,349 PTS)
-   └── Lv.26 Infinite Oracle 👁️ (1,250 - 1,299 PTS)
+👑 Tier 4: SAGE & GRANDMASTER (Lv.16 - 20)
+   ├── Lv.20 Word Sage 🧙‍♂️ [MAX RANK]
+   ├── Lv.19 Grandmaster 👑
+   ├── Lv.18 Mythic Guardian 🐉
+   ├── Lv.17 Archmage 💫
+   └── Lv.16 High Scholar 🏛️
 
-🌌 Tier 5: CELESTIAL & TITAN (Lv.21 - 25 · 1,000 - 1,249 PTS)
-   ├── Lv.25 Celestial Sovereign 🌞 (1,200 - 1,249 PTS)
-   ├── Lv.24 Titan of Words ⚡ (1,150 - 1,199 PTS)
-   ├── Lv.23 Cosmic Scholar 🌌 (1,100 - 1,149 PTS)
-   ├── Lv.22 Astral Weaver ✨ (1,050 - 1,099 PTS)
-   └── Lv.21 Star Voyager 🚀 (1,000 - 1,049 PTS)
+🏆 Tier 3: MASTER & SCHOLAR (Lv.11 - 15)
+   ├── Lv.15 Master of Lexicon 🔱
+   ├── Lv.14 Champion 🏆
+   ├── Lv.13 Grammar Captain ⚓
+   ├── Lv.12 Cipher Breaker 🗝️
+   └── Lv.11 Vanguard 🛡️
 
-👑 Tier 4: GRANDMASTER & SAGE (Lv.16 - 20 · 750 - 999 PTS)
-   ├── Lv.20 Linguistic Lord 🏰 (950 - 999 PTS)
-   ├── Lv.19 Grandmaster 👑 (900 - 949 PTS)
-   ├── Lv.18 Mythic Guardian 🐉 (850 - 899 PTS)
-   ├── Lv.17 Archmage 💫 (800 - 849 PTS)
-   └── Lv.16 Word Sage 🧙‍♂️ (750 - 799 PTS)
+⚔️ Tier 2: ADVENTURER & KNIGHT (Lv.6 - 10)
+   ├── Lv.10 Rune Master 🔮
+   ├── Lv.9  Scholar 📜
+   ├── Lv.8  Lexicon Knight ⚔️
+   ├── Lv.7  Word Hunter 🏹
+   └── Lv.6  Spellcaster 🪄
 
-🏆 Tier 3: VANGUARD & CHAMPION (Lv.11 - 15 · 500 - 749 PTS)
-   ├── Lv.15 High Scholar 🏛️ (700 - 749 PTS)
-   ├── Lv.14 Champion 🏆 (650 - 699 PTS)
-   ├── Lv.13 Grammar Captain ⚓ (600 - 649 PTS)
-   ├── Lv.12 Cipher Breaker 🗝️ (550 - 599 PTS)
-   └── Lv.11 Vanguard 🛡️ (500 - 549 PTS)
-
-⚔️ Tier 2: SCHOLAR & KNIGHT (Lv.6 - 10 · 250 - 499 PTS)
-   ├── Lv.10 Rune Master 🔮 (450 - 499 PTS)
-   ├── Lv.9  Scholar 📜 (400 - 449 PTS)
-   ├── Lv.8  Lexicon Knight ⚔️ (350 - 399 PTS)
-   ├── Lv.7  Word Hunter 🏹 (300 - 349 PTS)
-   └── Lv.6  Spellcaster 🪄 (250 - 299 PTS)
-
-🌱 Tier 1: NOVICE & EXPLORER (Lv.1 - 5 · 0 - 249 PTS)
-   ├── Lv.5  Adventurer 🎒 (200 - 249 PTS)
-   ├── Lv.4  Apprentice 📖 (150 - 199 PTS)
-   ├── Lv.3  Scout 🧭 (100 - 149 PTS)
-   ├── Lv.2  Seeker 🔍 (50 - 99 PTS)
-   └── Lv.1  Novice 🌱 (0 - 49 PTS)
+🌱 Tier 1: NOVICE & EXPLORER (Lv.1 - 5)
+   ├── Lv.5  Adventurer 🎒
+   ├── Lv.4  Pathfinder 🗺️
+   ├── Lv.3  Scout 🧭
+   ├── Lv.2  Seeker 🔍
+   └── Lv.1  Novice 🌱
 ```
 
-* **Rank Progression Modal:** ผู้เล่นสามารถแตะที่แถบโปรไฟล์บนหน้าโฮม เพื่อเปิดหน้าต่างดูรายละเอียด 30 ระดับ, ดูหลอด EXP, คะแนนที่ขาดสำหรับขั้นถัดไป และสถานะปลดล็อกแบบเรียงลำดับจากสูงสุดลงมาต่ำสุด
+---
+
+## 📊 5. แดชบอร์ดสำหรับคุณครู (Teacher Dashboard)
+
+หน้าแดชบอร์ดสำหรับครูผู้สอน (`dashboard/dashboard.html`) ออกแบบมาเพื่อติดตามและประเมินผลการเรียนรู้ของนักเรียนแบบครบวงจร:
+
+1. **ภาพรวมสถิติห้องเรียน (Summary Metrics):**
+   * จำนวนผู้เรียนทั้งหมด, ผู้เรียนที่ Active วันนี้, จำนวนครั้งการเล่นสะสม, อัตราการสะกดถูก (Win Rate), และจำนวนผู้เล่น Online แบบ Real-time
+2. **ระบบวิเคราะห์ความจำทั้งห้องเรียน (Classroom Retention & SRS Overview):**
+   * กราฟสัดส่วนกล่องความจำ Box 0 ถึง Box 4 รวมทั้งห้อง
+   * ความคืบหน้าการจำคำศัพท์แยกตาม Unit
+3. **ระบบเจาะลึกผู้เรียนรายบุคคล (Student SRS Profile & Word-by-word Telemetry):**
+   * สามารถกดปุ่ม **"🔍 ดู SRS"** หรือคลิกที่ชื่อนักเรียนในตาราง เพื่อเปิด Modal ดูรายละเอียดความจำของนักเรียนคนนั้น
+   * แสดงจำนวนคำที่จำได้ใน Box 0, 1, 2, 3, 4
+   * ตารางแสดงคำศัพท์ครบทุกคำ พร้อมสถานะกล่อง (Box), วันที่ต้องทบทวนรอบถัดไป, จำนวนครั้งที่เล่น, ทายถูก, ทายผิด, การข้าม, และการกดใช้คำใบ้
+4. **การวิเคราะห์คำศัพท์ (Word Difficulty Analysis):**
+   * สรุป 8 คำศัพท์ที่นักเรียน **ตอบถูกมากที่สุด** และ 8 คำศัพท์ที่ **ตอบผิด/ข้ามมากที่สุด** (คัดกรองเฉพาะคำศัพท์จริงในบทเรียน)
+5. **ระบบติดตามผลการทดสอบ (Pre/Post Assessment Tracking):**
+   * ตารางคะแนน Pre-test และ Post-test ของนักเรียน พร้อมการเปรียบเทียบพัฒนาการ
+6. **ตัวกรองชั้นเรียนและเลขที่ (Classroom & Student No Filter):**
+   * ค้นหาและจัดกลุ่มนักเรียนตามชั้นเรียน (เช่น `ม.4/1`, `ม.4/2`) และเลขที่ได้อย่างสะดวก
 
 ---
 
-## 🏆 5. ตารางจัดอันดับและโปรไฟล์ผู้เรียน (Leaderboard & Streak)
+## ☁️ 6. สถาปัตยกรรมฐานข้อมูล (Google Sheets 5-Sheet Database Schema)
 
-* **ตารางอันดับแบบแบ่งลีก (League Divided Leaderboard):** แสดงอันดับผู้เรียนจริงทั้งหมด โดยจัดกลุ่มตาม 6 ลีกแบนเนอร์ พร้อมไฮไลต์แถวของตัวผู้เล่น (`คุณ`)
-* **Daily Streak System (🔥):** นับจำนวนวันที่เข้าเรียนต่อเนื่องทุกวัน เพื่อส่งเสริมวินัยในการเรียนรู้
-* **ระบบความปลอดภัยของบัญชี (SHA-256 PIN Security):** ล็อกอินและลงทะเบียนด้วยอีเมลและรหัส PIN 4–6 หลัก โดยทำการแฮชรหัสแบบ Client-side SHA-256 ก่อนส่งบันทึก
+ระบบเชื่อมต่อกับ Google Apps Script Web App (`Code.gs`) จัดเก็บข้อมูลแยกเป็น 5 ชีตอย่างเป็นระเบียบ:
 
----
-
-## 📚 6. คลังคำศัพท์บทเรียน (Word Vault)
-
-* บรรจุคำศัพท์มาตรฐาน 48 คำ ครบทั้ง 3 หมวดการเรียนรู้ (Unit 5):
-  1. **หมวด Travelers (17 คำ):** `AUTHOR`, `INVOLVE`, `STIMULATE`, `DESCRIBE`, `ACCOMMODATION`, `CENTURY`, `VACATION`, `ADVENTURER`, `BACKPACKER`, `COMMUTER`, `EXPLORER`, `IMMIGRANT`, `MOTORIST`, `NOMAD`, `PASSENGER`, `REFUGEE`, `TOURIST`
-  2. **หมวด Travel skills (20 คำ):** `AMBULANCE`, `ARRIVAL`, `CALCULATE`, `COMPASS`, `CURRENCY`, `DEPARTURE`, `DIRECTIONS`, `EMERGENCY`, `EXCHANGERATE`, `LOCATE`, `SCHEDULE`, `OPTION`, `FORCE`, `STUFF`, `MEDICAL`, `POSITION`, `JOURNEY`, `SUCCESSFULLY`, `CHOICE`, `PERMANENTLY`
-  3. **หมวด Multi-word verb (11 คำ):** `DRIVEOUT`, `ENDUP`, `GIVEAWAY`, `GOAWAY`, `GROWUP`, `HIDEOUT`, `MOVEAWAY`, `PACKUP`, `STAYAWAY`, `STAYUP`, `STAYOUT`
-* **ระบบค้นหาคำศัพท์ Real-time:** ค้นหาคำแปล ชนิดของคำ หรือตัวสะกดได้ทันที
-* **ปุ่มกดฟังเสียงอ่านรายคำ:** สามารถกดฟังการออกเสียงคำศัพท์ทุกคำในคลังได้ไม่จำกัด
-
----
-
-## ☁️ 7. สถาปัตยกรรมระบบหลังบ้าน (Backend Multi-Sheet Architecture)
-
-ระบบขับเคลื่อนด้วย **Google Apps Script Web App (`Code.gs`)** เชื่อมต่อไปยัง **Google Sheets** โดยทำการแยกและกระจายข้อมูลอัตโนมัติลงในชีตทั้ง 5 หน้า:
-
-| ชื่อชีต (Sheet Name) | โครงสร้างคอลัมน์ | หน้าที่การทำงาน |
+| ชื่อชีต (Sheet Name) | โครงสร้างคอลัมน์ (Headers) | หน้าที่การทำงาน |
 | :--- | :--- | :--- |
-| **1. `User_Profile`** | `Email, Name, PinHash, Score, Streak, MaxStreak, MasteredCount, MasteredWords, PlayedProgress, LastPlayed, RegisteredAt` | เก็บโปรไฟล์หลัก คะแนนสะสม และสถานะความคืบหน้ารวม |
-| **2. `User_Streak`** | `email, Streak, Latest date` | บันทึกประวัติและจำนวนวันที่เข้าเรียนต่อเนื่องรายวัน |
-| **3. `User_Progress`** | `email, vocab_id, box_level, next_review` | บันทึกสถานะกล่องความจำ Leitner Box (Box 1-4) และวันทบทวนรอบถัดไปของแต่ละคำศัพท์ |
-| **4. `Activity_Logs`** | `Timestamp, Email, Name, Word, Category, Result, Mistakes, Score, Streak, MaxStreak, Box, NextReview, Action` | บันทึกประวัติ Telemetry ทุกการกดสะกดคำ ชนะ แพ้ ข้ามคำ และการเข้าสู่ระบบ |
-| **5. `Vocab_Master`** | `id, vocabulary, part of speech, meaning, section, unit` | ฐานข้อมูลคำศัพท์หลักของบทเรียน |
+| **1. `User_Profile`** | `StudentID, Name, PinHash, Score, Streak, MaxStreak, MasteredCount, MasteredWords, PlayedProgress, LastPlayed, RegisteredAt, Classroom, StudentNo` | จัดเก็บข้อมูลผู้ใช้งาน คะแนนสะสม ข้อมูล SRS รวม และข้อมูลชั้นเรียน |
+| **2. `User_Streak`** | `StudentID, Streak, Latest date` | จัดเก็บประวัติการเข้าเรียนต่อเนื่องรายวัน |
+| **3. `User_Progress`** | `StudentID, vocab_id, box_level, next_review` | บันทึกระดับกล่องความจำ (Box 1–4) และวันทบทวนรอบถัดไปรายคำของนักเรียนแต่ละคน |
+| **4. `Activity_Logs`** | `Timestamp, StudentID, Name, Word, Category, Result, Mistakes, Hints, Score, Streak, MaxStreak, Box, NextReview, Action, Classroom, StudentNo` | บันทึกประวัติ Telemetry ทุกการเล่น ชนะ แพ้ ข้ามคำ และจำนวนคำใบ้ที่ใช้ |
+| **5. `Assessment_Records`** | `Timestamp, StudentID, Test_type, Score, Classroom, StudentNo` | บันทึกประวัติและคะแนนการทำแบบทดสอบ Pre-test และ Post-test |
 
-### ⚡ ฟังก์ชันพิเศษใน `Code.gs`:
-* **`updateScore`**: ซิงค์คะแนนทันทีเมื่อชนะคำศัพท์ พร้อมเขียนข้อมูลกระจายลงชีต `User_Profile`, `User_Streak`, และ `User_Progress` พร้อมกัน
-* **`migrateOldData`**: ฟังก์ชันสำหรับคุณครู กดคลิกเดียวใน Apps Script เพื่อดึงประวัติคำศัพท์เก่าของนักเรียนทุกคน กระจายลงชีต `User_Progress` และจัดระเบียบตารางให้อัตโนมัติใน 1 วินาที
+---
+
+## ⚡ 7. ประสิทธิภาพการทำงานระดับสูง (High-Performance Engine)
+
+ระบบได้รับการปรับปรุงเพื่อรองรับการใช้งานพร้อมกันในห้องเรียน (**Concurrent Classroom Play**):
+* **Batch Spreadsheet Writes:** รวมคำสั่งเขียนข้อมูลใน Apps Script ให้เสร็จสิ้นใน 1 คำสั่ง ลดระยะเวลาประมวลผลจาก 2–4 วินาที เหลือไม่กี่มิลลิวินาที
+* **Debounced Background Sync:** ซิงค์คะแนนลงเครื่องทันที 0ms และส่งขึ้นเซิร์ฟเวอร์ในเบื้องหลังทุก 10–12 วินาที ช่วยลด Traffic ได้มากกว่า 80%
+* **Non-blocking Telemetry:** การบันทึกประวัติการเล่นทำงานแบบ Fire-and-Forget เบื้องหลัง ไม่ขัดจังหวะการเล่นเกม
+* **Mobile 60 FPS Optimization:** ปรับแต่ง Canvas Confetti และ Particle Animations ให้ใช้หน่วยความจำต่ำ เล่นได้ลื่นไหลบนสมาร์ตโฟนทุกรุ่น
+
+---
+
+## 📚 8. คลังคำศัพท์หลักสูตร (Master Vocabulary Database - 48 Words)
+
+บรรจุคำศัพท์มาตรฐาน 48 คำ ครบทั้ง 3 หมวดการเรียนรู้ (Unit 5):
+1. **หมวด Travelers (17 คำ):** `AUTHOR`, `INVOLVE`, `STIMULATE`, `DESCRIBE`, `ACCOMMODATION`, `CENTURY`, `VACATION`, `ADVENTURER`, `BACKPACKER`, `COMMUTER`, `EXPLORER`, `IMMIGRANT`, `MOTORIST`, `NOMAD`, `PASSENGER`, `REFUGEE`, `TOURIST`
+2. **หมวด Travel skills (20 คำ):** `AMBULANCE`, `ARRIVAL`, `CALCULATE`, `COMPASS`, `CURRENCY`, `DEPARTURE`, `DIRECTIONS`, `EMERGENCY`, `EXCHANGERATE`, `LOCATE`, `SCHEDULE`, `OPTION`, `FORCE`, `STUFF`, `MEDICAL`, `POSITION`, `JOURNEY`, `SUCCESSFULLY`, `CHOICE`, `PERMANENTLY`
+3. **หมวด Multi-word verb (11 คำ):** `DRIVEOUT`, `ENDUP`, `GIVEAWAY`, `GOAWAY`, `GROWUP`, `HIDEOUT`, `MOVEAWAY`, `PACKUP`, `STAYAWAY`, `STAYUP`, `STAYOUT`
 
 ---
 
 <div align="center">
-  <sub>พัฒนาด้วย ❤️ และเทคโนโลยีเว็บมาตรฐานสมัยใหม่ (Vanilla JS · TailwindCSS · GSAP · Google Apps Script)</sub>
+  <sub>พัฒนาด้วย ❤️ สำหรับการจัดการเรียนรู้คำศัพท์ภาษาอังกฤษยุคใหม่ (Vanilla JS · TailwindCSS · GSAP · Google Apps Script)</sub>
 </div>

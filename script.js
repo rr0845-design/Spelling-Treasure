@@ -1,5 +1,5 @@
 // ─── API Endpoints ──────────────────────────────────────────────────────────
-const GAS_BASE = 'https://script.google.com/macros/s/AKfycbysQ5fNFsO9Vk9ueP1Gplb-3OJtdVHjKDjPbUujG9hpOMRb7UiQpRj5AL37_yxik6XrKQ/exec';
+const GAS_BASE = 'https://script.google.com/macros/s/AKfycbxWVpnhVND4cEB2aaI5TG-O7xYEevkKQ2kqgwJsxyegou3BBs_w3Qv8wBvQzyuT0VSDtw/exec';
 const SPREADSHEET_CSV_URL = 'https://docs.google.com/spreadsheets/d/1dY39PZ4YF_iN3CeueclsUA3uluZW2oolKkPSTp0Bk7c/export?format=csv&gid=1873851496';
 
 // ─── Verified Official Vocabulary Database (48 Master Words) ────────────────
@@ -339,25 +339,24 @@ function spawnSparkleBurst(targetElement) {
   const cx = rect.left + rect.width / 2;
   const cy = rect.top + rect.height / 2;
 
-  const colors = ["#E5AD7A", "#C26754", "#A37B8F", "#FFFFFF", "#FCD8C1"];
-  for (let i = 0; i < 8; i++) {
+  const colors = ["#E5AD7A", "#C26754", "#3D8B6E", "#FFFFFF"];
+  // Optimized for mobile: 4 lightweight particles
+  for (let i = 0; i < 4; i++) {
     const spark = document.createElement("div");
     spark.style.position = "fixed";
     spark.style.left = cx + "px";
     spark.style.top = cy + "px";
-    spark.style.width = (Math.random() * 5 + 4) + "px";
-    spark.style.height = spark.style.width;
+    spark.style.width = "6px";
+    spark.style.height = "6px";
     spark.style.borderRadius = "50%";
-    spark.style.backgroundColor = colors[Math.floor(Math.random() * colors.length)];
+    spark.style.backgroundColor = colors[i % colors.length];
     spark.style.pointerEvents = "none";
     spark.style.zIndex = "9999";
-    spark.style.boxShadow = "0 0 8px rgba(229, 173, 122, 0.8)";
+    spark.style.boxShadow = "0 0 6px rgba(229, 173, 122, 0.7)";
     document.body.appendChild(spark);
 
-    const angle = (Math.PI * 2 / 8) * i + (Math.random() - 0.5) * 0.5;
-    const dist = Math.random() * 32 + 20;
-    const destX = cx + Math.cos(angle) * dist;
-    const destY = cy + Math.sin(angle) * dist;
+    const angle = (Math.PI * 2 / 4) * i;
+    const dist = 24 + Math.random() * 12;
 
     if (window.gsap) {
       gsap.to(spark, {
@@ -365,36 +364,40 @@ function spawnSparkleBurst(targetElement) {
         y: Math.sin(angle) * dist,
         scale: 0,
         opacity: 0,
-        duration: 0.45,
+        duration: 0.35,
         ease: "power2.out",
         onComplete: () => spark.remove()
       });
     } else {
-      setTimeout(() => spark.remove(), 450);
+      setTimeout(() => spark.remove(), 350);
     }
   }
 }
 
 // ─── Confetti (Patina & Copper Theme) ────────────────────────────────────────
+let confettiAnimId = null;
 function triggerConfetti() {
   const canvas = document.getElementById("confetti-canvas");
   if (!canvas) return;
+  if (confettiAnimId) cancelAnimationFrame(confettiAnimId);
+
   const ctx = canvas.getContext("2d");
   canvas.width = window.innerWidth;
   canvas.height = window.innerHeight;
 
   const particles = [];
-  const colors = ["#E5AD7A", "#C26754", "#A37B8F", "#B3B9C9", "#D97D69", "#7B859C", "#3D8B6E"];
-  for (let i = 0; i < 70; i++) {
+  const colors = ["#E5AD7A", "#C26754", "#A37B8F", "#B3B9C9", "#D97D69", "#3D8B6E"];
+  const particleCount = window.innerWidth < 640 ? 30 : 50; // Optimized particle count
+  for (let i = 0; i < particleCount; i++) {
     particles.push({
-      x: canvas.width / 2 + (Math.random() - 0.5) * 150,
-      y: canvas.height / 2 + (Math.random() - 0.5) * 60,
-      vx: (Math.random() - 0.5) * 12,
-      vy: (Math.random() - 1.2) * 12,
-      size: Math.random() * 7 + 4,
+      x: canvas.width / 2 + (Math.random() - 0.5) * 120,
+      y: canvas.height / 2 + (Math.random() - 0.5) * 40,
+      vx: (Math.random() - 0.5) * 10,
+      vy: (Math.random() - 1.1) * 10,
+      size: Math.random() * 5 + 4,
       color: colors[Math.floor(Math.random() * colors.length)],
       rotation: Math.random() * 360,
-      vRot: (Math.random() - 0.5) * 12
+      vRot: (Math.random() - 0.5) * 8
     });
   }
 
@@ -407,7 +410,7 @@ function triggerConfetti() {
     particles.forEach(p => {
       p.x += p.vx;
       p.y += p.vy;
-      p.vy += 9.8 * delta;
+      p.vy += 8.5 * delta;
       p.rotation += p.vRot * delta;
       ctx.save();
       ctx.translate(p.x, p.y);
@@ -417,13 +420,14 @@ function triggerConfetti() {
       ctx.restore();
     });
 
-    if (elapsed < 2000) {
-      requestAnimationFrame(anim);
+    if (elapsed < 1400) {
+      confettiAnimId = requestAnimationFrame(anim);
     } else {
       ctx.clearRect(0, 0, canvas.width, canvas.height);
+      confettiAnimId = null;
     }
   }
-  requestAnimationFrame(anim);
+  confettiAnimId = requestAnimationFrame(anim);
 }
 
 function updateHangmanSVG(mistakeCount, isLost) {}
@@ -927,7 +931,24 @@ function updateScoreBoard() {
   }
 }
 
-async function syncScoreToGAS() {
+let syncScoreTimer = null;
+function debouncedSyncScore(immediate = false) {
+  if (syncScoreTimer) {
+    clearTimeout(syncScoreTimer);
+    syncScoreTimer = null;
+  }
+  if (immediate) {
+    syncScoreToGAS();
+    return;
+  }
+  // Debounce score sync so 12+ simultaneous players don't flood Google Apps Script on every word
+  syncScoreTimer = setTimeout(() => {
+    syncScoreToGAS();
+    syncScoreTimer = null;
+  }, 10000);
+}
+
+function syncScoreToGAS() {
   if (!userEmail || !navigator.onLine) return;
   try {
     const url = GAS_BASE + "?action=updateScore" +
@@ -938,7 +959,9 @@ async function syncScoreToGAS() {
       "&masteredCount=" + masteredWords.length +
       "&masteredWords=" + encodeURIComponent(JSON.stringify(masteredWords)) +
       "&playedProgress=" + encodeURIComponent(JSON.stringify(wordProgress));
-    await fetchWithTimeout(url);
+    
+    // Non-blocking background fetch
+    fetch(url, { keepalive: true, mode: "no-cors" }).catch(() => {});
   } catch(e) {}
 }
 
@@ -1360,7 +1383,7 @@ function getRevealedCount() { return revealedTiles.filter(Boolean).length; }
 function pauseGame() {
   saveWordProgress();
   saveCategoryProgress();
-  syncScoreToGAS();
+  debouncedSyncScore(true);
   goToHome();
   showToast("⏸️ บันทึกความคืบหน้าเรียบร้อยแล้ว พักผ่อนได้เลย!", "info", 3000);
 }
@@ -1376,7 +1399,7 @@ function skipWord() {
   if (!isTestMode) {
     checkAndProcessDailyStreak();
     updateScoreBoard();
-    syncScoreToGAS();
+    debouncedSyncScore(false);
   }
   playSound("wrong");
   updateHangmanSVG(MAX_MISTAKES, true);
@@ -1524,6 +1547,7 @@ function updateDisplay(revealAll) {
 
 function flipAllTilesSequentially(isMiss = false) {
   const cards = document.querySelectorAll("#word-container .tile-card-3d");
+  const midIdx = Math.floor(cards.length / 2);
   cards.forEach((card, idx) => {
     if (!card.classList.contains("is-flipped")) {
       setTimeout(() => {
@@ -1537,8 +1561,8 @@ function flipAllTilesSequentially(isMiss = false) {
           front.textContent = "";
         }
         card.classList.add("is-flipped");
-        if (!isMiss) spawnSparkleBurst(card);
-      }, idx * 85);
+        if (!isMiss && idx === midIdx) spawnSparkleBurst(card);
+      }, idx * 70);
     }
   });
 }
@@ -1564,7 +1588,7 @@ function checkGameEnd() {
     if (!isTestMode) {
       checkAndProcessDailyStreak();
       updateScoreBoard();
-      syncScoreToGAS();
+      debouncedSyncScore(false);
     }
     playSound("stamp");
     setTimeout(() => playSound("win"), 120);
@@ -1628,7 +1652,7 @@ function checkGameEnd() {
     if (!isTestMode) {
       checkAndProcessDailyStreak();
       updateScoreBoard();
-      syncScoreToGAS();
+      debouncedSyncScore(false);
     }
     playSound("stamp");
     setTimeout(() => playSound("lose"), 120);
@@ -2102,7 +2126,7 @@ function saveProfile() {
   if (n) userName = n;
   if (currentUser) currentUser.name = userName;
   updateScoreBoard();
-  syncScoreToGAS();
+  debouncedSyncScore(true);
   closeProfileModal();
 }
 
