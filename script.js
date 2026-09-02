@@ -1,5 +1,5 @@
 // ─── API Endpoints ──────────────────────────────────────────────────────────
-const GAS_BASE = 'https://script.google.com/macros/s/AKfycbz7kvbxg8Mo7xEiKaGXZylXrN6BiQ8GMSrUMu2HKqB-nN7ZutuYIL0PpczYo34iA9Bc/exec';
+const GAS_BASE = 'https://script.google.com/macros/s/AKfycbysQ5fNFsO9Vk9ueP1Gplb-3OJtdVHjKDjPbUujG9hpOMRb7UiQpRj5AL37_yxik6XrKQ/exec';
 const SPREADSHEET_CSV_URL = 'https://docs.google.com/spreadsheets/d/1dY39PZ4YF_iN3CeueclsUA3uluZW2oolKkPSTp0Bk7c/export?format=csv&gid=1873851496';
 
 // ─── Verified Official Vocabulary Database (48 Master Words) ────────────────
@@ -126,6 +126,7 @@ let playedWordsPerCategory = JSON.parse(localStorage.getItem("hangman_category_p
 let revealedTiles = [];
 let currentTileIndex = 1;
 let comboCount = 0;
+let hintsUsed = 0;
 
 // ─── Test Mode State (Assessment 20 Questions) ──────────────────────────────
 let isTestMode = false;
@@ -442,16 +443,24 @@ function addDays(dateStr, days) {
   return d.toISOString().slice(0, 10);
 }
 
+function getSRSItem(word) {
+  if (!word || !wordProgress) return null;
+  const w = String(word).trim().toUpperCase();
+  return wordProgress[w] || wordProgress[word] || null;
+}
+
 function getWordSRS(word) {
-  if (!wordProgress[word]) {
+  const item = getSRSItem(word);
+  if (!item) {
     return { box: 0, lastReviewed: "", nextReview: todayString(), correct: 0, wrong: 0 };
   }
-  return wordProgress[word];
+  return item;
 }
 
 function updateWordSRS(word, isCorrect) {
   const today = todayString();
   const current = getWordSRS(word);
+  const wKey = String(word).trim().toUpperCase();
   let nextBox;
   
   if (isCorrect) {
@@ -467,7 +476,7 @@ function updateWordSRS(word, isCorrect) {
   const intervalDays = BOX_INTERVALS[nextBox] || 1;
   const nextReviewDate = addDays(today, intervalDays);
 
-  wordProgress[word] = {
+  wordProgress[wKey] = {
     box: nextBox,
     lastReviewed: today,
     nextReview: nextReviewDate,
@@ -478,7 +487,7 @@ function updateWordSRS(word, isCorrect) {
   masteredWords = Object.keys(wordProgress).filter(w => wordProgress[w] && wordProgress[w].box >= 2);
   localStorage.setItem("hangman_mastered", JSON.stringify(masteredWords));
   saveWordProgress();
-  return wordProgress[word];
+  return wordProgress[wKey];
 }
 
 function saveWordProgress() {
@@ -494,7 +503,7 @@ function getBoxCounts() {
   const counts = { 0: 0, 1: 0, 2: 0, 3: 0, 4: 0, dueToday: 0 };
   const today = todayString();
   WORD_DATABASE.forEach(item => {
-    const srs = wordProgress[item.word];
+    const srs = getSRSItem(item.word);
     const box = srs ? (srs.box || 0) : 0;
     counts[box] = (counts[box] || 0) + 1;
     if (srs && srs.box > 0 && srs.nextReview <= today) {
@@ -598,29 +607,85 @@ const RANK_TIERS_30 = [
   { level: 30, title: "Supreme Deity 🌠", badgeClass: "bg-gradient-to-r from-[#FFF1E6] via-[#E5AD7A] to-[#C26754] text-[#5E4B5B] border-[#C26754]" }
 ];
 
+// ─── 30-Level Score Thresholds (Challenging & Balanced Curve) ─────────────────
+const LEVEL_THRESHOLDS = [
+  0,      // Lv. 1 : Novice
+  150,    // Lv. 2 : Seeker
+  350,    // Lv. 3 : Scout
+  600,    // Lv. 4 : Apprentice
+  900,    // Lv. 5 : Adventurer
+  1300,   // Lv. 6 : Spellcaster
+  1800,   // Lv. 7 : Word Hunter
+  2400,   // Lv. 8 : Lexicon Knight
+  3100,   // Lv. 9 : Scholar
+  3900,   // Lv. 10 : Rune Master
+  4800,   // Lv. 11 : Vanguard
+  5800,   // Lv. 12 : Cipher Breaker
+  6900,   // Lv. 13 : Grammar Captain
+  8100,   // Lv. 14 : Champion
+  9400,   // Lv. 15 : High Scholar
+  10800,  // Lv. 16 : Word Sage
+  12300,  // Lv. 17 : Archmage
+  13900,  // Lv. 18 : Mythic Guardian
+  15600,  // Lv. 19 : Grandmaster
+  17400,  // Lv. 20 : Linguistic Lord
+  19300,  // Lv. 21 : Star Voyager
+  21300,  // Lv. 22 : Astral Weaver
+  23400,  // Lv. 23 : Cosmic Scholar
+  25600,  // Lv. 24 : Titan of Words
+  27900,  // Lv. 25 : Celestial Sovereign
+  30300,  // Lv. 26 : Infinite Oracle
+  32800,  // Lv. 27 : Omniscient Mind
+  35400,  // Lv. 28 : Eternal Paragon
+  38100,  // Lv. 29 : God of Lexicon
+  41000   // Lv. 30 : Supreme Deity (MAX Prestige)
+];
+
 // ─── 6 League Divisions (Highest to Lowest) ──────────────────────────────────
 const LEAGUE_DIVISIONS = [
-  { id: "supreme", name: "SUPREME IMMORTAL", icon: "🌠", minLevel: 26, maxLevel: 30, range: "Lv.26 - 30 · 1,250+ PTS", hdrClass: "tier-hdr-supreme" },
-  { id: "celestial", name: "CELESTIAL & TITAN", icon: "🌌", minLevel: 21, maxLevel: 25, range: "Lv.21 - 25 · 1,000 - 1,249 PTS", hdrClass: "tier-hdr-celestial" },
-  { id: "grandmaster", name: "GRANDMASTER & SAGE", icon: "👑", minLevel: 16, maxLevel: 20, range: "Lv.16 - 20 · 750 - 999 PTS", hdrClass: "tier-hdr-grandmaster" },
-  { id: "champion", name: "VANGUARD & CHAMPION", icon: "🏆", minLevel: 11, maxLevel: 15, range: "Lv.11 - 15 · 500 - 749 PTS", hdrClass: "tier-hdr-champion" },
-  { id: "scholar", name: "SCHOLAR & KNIGHT", icon: "⚔️", minLevel: 6, maxLevel: 10, range: "Lv.6 - 10 · 250 - 499 PTS", hdrClass: "tier-hdr-scholar" },
-  { id: "novice", name: "NOVICE & EXPLORER", icon: "🌱", minLevel: 1, maxLevel: 5, range: "Lv.1 - 5 · 0 - 249 PTS", hdrClass: "tier-hdr-novice" }
+  { id: "supreme", name: "SUPREME IMMORTAL", icon: "🌠", minLevel: 26, maxLevel: 30, range: "Lv.26 - 30 · 30,300+ PTS", hdrClass: "tier-hdr-supreme" },
+  { id: "celestial", name: "CELESTIAL & TITAN", icon: "🌌", minLevel: 21, maxLevel: 25, range: "Lv.21 - 25 · 19,300 - 30,299 PTS", hdrClass: "tier-hdr-celestial" },
+  { id: "grandmaster", name: "GRANDMASTER & SAGE", icon: "👑", minLevel: 16, maxLevel: 20, range: "Lv.16 - 20 · 10,800 - 19,299 PTS", hdrClass: "tier-hdr-grandmaster" },
+  { id: "champion", name: "VANGUARD & CHAMPION", icon: "🏆", minLevel: 11, maxLevel: 15, range: "Lv.11 - 15 · 4,800 - 10,799 PTS", hdrClass: "tier-hdr-champion" },
+  { id: "scholar", name: "SCHOLAR & KNIGHT", icon: "⚔️", minLevel: 6, maxLevel: 10, range: "Lv.6 - 10 · 1,300 - 4,799 PTS", hdrClass: "tier-hdr-scholar" },
+  { id: "novice", name: "NOVICE & EXPLORER", icon: "🌱", minLevel: 1, maxLevel: 5, range: "Lv.1 - 5 · 0 - 1,299 PTS", hdrClass: "tier-hdr-novice" }
 ];
 
 function getPlayerRankInfo(scoreVal) {
   const s = Math.max(0, Number(scoreVal) || 0);
-  const rawLevel = Math.floor(s / 50) + 1;
-  const level = Math.min(30, Math.max(1, rawLevel));
-  const currentXP = level >= 30 && s >= 1450 ? 50 : s % 50;
-  const percent = level >= 30 && s >= 1450 ? 100 : Math.min(100, Math.round((currentXP / 50) * 100));
+  
+  let level = 1;
+  for (let lv = 30; lv >= 1; lv--) {
+    if (s >= LEVEL_THRESHOLDS[lv - 1]) {
+      level = lv;
+      break;
+    }
+  }
+
+  const basePts = LEVEL_THRESHOLDS[level - 1];
+  const isMax = level >= 30;
+  const nextPts = isMax ? LEVEL_THRESHOLDS[29] : LEVEL_THRESHOLDS[level];
+  const requiredXP = isMax ? 100 : (nextPts - basePts);
+  const currentXP = isMax ? (s - basePts) : (s - basePts);
+  const percent = isMax ? 100 : Math.min(100, Math.max(0, Math.round((currentXP / requiredXP) * 100)));
+  const ptsNeededForNext = isMax ? 0 : (nextPts - s);
 
   const tier = RANK_TIERS_30[level - 1] || RANK_TIERS_30[RANK_TIERS_30.length - 1];
   const title = tier.title;
   const badgeClass = tier.badgeClass;
   const fullLabel = "Lv." + level + " " + title;
 
-  return { level, title, fullLabel, badgeClass, currentXP, percent, isMax: level >= 30 };
+  return {
+    level,
+    title,
+    fullLabel,
+    badgeClass,
+    currentXP,
+    requiredXP,
+    percent,
+    ptsNeededForNext,
+    isMax
+  };
 }
 
 function updatePlayerLevelXP() {
@@ -628,9 +693,20 @@ function updatePlayerLevelXP() {
   const rankBadge = document.getElementById("player-rank-badge");
   if (rankBadge) rankBadge.textContent = rankInfo.fullLabel;
 
+  const gameRankBadge = document.getElementById("game-rank-badge");
+  if (gameRankBadge) {
+    gameRankBadge.textContent = rankInfo.fullLabel;
+    gameRankBadge.className = `text-[11px] font-black px-2 py-0.5 rounded-md border shadow-xs ${rankInfo.badgeClass}`;
+  }
+
   const xpText = document.getElementById("current-xp-text");
   if (xpText) {
-    xpText.textContent = rankInfo.isMax && rankInfo.percent === 100 ? "MAX" : rankInfo.currentXP;
+    xpText.textContent = rankInfo.isMax ? "MAX" : rankInfo.currentXP;
+  }
+
+  const maxXPText = document.getElementById("max-xp-text");
+  if (maxXPText) {
+    maxXPText.textContent = rankInfo.isMax ? "MAX" : rankInfo.requiredXP;
   }
 
   const xpFill = document.getElementById("xp-bar-fill");
@@ -668,7 +744,6 @@ function renderRankModal() {
   const userRank = getPlayerRankInfo(currentScore);
   const nextLevel = Math.min(30, userRank.level + 1);
   const nextTargetTier = RANK_TIERS_30[nextLevel - 1];
-  const ptsNeededForNext = userRank.isMax ? 0 : (userRank.level * 50 - currentScore);
 
   // 1. Render Current Card
   if (currentCardEl) {
@@ -689,14 +764,14 @@ function renderRankModal() {
           </div>
         </div>
         <div class="text-right shrink-0">
-          <span class="text-xl font-black text-[#C26754]">${currentScore}</span>
+          <span class="text-xl font-black text-[#C26754]">${currentScore.toLocaleString()}</span>
           <span class="text-[9px] block text-[#7A6677] font-extrabold">PTS รวม</span>
         </div>
       </div>
       <div class="mt-2.5 pt-2 border-t border-[#E5AD7A]/30">
         <div class="flex justify-between items-center text-[10px] font-bold text-[#7A6677] mb-1">
-          <span>ความคืบหน้าเลเวล: <strong class="text-[#5E4B5B]">${userRank.isMax && userRank.percent === 100 ? '50 / 50 XP (MAX)' : `${userRank.currentXP} / 50 XP`}</strong></span>
-          <span class="text-[#A8503E] font-black">${userRank.isMax ? '🏆 สูงสุดแล้ว (MAX)' : `อีก ${ptsNeededForNext} PTS ปลดล็อก ${nextTargetTier.title}`}</span>
+          <span>ความคืบหน้าเลเวล: <strong class="text-[#5E4B5B]">${userRank.isMax ? 'MAX LEVEL' : `${userRank.currentXP} / ${userRank.requiredXP} XP`}</strong></span>
+          <span class="text-[#A8503E] font-black">${userRank.isMax ? '🏆 สูงสุดแล้ว (MAX)' : `อีก ${userRank.ptsNeededForNext.toLocaleString()} PTS ปลดล็อก ${nextTargetTier.title}`}</span>
         </div>
         <div class="w-full h-2.5 bg-white/90 rounded-full overflow-hidden border border-[#E5AD7A]/40 p-0.5 shadow-inner">
           <div class="h-full rounded-full bg-gradient-to-r from-[#C26754] via-[#D97D69] to-[#E5AD7A] transition-all duration-500" style="width: ${userRank.percent}%;"></div>
@@ -726,7 +801,7 @@ function renderRankModal() {
       const tier = RANK_TIERS_30[lv - 1];
       if (!tier) continue;
 
-      const minPts = (lv - 1) * 50;
+      const minPts = LEVEL_THRESHOLDS[lv - 1];
       const isUnlocked = userRank.level >= lv;
       const isCurrent = userRank.level === lv;
       const isNextTarget = (userRank.level + 1 === lv);
@@ -737,9 +812,17 @@ function renderRankModal() {
       } else if (isUnlocked) {
         statusBadge = `<span class="text-[10px] font-extrabold px-2.5 py-0.5 bg-[#F0F8F4] text-[#3D8B6E] border border-[#C2E2D4] rounded-full">✓ ปลดล็อกแล้ว</span>`;
       } else if (isNextTarget) {
-        statusBadge = `<span class="text-[10px] font-black px-2.5 py-0.5 bg-[#FFF4EC] text-[#C26754] border border-[#E5AD7A] rounded-full">🔒 ขาดอีก ${minPts - currentScore} PTS</span>`;
+        statusBadge = `<span class="text-[10px] font-black px-2.5 py-0.5 bg-[#FFF4EC] text-[#C26754] border border-[#E5AD7A] rounded-full">🔒 ขาดอีก ${(minPts - currentScore).toLocaleString()} PTS</span>`;
       } else {
-        statusBadge = `<span class="text-[10px] font-bold px-2 py-0.5 bg-slate-100/90 text-[#998495] border border-slate-200 rounded-full">🔒 ${minPts} PTS</span>`;
+        statusBadge = `<span class="text-[10px] font-bold px-2 py-0.5 bg-slate-100/90 text-[#998495] border border-slate-200 rounded-full">🔒 ${minPts.toLocaleString()} PTS</span>`;
+      }
+
+      let ptsRangeText = "";
+      if (lv === 30) {
+        ptsRangeText = `${minPts.toLocaleString()}+ PTS (MAX)`;
+      } else {
+        const nextLvMin = LEVEL_THRESHOLDS[lv];
+        ptsRangeText = `${minPts.toLocaleString()} - ${(nextLvMin - 1).toLocaleString()} PTS`;
       }
 
       html += `
@@ -750,7 +833,7 @@ function renderRankModal() {
             </span>
             <div class="min-w-0 flex-1">
               <div class="font-black text-sm text-[#5E4B5B] truncate">${tier.title}</div>
-              <div class="text-[10px] text-[#998495] font-semibold">${minPts} - ${minPts + 49} PTS</div>
+              <div class="text-[10px] text-[#998495] font-semibold">${ptsRangeText}</div>
             </div>
           </div>
           <div class="shrink-0">
@@ -862,14 +945,19 @@ async function syncScoreToGAS() {
 // ─── Section Tabs ─────────────────────────────────────────────────────────────
 function renderSectionTabs() {
   const unitPool = activeUnit === "ALL" ? WORD_DATABASE : WORD_DATABASE.filter(i => String(i.unit || "").trim() === String(activeUnit).trim());
-  const sections = ["ALL", ...new Set(unitPool.map(i => i.category).filter(Boolean))];
+  const uLabel = formatUnitLabel(activeUnit);
+  const sections = ["SRS_REVIEW", ...new Set(unitPool.map(i => i.category).filter(Boolean))];
   const container = document.getElementById("section-tabs");
   if (!container) return;
   container.innerHTML = "";
   sections.forEach(sec => {
     const tab = document.createElement("button");
     tab.className = "section-tab" + (sec === activeSection ? " active" : "");
-    tab.textContent = sec === "ALL" ? "ทั้งหมด" : sec;
+    if (sec === "SRS_REVIEW") {
+      tab.innerHTML = activeUnit === "ALL" ? "🔁 ทบทวนความจำ" : `🔁 ทบทวน ${uLabel}`;
+    } else {
+      tab.textContent = sec;
+    }
     tab.onclick = () => { activeSection = sec; renderSectionTabs(); initGame(); };
     container.appendChild(tab);
   });
@@ -880,6 +968,30 @@ function getFilteredWords() {
   if (activeUnit !== "ALL") {
     pool = pool.filter(i => String(i.unit || "").trim() === String(activeUnit).trim());
   }
+  
+  if (activeSection === "SRS_REVIEW" || activeSection === "REVIEW") {
+    const today = todayString();
+    const reviewPool = pool.filter(item => {
+      const srs = getSRSItem(item.word);
+      if (!srs) return false;
+      // 1. Box 1 words (คำที่ยังไม่แม่น / เพิ่งเริ่มจำ)
+      if (srs.box === 1) return true;
+      // 2. Due words in Box 2, 3, 4 (คำที่ถึงกำหนดทบทวน)
+      if (srs.box > 0 && srs.nextReview && srs.nextReview <= today) return true;
+      return false;
+    });
+
+    if (reviewPool.length > 0) {
+      return reviewPool;
+    }
+    // If no words are in Box 1 or due for review, fallback to unmastered words or full pool
+    const unmastered = pool.filter(item => {
+      const srs = getSRSItem(item.word);
+      return !srs || srs.box < 4;
+    });
+    return unmastered.length > 0 ? unmastered : pool;
+  }
+
   if (activeSection !== "ALL") {
     pool = pool.filter(i => i.category === activeSection);
   }
@@ -916,29 +1028,48 @@ function initGame() {
     let candidatePool = pool.filter(item => !playedThisSession.includes(item.word));
 
     if (candidatePool.length === 0) {
-      const secName = activeSection === "ALL" ? "ทั้งหมด" : activeSection;
+      let secName = activeSection;
+      if (activeSection === "SRS_REVIEW" || activeSection === "REVIEW") {
+        secName = "ทบทวน " + formatUnitLabel(activeUnit);
+      } else if (activeSection === "ALL") {
+        secName = "ทั้งหมด";
+      }
       showToast("คุณเล่นครบทุกคำในหมวด " + secName + " แล้ว! เริ่มรอบใหม่", "success", 4000);
       playedWordsPerCategory[activeSection] = [];
       saveCategoryProgress();
       candidatePool = [...pool];
     }
 
-    const dueWords = candidatePool.filter(item => {
-      const srs = wordProgress[item.word];
-      return srs && srs.box > 0 && srs.nextReview <= today;
-    });
+    if (activeSection === "SRS_REVIEW" || activeSection === "REVIEW") {
+      // Prioritize Box 1 and due words
+      const box1AndDueWords = candidatePool.filter(item => {
+        const srs = getSRSItem(item.word);
+        return srs && (srs.box === 1 || (srs.box > 0 && srs.nextReview && srs.nextReview <= today));
+      });
 
-    const newWords = candidatePool.filter(item => {
-      const srs = wordProgress[item.word];
-      return !srs || srs.box === 0;
-    });
-
-    if (dueWords.length > 0) {
-      currentItem = dueWords[Math.floor(Math.random() * dueWords.length)];
-    } else if (newWords.length > 0) {
-      currentItem = newWords[Math.floor(Math.random() * newWords.length)];
+      if (box1AndDueWords.length > 0) {
+        currentItem = box1AndDueWords[Math.floor(Math.random() * box1AndDueWords.length)];
+      } else {
+        currentItem = candidatePool[Math.floor(Math.random() * candidatePool.length)];
+      }
     } else {
-      currentItem = candidatePool[Math.floor(Math.random() * candidatePool.length)];
+      const dueWords = candidatePool.filter(item => {
+        const srs = getSRSItem(item.word);
+        return srs && srs.box > 0 && srs.nextReview <= today;
+      });
+
+      const newWords = candidatePool.filter(item => {
+        const srs = getSRSItem(item.word);
+        return !srs || srs.box === 0;
+      });
+
+      if (dueWords.length > 0) {
+        currentItem = dueWords[Math.floor(Math.random() * dueWords.length)];
+      } else if (newWords.length > 0) {
+        currentItem = newWords[Math.floor(Math.random() * newWords.length)];
+      } else {
+        currentItem = candidatePool[Math.floor(Math.random() * candidatePool.length)];
+      }
     }
 
     if (!playedThisSession.includes(currentItem.word)) {
@@ -958,14 +1089,18 @@ function initGame() {
 
   mistakes = 0;
   comboCount = 0;
+  hintsUsed = 0;
   isGameOver = false;
 
   activeKeys = generateKeyPool(secretWord);
-  const targetUnit = currentItem.unit || (activeUnit !== "ALL" ? activeUnit : "");
-  const uText = targetUnit && targetUnit !== "ALL" ? (formatUnitLabel(targetUnit) + " · ") : "";
-  const secText = (currentItem.category || activeSection) === "ALL" ? "ทั้งหมด" : (currentItem.category || activeSection);
-  const prefix = isTestMode ? "📝 โหมดทดสอบ: " : "";
-  document.getElementById("category-tag").textContent = prefix + uText + "หมวด: " + secText;
+  let secText = currentItem.category || activeSection;
+  if (activeSection === "SRS_REVIEW" || activeSection === "REVIEW") {
+    secText = "ทบทวน " + formatUnitLabel(activeUnit);
+  } else if (secText === "ALL") {
+    secText = "ทั้งหมด";
+  }
+  const prefix = isTestMode ? "📝 โหมดทดสอบ: " : "หมวด: ";
+  document.getElementById("category-tag").textContent = prefix + secText;
   document.getElementById("clue-text").innerHTML = formatClueHTML(currentItem.clue);
   document.getElementById("status").innerHTML = "";
   checkAndProcessDailyStreak();
@@ -1179,6 +1314,7 @@ function revealLetter() {
   }
 
   revealedTiles[targetIdx] = true;
+  hintsUsed++;
   playSound("reveal");
   currentTileIndex++;
   while (currentTileIndex < secretWord.length && revealedTiles[currentTileIndex]) {
@@ -1217,7 +1353,7 @@ function updateHintButton() {
   }
 }
 
-function getMaxRevealedAllowed() { return Math.min(secretWord.length-1, Math.max(1, Math.floor(secretWord.length*0.8))); }
+function getMaxRevealedAllowed() { return Math.min(secretWord.length - 1, Math.max(1, Math.floor(secretWord.length * 0.4))); }
 function getRevealedCount() { return revealedTiles.filter(Boolean).length; }
 
 // ─── Pause Game ─────────────────────────────────────────────────────────────
@@ -1245,7 +1381,7 @@ function skipWord() {
   playSound("wrong");
   updateHangmanSVG(MAX_MISTAKES, true);
   if (!isTestMode) {
-    logActivityToGAS({ word: secretWord, isWon: false, mistakes, score, streak, maxStreak, box: srsResult.box, nextReview: srsResult.nextReview, action: "skip", category: (currentItem && currentItem.category) || activeSection });
+    logActivityToGAS({ word: secretWord, isWon: false, mistakes, hints: hintsUsed, score, streak, maxStreak, box: srsResult.box, nextReview: srsResult.nextReview, action: "skip", category: (currentItem && currentItem.category) || activeSection });
     document.getElementById("status").innerHTML = '<span class="stamp-banner stamp-neutral"><svg class="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><line x1="12" y1="16" x2="12" y2="12"/><line x1="12" y1="8" x2="12.01" y2="8"/></svg>ข้ามคำ! (Box ' + srsResult.box + ' · ทบทวนใน 1 วัน) คำตอบคือ ' + secretWord + '</span>';
   } else {
     document.getElementById("status").innerHTML = '<span class="stamp-banner stamp-neutral"><svg class="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><line x1="12" y1="16" x2="12" y2="12"/><line x1="12" y1="8" x2="12.01" y2="8"/></svg>ข้ามคำ! คำตอบคือ ' + secretWord + '</span>';
@@ -1259,7 +1395,7 @@ function skipWord() {
     const q = testQuestionsState[testCurrentIndex];
     q.isCompleted = true;
     q.isWon = false;
-    q.status = "failed";
+    q.status = "skipped";
     q.mistakes = MAX_MISTAKES;
 
     renderTestPalette();
@@ -1280,7 +1416,7 @@ function skipWord() {
   const playedThisSession = getPlayedWords(activeSection);
   const roundComplete = playedThisSession.length >= pool.length;
 
-  if (roundComplete || (sessionWordsPlayed > 0 && sessionWordsPlayed % 5 === 0)) {
+  if (roundComplete) {
     setTimeout(showSessionSummary, 1800);
   } else {
     setTimeout(() => {
@@ -1315,7 +1451,10 @@ function updateDisplay(revealAll) {
   if (!container) return;
 
   const currentCards = container.querySelectorAll(".tile-card-3d");
-  const needsRebuild = (currentCards.length !== secretWord.length);
+  const isDifferentWord = (container.dataset.renderedWord !== secretWord);
+  const needsRebuild = isDifferentWord || (currentCards.length !== secretWord.length);
+
+  container.dataset.renderedWord = secretWord;
 
   if (needsRebuild) {
     container.innerHTML = "";
@@ -1324,11 +1463,11 @@ function updateDisplay(revealAll) {
       card.id = "tile-card-" + idx;
       card.className = "tile-card-3d";
 
-      const isFlipped = revealedTiles[idx] || revealAll;
+      const isFlipped = Boolean(revealedTiles[idx] || revealAll);
       if (isFlipped) card.classList.add("is-flipped");
 
       const isActive = (idx === currentTileIndex && !isFlipped);
-      const isMiss = (revealAll && !revealedTiles[idx]);
+      const isMiss = Boolean(revealAll && !revealedTiles[idx]);
 
       card.innerHTML = `
         <div class="tile-card-inner">
@@ -1349,7 +1488,7 @@ function updateDisplay(revealAll) {
       const card = document.getElementById("tile-card-" + idx);
       if (!card) return;
       
-      const isFlipped = revealedTiles[idx] || revealAll;
+      const isFlipped = Boolean(revealedTiles[idx] || revealAll);
       if (isFlipped) {
         card.classList.add("is-flipped");
       } else {
@@ -1370,6 +1509,7 @@ function updateDisplay(revealAll) {
 
       const back = card.querySelector(".tile-card-back");
       if (back) {
+        back.textContent = letter;
         if (revealAll && !revealedTiles[idx]) {
           back.classList.add("is-miss");
         } else {
@@ -1433,7 +1573,7 @@ function checkGameEnd() {
     flipAllTilesSequentially(false);
     updateHangmanSVG(mistakes, false);
     if (!isTestMode) {
-      logActivityToGAS({ word: secretWord, isWon: true, mistakes, score, streak, maxStreak, box: srsResult.box, nextReview: srsResult.nextReview, action: "win", category: (currentItem && currentItem.category) || activeSection });
+      logActivityToGAS({ word: secretWord, isWon: true, mistakes, hints: hintsUsed, score, streak, maxStreak, box: srsResult.box, nextReview: srsResult.nextReview, action: "win", category: (currentItem && currentItem.category) || activeSection });
       const stampLabel = srsResult.box >= 4 ? "MASTERED ✨" : streak >= 3 ? "HOT STREAK 🔥" : "CORRECT! ✓";
       document.getElementById("status").innerHTML = '<div class="stamp-banner stamp-win"><svg class="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6 9 17l-5-5"/></svg><span>' + stampLabel + ' (+' + pts + ' · Box ' + srsResult.box + ')</span></div>';
     } else {
@@ -1474,7 +1614,7 @@ function checkGameEnd() {
     const playedThisSession = getPlayedWords(activeSection);
     const roundComplete = playedThisSession.length >= pool.length;
 
-    if (roundComplete || (sessionWordsPlayed > 0 && sessionWordsPlayed % 5 === 0)) {
+    if (roundComplete) {
       setTimeout(showSessionSummary, 1800);
     } else {
       setTimeout(() => {
@@ -1497,7 +1637,7 @@ function checkGameEnd() {
     updateDisplay(true);
     flipAllTilesSequentially(true);
     if (!isTestMode) {
-      logActivityToGAS({ word: secretWord, isWon: false, mistakes, score, streak, maxStreak, box: srsResult.box, nextReview: srsResult.nextReview, action: "lose", category: (currentItem && currentItem.category) || activeSection });
+      logActivityToGAS({ word: secretWord, isWon: false, mistakes, hints: hintsUsed, score, streak, maxStreak, box: srsResult.box, nextReview: srsResult.nextReview, action: "lose", category: (currentItem && currentItem.category) || activeSection });
       document.getElementById("status").innerHTML = '<div class="stamp-banner stamp-lose"><svg class="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><line x1="15" y1="9" x2="9" y2="15"/><line x1="9" y1="9" x2="15" y2="15"/></svg><span>หมดหัวใจ! (Box ' + srsResult.box + ') — ' + secretWord + '</span></div>';
     } else {
       document.getElementById("status").innerHTML = '<div class="stamp-banner stamp-lose"><svg class="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><line x1="15" y1="9" x2="9" y2="15"/><line x1="9" y1="9" x2="15" y2="15"/></svg><span>หมดหัวใจ! คำตอบคือ ' + secretWord + '</span></div>';
@@ -1530,7 +1670,7 @@ function checkGameEnd() {
     const playedThisSession = getPlayedWords(activeSection);
     const roundComplete = playedThisSession.length >= pool.length;
 
-    if (roundComplete || (sessionWordsPlayed > 0 && sessionWordsPlayed % 5 === 0)) {
+    if (roundComplete) {
       setTimeout(showSessionSummary, 1800);
     } else {
       setTimeout(() => {
@@ -1574,6 +1714,7 @@ async function logActivityToGAS(payload) {
     category: payload.category || (currentItem && currentItem.category) || activeSection || "",
     isWon: payload.isWon,
     mistakes: payload.mistakes !== undefined ? payload.mistakes : mistakes,
+    hints: payload.hints !== undefined ? payload.hints : hintsUsed,
     score: payload.score !== undefined ? payload.score : score,
     streak: payload.streak !== undefined ? payload.streak : streak,
     maxStreak: payload.maxStreak !== undefined ? payload.maxStreak : maxStreak,
@@ -1600,6 +1741,9 @@ function hideSkeleton() {
 // ─── Dynamic Category Styling & Icons (Patina Palette) ────────────────────────
 function getCategoryIconSVG(cat) {
   const c = (cat || "").toLowerCase();
+  if (c.includes("srs") || c.includes("review") || c.includes("ทบทวน")) {
+    return '<svg class="w-5 h-5 inline-block text-[#C26754]" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 12a9 9 0 0 1 9-9 9.75 9.75 0 0 1 6.74 2.74L21 8"/><path d="M21 3v5h-5"/><path d="M21 12a9 9 0 0 1-9 9 9.75 9.75 0 0 1-6.74-2.74L3 16"/><path d="M3 21v-5h5"/></svg>';
+  }
   if (c === "all" || c === "ทั้งหมด") {
     return '<svg class="w-5 h-5 inline-block text-[#C26754] fill-[#E5AD7A]" viewBox="0 0 24 24"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg>';
   }
@@ -1617,6 +1761,7 @@ function getCategoryIconSVG(cat) {
 
 function getCategorySubtitle(cat, count) {
   const c = (cat || "").toLowerCase();
+  if (c.includes("srs") || c.includes("review") || c.includes("ทบทวน")) return count + " คำที่ต้องทบทวน (Box 1 + ถึงกำหนดทบทวน)";
   if (c === "all") return count + " คำศัพท์ครบทุกหมวดหมู่ในเล่ม";
   if (c.includes("traveler")) return count + " คำศัพท์เกี่ยวกับประเภทผู้เดินทาง";
   if (c.includes("skill")) return count + " คำศัพท์เกี่ยวกับการเดินทางและทิศทาง";
@@ -1704,11 +1849,33 @@ function renderCategoryModalList() {
 
   const unitPool = activeUnit === "ALL" ? WORD_DATABASE : WORD_DATABASE.filter(i => String(i.unit || "").trim() === String(activeUnit).trim());
   const categories = Array.from(new Set(unitPool.map(i => i.category).filter(Boolean)));
-  
-  const allLabel = activeUnit === "ALL" ? "ทั้งหมด (All Words)" : ("ทั้งหมดใน " + uLabel + " (All)");
-  const allSub = activeUnit === "ALL" ? (WORD_DATABASE.length + " คำศัพท์ครบทุกหมวดหมู่ในเล่ม") : (unitPool.length + " คำศัพท์ใน " + uLabel);
-  
-  const allList = [{ name: "ALL", label: allLabel, count: unitPool.length, customSub: allSub }];
+  const today = todayString();
+
+  // Calculate review words for this Unit: Box 1 words + Due words (nextReview <= today)
+  const reviewWords = unitPool.filter(item => {
+    const srs = getSRSItem(item.word);
+    if (!srs) return false;
+    if (srs.box === 1) return true;
+    if (srs.box > 0 && srs.nextReview && srs.nextReview <= today) return true;
+    return false;
+  });
+
+  const reviewLabel = activeUnit === "ALL" ? "ทบทวนความจำ (SRS Review)" : ("ทบทวนใน " + uLabel);
+  let reviewSub = "";
+  if (reviewWords.length > 0) {
+    reviewSub = reviewWords.length + " คำที่ต้องทบทวน (Box 1 + ถึงกำหนดทบทวน)";
+  } else {
+    reviewSub = "ไม่มีคำค้างทบทวนใน " + uLabel + " (จำได้ครบ ✨)";
+  }
+
+  const allList = [{
+    name: "SRS_REVIEW",
+    label: reviewLabel,
+    count: reviewWords.length,
+    customSub: reviewSub,
+    isReview: true
+  }];
+
   categories.forEach(cat => {
     const cnt = unitPool.filter(i => i.category === cat).length;
     allList.push({ name: cat, label: cat, count: cnt });
@@ -1716,11 +1883,18 @@ function renderCategoryModalList() {
 
   allList.forEach((catObj) => {
     const btn = document.createElement("button");
-    btn.className = "category-card group";
+    btn.className = "category-card group" + (catObj.isReview ? " border-[#E5AD7A] bg-gradient-to-r from-[#FFF9F5] to-[#FFF1E8]" : "");
     btn.onclick = () => {
       playSound('click');
+      if (catObj.isReview && catObj.count === 0) {
+        showToast("ยอดเยี่ยม! ไม่มีคำค้างทบทวนใน " + uLabel + " แต่คุณสามารถฝึกซ้ำได้", "success", 3500);
+      }
       selectCategoryAndPlay(catObj.name);
     };
+
+    const countBadge = catObj.isReview && catObj.count === 0
+      ? `<span class="text-xs font-bold px-2.5 py-1 bg-[#F0F8F4] border border-[#A2D9C5] rounded-full text-[#3D8B6E] shadow-xs">✨ ครบแล้ว</span>`
+      : `<span class="text-xs font-black px-2.5 py-1 bg-white border border-slate-200 rounded-full text-[#7A6677] shadow-xs">${catObj.count} คำ</span>`;
 
     btn.innerHTML = `
       <div class="category-card-icon">
@@ -1731,9 +1905,7 @@ function renderCategoryModalList() {
         <div class="text-xs text-[#7A6677] font-semibold mt-0.5 truncate">${(catObj.customSub || getCategorySubtitle(catObj.name, catObj.count))}</div>
       </div>
       <div class="flex items-center gap-2 shrink-0">
-        <span class="text-xs font-black px-2.5 py-1 bg-white border border-slate-200 rounded-full text-[#7A6677] shadow-sm">
-          ${catObj.count} คำ
-        </span>
+        ${countBadge}
         <div class="category-card-arrow">
           <svg class="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="m9 18 6-6-6-6"/></svg>
         </div>
@@ -1887,9 +2059,33 @@ function closeModalWithGSAP(modalId, callback) {
   }
 }
 
+function formatClassroomDisplay(cls) {
+  if (!cls) return "";
+  const str = String(cls).trim();
+  if (str.includes("GMT") || /^[A-Za-z]{3}\s+[A-Za-z]{3}\s+\d+/.test(str)) {
+    const d = new Date(str);
+    if (!isNaN(d.getTime())) {
+      return d.getDate() + "/" + (d.getMonth() + 1);
+    }
+  }
+  return str;
+}
+
 function openProfileModal() {
   document.getElementById("profile-name-input").value = userName;
-  document.getElementById("profile-email-input").value = userEmail;
+  const classroomInput = document.getElementById("profile-classroom-input");
+  const studentnoInput = document.getElementById("profile-studentno-input");
+  if (classroomInput && studentnoInput) {
+    let cls = (currentUser && currentUser.classroom) || "";
+    let num = (currentUser && currentUser.studentNo) || "";
+    if ((!cls || !num) && userEmail && userEmail.includes("-")) {
+      const parts = userEmail.split("-");
+      cls = parts[0];
+      num = parts.slice(1).join("-");
+    }
+    classroomInput.value = formatClassroomDisplay(cls);
+    studentnoInput.value = num;
+  }
   document.getElementById("modal-streak-count").textContent = streak;
   const maxEl = document.getElementById("modal-max-streak-count");
   if (maxEl) maxEl.textContent = maxStreak;
@@ -1903,9 +2099,8 @@ function openProfileModal() {
 function closeProfileModal() { closeModalWithGSAP("profile-modal"); }
 function saveProfile() {
   const n = document.getElementById("profile-name-input").value.trim();
-  const e = document.getElementById("profile-email-input").value.trim();
   if (n) userName = n;
-  if (e) userEmail = e;
+  if (currentUser) currentUser.name = userName;
   updateScoreBoard();
   syncScoreToGAS();
   closeProfileModal();
@@ -2093,7 +2288,26 @@ function renderLeaderboardRows(players) {
 
     // Players inside this League Tier
     divPlayers.forEach(p => {
-      const pName = String(p.name || p.email || "ผู้เรียน");
+      let pName = String(p.name || "").trim();
+      const pEmail = String(p.email || "").trim();
+      if (/^[0-9a-f]{20,}$/i.test(pName)) {
+        pName = "";
+      }
+      if (!pName) {
+        if (p.classroom && p.studentNo) {
+          pName = `ชั้น ${formatClassroomDisplay(p.classroom)} เลขที่ ${p.studentNo}`;
+        } else if (pEmail && !/^[0-9a-f]{20,}$/i.test(pEmail)) {
+          if (pEmail.includes("-")) {
+            const parts = pEmail.split("-");
+            pName = `ชั้น ${formatClassroomDisplay(parts[0])} เลขที่ ${parts.slice(1).join("-")}`;
+          } else {
+            pName = pEmail.includes("@") ? pEmail.split("@")[0] : pEmail;
+          }
+        } else {
+          pName = "ผู้เรียน";
+        }
+      }
+
       const pStreak = Number(p.streak) || Number(p.maxStreak) || 1;
       const isSelf = Boolean(p.isCurrent || (currentEmail && p.email && String(p.email).toLowerCase() === currentEmail) || (pName === currentDisplayName));
       const rankNum = p.globalRank;
@@ -2312,24 +2526,26 @@ function switchAuthTab(tab) {
 
 async function handleLoginSubmit(e) {
   e.preventDefault();
-  const email = document.getElementById("login-email-input").value.trim();
+  const classroom = document.getElementById("login-classroom-input").value.trim();
+  const studentNo = document.getElementById("login-studentno-input").value.trim();
   const pin = document.getElementById("login-pin-input").value.trim();
   const errEl = document.getElementById("login-error-msg");
   const btn = e.target.querySelector("button[type=submit]");
-  if (!email || pin.length !== 4) { errEl.textContent = "กรุณากรอกอีเมลและ PIN 4 หลักให้ถูกต้อง"; errEl.classList.remove("hidden"); return; }
+  if (!classroom || !studentNo || pin.length !== 4) { errEl.textContent = "กรุณากรอกชั้น เลขที่ และ PIN 4 หลักให้ครบถ้วน"; errEl.classList.remove("hidden"); return; }
   errEl.classList.add("hidden");
   if (btn) { btn.disabled = true; btn.textContent = "กำลังตรวจสอบ..."; }
 
+  const studentId = classroom + "-" + studentNo;
   const pinHash = await hashPin(pin);
   let userRecord = null;
 
   try {
-    const res = await fetchWithTimeout(GAS_BASE + "?action=loginUser&email=" + encodeURIComponent(email) + "&pinHash=" + encodeURIComponent(pinHash));
+    const res = await fetchWithTimeout(GAS_BASE + "?action=loginUser&email=" + encodeURIComponent(studentId) + "&pinHash=" + encodeURIComponent(pinHash));
     if (res.ok) {
       const j = await res.json();
       if (j.status === "success" && j.user) { userRecord = j.user; }
       else if (j.status === "error") {
-        errEl.textContent = j.message || "อีเมลหรือ PIN ไม่ถูกต้อง";
+        errEl.textContent = j.message || "ชั้น/เลขที่ หรือ PIN ไม่ถูกต้อง";
         errEl.classList.remove("hidden");
         if (btn) { btn.disabled = false; btn.textContent = "เข้าเรียนและโหลดสถิติ"; }
         return;
@@ -2339,8 +2555,8 @@ async function handleLoginSubmit(e) {
 
   if (!userRecord) {
     const stored = JSON.parse(localStorage.getItem("hangman_registered_users") || "[]");
-    const match = stored.find(u => u.email.toLowerCase() === email.toLowerCase() && (u.pinHash === pinHash || u.pin === pin));
-    userRecord = match || { name: email.split("@")[0], email, pinHash, score: 0, streak: 0, maxStreak: 0, masteredWords: [], playedProgress: {} };
+    const match = stored.find(u => u.email.toLowerCase() === studentId.toLowerCase() && (u.pinHash === pinHash || u.pin === pin));
+    userRecord = match || { name: studentId, email: studentId, pinHash, score: 0, streak: 0, maxStreak: 0, masteredWords: [], playedProgress: {} };
   }
 
   currentUser = userRecord;
@@ -2358,7 +2574,7 @@ async function handleLoginSubmit(e) {
   localStorage.setItem("hangman_session_user", JSON.stringify(currentUser));
   saveCategoryProgress();
   updateScoreBoard();
-  logActivityToGAS({ word: "LOGIN_ACCOUNT", isWon: true, mistakes: 0, score, streak, maxStreak, action: "login" });
+  logActivityToGAS({ word: "", isWon: false, mistakes: 0, score, streak, maxStreak, action: "login" });
 
   if (btn) { btn.disabled = false; btn.textContent = "เข้าเรียนและโหลดสถิติ"; }
   checkAuthSession();
@@ -2368,21 +2584,23 @@ async function handleLoginSubmit(e) {
 async function handleRegisterSubmit(e) {
   e.preventDefault();
   const name = document.getElementById("reg-name-input").value.trim();
-  const email = document.getElementById("reg-email-input").value.trim();
+  const classroom = document.getElementById("reg-classroom-input").value.trim();
+  const studentNo = document.getElementById("reg-studentno-input").value.trim();
   const pin = document.getElementById("reg-pin-input").value.trim();
   const errEl = document.getElementById("reg-error-msg");
   const btn = e.target.querySelector("button[type=submit]");
-  if (!name || !email || pin.length !== 4) { errEl.textContent = "กรุณากรอกชื่อ อีเมล และ PIN 4 หลักให้ครบถ้วน"; errEl.classList.remove("hidden"); return; }
+  if (!name || !classroom || !studentNo || pin.length !== 4) { errEl.textContent = "กรุณากรอกชื่อ ชั้น เลขที่ และ PIN 4 หลักให้ครบถ้วน"; errEl.classList.remove("hidden"); return; }
   errEl.classList.add("hidden");
   if (btn) { btn.disabled = true; btn.textContent = "กำลังสร้างบัญชี..."; }
 
+  const studentId = classroom + "-" + studentNo;
   const pinHash = await hashPin(pin);
 
   try {
-    const res = await fetchWithTimeout(GAS_BASE + "?action=registerUser&name=" + encodeURIComponent(name) + "&email=" + encodeURIComponent(email) + "&pinHash=" + encodeURIComponent(pinHash));
+    const res = await fetchWithTimeout(GAS_BASE + "?action=registerUser&name=" + encodeURIComponent(name) + "&email=" + encodeURIComponent(studentId) + "&classroom=" + encodeURIComponent(classroom) + "&studentNo=" + encodeURIComponent(studentNo) + "&pinHash=" + encodeURIComponent(pinHash));
     if (res.ok) {
       const j = await res.json();
-      if (j.status === "error" && j.message && j.message.includes("มีอีเมลนี้")) {
+      if (j.status === "error" && j.message) {
         errEl.textContent = j.message; errEl.classList.remove("hidden");
         if (btn) { btn.disabled = false; btn.textContent = "สร้างบัญชีและเข้าเรียน"; }
         return;
@@ -2390,15 +2608,15 @@ async function handleRegisterSubmit(e) {
     }
   } catch(err) { showToast("บันทึกออฟไลน์เท่านั้น", "warning", 4000); }
 
-  const newUser = { name, email, pinHash, score: 0, streak: 0, maxStreak: 0, masteredWords: [], playedProgress: {} };
+  const newUser = { name, email: studentId, classroom, studentNo, pinHash, score: 0, streak: 0, maxStreak: 0, masteredWords: [], playedProgress: {} };
   const stored = JSON.parse(localStorage.getItem("hangman_registered_users") || "[]");
-  const idx = stored.findIndex(u => u.email.toLowerCase() === email.toLowerCase());
+  const idx = stored.findIndex(u => u.email.toLowerCase() === studentId.toLowerCase());
   if (idx >= 0) stored[idx] = newUser; else stored.push(newUser);
   localStorage.setItem("hangman_registered_users", JSON.stringify(stored));
 
   currentUser = newUser;
   userName = name;
-  userEmail = email;
+  userEmail = studentId;
   score = 0;
   streak = 0;
   maxStreak = 0;
@@ -2410,7 +2628,7 @@ async function handleRegisterSubmit(e) {
   localStorage.setItem("hangman_word_progress", JSON.stringify(wordProgress));
   saveCategoryProgress();
   updateScoreBoard();
-  logActivityToGAS({ word: "REGISTER_ACCOUNT", isWon: true, mistakes: 0, score: 0, streak: 0, maxStreak: 0, action: "register" });
+  logActivityToGAS({ word: "", isWon: false, mistakes: 0, score: 0, streak: 0, maxStreak: 0, action: "register" });
 
   if (btn) { btn.disabled = false; btn.textContent = "สร้างบัญชีและเข้าเรียน"; }
   showToast("ยินดีต้อนรับ " + name + "! บัญชีถูกสร้างแล้ว", "success", 3000);
@@ -2692,7 +2910,7 @@ function loadTestQuestion(index) {
     statusEl.innerHTML = "";
   }
 
-  updateDisplay();
+  updateDisplay(q.isCompleted);
   renderKeyboard();
   updateLivesDisplay();
   updateHangmanSVG(mistakes, mistakes >= MAX_MISTAKES);
@@ -2701,7 +2919,6 @@ function loadTestQuestion(index) {
   
   if (q.isCompleted) {
     document.querySelectorAll("#keyboard button").forEach(b => disableKeyButton(b));
-    flipAllTilesSequentially(!q.isWon);
   }
 }
 

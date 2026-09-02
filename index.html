@@ -88,7 +88,7 @@
           <!-- Level XP Progress Bar -->
           <div>
             <div class="flex justify-between items-center text-[10px] text-[#7A6677] font-bold">
-              <span>EXP: <span id="current-xp-text" class="text-[#5E4B5B]">0</span> / 50 XP</span>
+              <span>EXP: <span id="current-xp-text" class="text-[#5E4B5B]">0</span> / <span id="max-xp-text">150</span> XP</span>
               <span class="flex items-center gap-1 text-[#C26754] font-black group-hover:underline">
                 <span>View All Ranks</span>
                 <svg class="w-3.5 h-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="m9 18 6-6-6-6"/></svg>
@@ -280,7 +280,7 @@
                 </button>
                 
                 <div class="flex items-center gap-1.5 flex-wrap justify-center min-w-0">
-                  <span id="category-tag" class="text-xs font-black px-2.5 py-1 bg-[#FFF4EC] border border-[#FCD8C1] text-[#A8503E] rounded-lg shadow-xs truncate max-w-[130px] sm:max-w-none">หมวด: ทั้งหมด</span>
+                  <span id="category-tag" class="text-xs font-black px-2.5 py-1 bg-[#FFF4EC] border border-[#FCD8C1] text-[#A8503E] rounded-lg shadow-xs truncate max-w-[180px] sm:max-w-none">หมวด: ทั้งหมด</span>
                   <span id="session-progress" class="text-xs font-mono font-bold bg-white/90 text-[#5E4B5B] px-2.5 py-1 border border-slate-200/80 rounded-lg shadow-xs shrink-0">คำที่ 1/10</span>
                 </div>
 
@@ -289,7 +289,7 @@
                 </button>
               </div>
 
-              <!-- Bottom Row: Score & Streak Badges (Unified inside card) -->
+              <!-- Bottom Row: Score & Realtime Rank Level Badges -->
               <div class="flex items-center justify-between border-t border-[#A37B8F]/15 pt-2 text-xs font-bold">
                 <div class="flex items-center gap-1.5 text-[#5E4B5B]">
                   <span class="text-[#7A6677] text-[11px] font-semibold">คะแนนสะสม:</span>
@@ -297,13 +297,12 @@
                     <span id="score-val">0</span> PTS
                   </span>
                 </div>
-                <div class="flex items-center gap-1.5 text-[#A8503E]">
-                  <span class="text-[11px] font-semibold text-[#7A6677]">เข้าเรียนต่อเนื่อง:</span>
-                  <span class="px-2 py-0.5 bg-[#FFF4EC] border border-[#FCD8C1] text-[#A8503E] font-black rounded-md shadow-xs flex items-center gap-1">
-                    <span>🔥</span>
-                    <span id="streak-val">0</span> วัน
+                <button type="button" onclick="openRankModal()" class="flex items-center gap-1 text-[#5E4B5B] hover:opacity-85 active:scale-95 transition-all cursor-pointer" title="คลิกดูตารางระดับและฉายาทั้งหมด">
+                  <span class="text-[11px] font-semibold text-[#7A6677]">ระดับ:</span>
+                  <span id="game-rank-badge" class="text-[11px] font-black px-2 py-0.5 rounded-md border shadow-xs bg-[#F0F8F4] text-[#3D8B6E] border-[#C2E2D4]">
+                    Lv.1 Novice 🌱
                   </span>
-                </div>
+                </button>
               </div>
             </div>
             <div id="section-tabs" class="hidden"></div>
@@ -430,9 +429,15 @@
         <button id="auth-tab-register" onclick="switchAuthTab('register')" class="section-tab">สมัครเข้าเรียน (Register)</button>
       </div>
       <form id="login-form" onsubmit="handleLoginSubmit(event)" class="flex flex-col gap-3 text-left">
-        <div>
-          <label class="block text-xs font-bold mb-1 text-[#5E4B5B]">อีเมลผู้เรียน / รหัสนักเรียน <span class="text-red-500">*</span></label>
-          <input type="text" id="login-email-input" required autocomplete="email" class="w-full p-2.5 border border-slate-200 rounded-xl font-bold bg-white/85 text-[#5E4B5B] focus:ring-2 focus:ring-[#C26754] focus:outline-none" placeholder="เช่น student@school.com">
+        <div class="flex gap-2">
+          <div class="flex-1">
+            <label class="block text-xs font-bold mb-1 text-[#5E4B5B]">ชั้น <span class="text-red-500">*</span></label>
+            <input type="text" id="login-classroom-input" required class="w-full p-2.5 border border-slate-200 rounded-xl font-bold bg-white/85 text-[#5E4B5B] focus:ring-2 focus:ring-[#C26754] focus:outline-none text-center" placeholder="เช่น 2/5">
+          </div>
+          <div class="flex-1">
+            <label class="block text-xs font-bold mb-1 text-[#5E4B5B]">เลขที่ <span class="text-red-500">*</span></label>
+            <input type="text" id="login-studentno-input" required inputmode="numeric" class="w-full p-2.5 border border-slate-200 rounded-xl font-bold bg-white/85 text-[#5E4B5B] focus:ring-2 focus:ring-[#C26754] focus:outline-none text-center" placeholder="เช่น 45">
+          </div>
         </div>
         <div>
           <label class="block text-xs font-bold mb-1 text-[#5E4B5B]">รหัส PIN 4 หลัก <span class="text-red-500">*</span></label>
@@ -448,9 +453,15 @@
           <label class="block text-xs font-bold mb-1 text-[#5E4B5B]">ชื่อ-นามสกุล ผู้เรียน <span class="text-red-500">*</span></label>
           <input type="text" id="reg-name-input" required autocomplete="name" class="w-full p-2.5 border border-slate-200 rounded-xl font-bold bg-white/85 text-[#5E4B5B] focus:ring-2 focus:ring-[#C26754] focus:outline-none" placeholder="เช่น สมชาย ใจดี">
         </div>
-        <div>
-          <label class="block text-xs font-bold mb-1 text-[#5E4B5B]">อีเมลผู้เรียน / รหัสนักเรียน <span class="text-red-500">*</span></label>
-          <input type="text" id="reg-email-input" required autocomplete="email" class="w-full p-2.5 border border-slate-200 rounded-xl font-bold bg-white/85 text-[#5E4B5B] focus:ring-2 focus:ring-[#C26754] focus:outline-none" placeholder="student@school.com">
+        <div class="flex gap-2">
+          <div class="flex-1">
+            <label class="block text-xs font-bold mb-1 text-[#5E4B5B]">ชั้น <span class="text-red-500">*</span></label>
+            <input type="text" id="reg-classroom-input" required class="w-full p-2.5 border border-slate-200 rounded-xl font-bold bg-white/85 text-[#5E4B5B] focus:ring-2 focus:ring-[#C26754] focus:outline-none text-center" placeholder="เช่น 2/5">
+          </div>
+          <div class="flex-1">
+            <label class="block text-xs font-bold mb-1 text-[#5E4B5B]">เลขที่ <span class="text-red-500">*</span></label>
+            <input type="text" id="reg-studentno-input" required inputmode="numeric" class="w-full p-2.5 border border-slate-200 rounded-xl font-bold bg-white/85 text-[#5E4B5B] focus:ring-2 focus:ring-[#C26754] focus:outline-none text-center" placeholder="เช่น 45">
+          </div>
         </div>
         <div>
           <label class="block text-xs font-bold mb-1 text-[#5E4B5B]">ตั้งรหัส PIN 4 หลัก <span class="text-red-500">*</span></label>
@@ -481,9 +492,15 @@
           <label class="block text-xs font-bold mb-1 text-[#5E4B5B]">ชื่อผู้เล่น / นักเรียน:</label>
           <input type="text" id="profile-name-input" class="w-full p-2.5 border border-slate-200 rounded-xl font-bold bg-white/85 text-[#5E4B5B] focus:ring-2 focus:ring-[#C26754] focus:outline-none" placeholder="เช่น สมชาย ใจดี">
         </div>
-        <div>
-          <label class="block text-xs font-bold mb-1 text-[#5E4B5B]">อีเมล / รหัสนักเรียน:</label>
-          <input type="email" id="profile-email-input" class="w-full p-2.5 border border-slate-200 rounded-xl font-bold bg-white/85 text-[#5E4B5B] focus:ring-2 focus:ring-[#C26754] focus:outline-none" placeholder="student@school.com">
+        <div class="flex gap-2">
+          <div class="flex-1">
+            <label class="block text-xs font-bold mb-1 text-[#5E4B5B]">ชั้น:</label>
+            <input type="text" id="profile-classroom-input" readonly class="w-full p-2.5 border border-slate-200 rounded-xl font-bold bg-slate-100/80 text-[#5E4B5B] focus:outline-none text-center" placeholder="เช่น 2/5">
+          </div>
+          <div class="flex-1">
+            <label class="block text-xs font-bold mb-1 text-[#5E4B5B]">เลขที่:</label>
+            <input type="text" id="profile-studentno-input" readonly class="w-full p-2.5 border border-slate-200 rounded-xl font-bold bg-slate-100/80 text-[#5E4B5B] focus:outline-none text-center" placeholder="เช่น 45">
+          </div>
         </div>
         <div class="p-3.5 border border-white/90 rounded-2xl bg-white/75 text-xs flex flex-col gap-2 shadow-sm mt-1">
           <p>🔥 <strong>Daily Streak (เข้าเรียนต่อเนื่อง):</strong> <span id="modal-streak-count" class="text-[#C26754] font-extrabold">0</span> วัน (สถิติสูงสุด <span id="modal-max-streak-count">0</span> วัน)</p>
@@ -569,7 +586,7 @@
           <svg class="w-4 h-4 text-[#5E4B5B]" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
         </button>
       </div>
-      <p class="text-xs text-[#7A6677] text-left mb-3">สะสมคะแนนจากการสะกดคำถูก ทุกๆ 50 คะแนน (+50 XP) จะปลดล็อกระดับใหม่ทันที!</p>
+      <p class="text-xs text-[#7A6677] text-left mb-3">สะสมคะแนนจากการสะกดคำถูกเพื่อปลดล็อกระดับและฉายาผู้เรียน 30 ขั้น!</p>
       
       <!-- Current User Rank Progress Card -->
       <div id="rank-modal-current-card" class="mb-3 p-3.5 rounded-2xl bg-gradient-to-r from-[#FFF4EC] to-[#FCD8C1] border border-[#E5AD7A] shadow-sm text-left"></div>
@@ -611,7 +628,7 @@
         <svg class="w-6 h-6 text-[#3D8B6E] inline-block" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><rect width="8" height="4" x="8" y="2" rx="1" ry="1"/><path d="M16 4h2a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2h2"/></svg>
         <span>สรุปผลรอบนี้!</span>
       </h2>
-      <p class="text-xs text-[#7A6677] mb-4">คุณเล่นครบ 5 คำแล้ว นี่คือผลของคุณ</p>
+      <p class="text-xs text-[#7A6677] mb-4">คุณเล่นครบทุกคำในรอบนี้แล้ว นี่คือผลคะแนนของคุณ</p>
       <div class="grid grid-cols-2 gap-3 mb-5 text-left">
         <div class="p-3.5 border border-[#C2E2D4] rounded-2xl bg-[#F0F8F4] shadow-sm">
           <div class="text-xs font-bold text-[#3D8B6E]">คำที่เล่น</div>
@@ -634,18 +651,20 @@
         <svg class="w-4 h-4 inline-block fill-[#E5AD7A] stroke-[#C26754]" viewBox="0 0 24 24" stroke-width="1.5"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg>
         <span class="text-[#5E4B5B]">คำที่จำได้แล้ว: <strong><span id="ss-mastered" class="text-[#C26754] font-extrabold">0</span>/<span id="ss-total-words">32</span> คำ</strong></span>
       </div>
-      <div class="flex gap-2 justify-center flex-wrap">
-        <button onclick="finishSessionAndGoHome()" class="stamp-btn stamp-green flex-1 justify-center">
-          <svg class="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="m3 9 9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg>
-          <span>กลับหน้าหลัก (Home)</span>
-        </button>
-        <button onclick="closeSessionSummary()" class="stamp-btn stamp-yellow flex-1 justify-center">
-          <svg class="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polygon points="5 3 19 12 5 21 5 3"/></svg>
-          <span>เล่นต่ออีกรอบ</span>
-        </button>
-        <button onclick="openLeaderboardModal(); closeSessionSummary();" class="stamp-btn stamp-blue">
-          <svg class="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M6 9H4.5a2.5 2.5 0 0 1 0-5H6"/><path d="M18 9h1.5a2.5 2.5 0 0 0 0-5H18"/><path d="M4 22h16"/><path d="M10 14.66V17c0 .55-.47.98-.97 1.21C7.85 18.75 7 20.24 7 22"/><path d="M14 14.66V17c0 .55.47.98.97 1.21C16.15 18.75 17 20.24 17 22"/><path d="M18 2H6v7a6 6 0 0 0 12 0V2z"/></svg>
-          <span>อันดับ</span>
+      <div class="flex flex-col gap-2 mt-2">
+        <div class="grid grid-cols-2 gap-2">
+          <button onclick="finishSessionAndGoHome()" class="stamp-btn stamp-green justify-center py-2.5">
+            <svg class="w-4 h-4 shrink-0" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="m3 9 9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg>
+            <span>หน้าหลัก</span>
+          </button>
+          <button onclick="closeSessionSummary()" class="stamp-btn stamp-yellow justify-center py-2.5">
+            <svg class="w-4 h-4 shrink-0" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polygon points="5 3 19 12 5 21 5 3"/></svg>
+            <span>เล่นอีกรอบ</span>
+          </button>
+        </div>
+        <button onclick="openLeaderboardModal(); closeSessionSummary();" class="stamp-btn stamp-blue justify-center w-full py-2.5">
+          <svg class="w-4 h-4 shrink-0" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M6 9H4.5a2.5 2.5 0 0 1 0-5H6"/><path d="M18 9h1.5a2.5 2.5 0 0 0 0-5H18"/><path d="M4 22h16"/><path d="M10 14.66V17c0 .55-.47.98-.97 1.21C7.85 18.75 7 20.24 7 22"/><path d="M14 14.66V17c0 .55.47.98.97 1.21C16.15 18.75 17 20.24 17 22"/><path d="M18 2H6v7a6 6 0 0 0 12 0V2z"/></svg>
+          <span>ดูตารางอันดับ</span>
         </button>
       </div>
     </div>

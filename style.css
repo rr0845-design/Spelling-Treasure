@@ -800,6 +800,7 @@ button, .stamp-btn, .key-btn, .home-card, .category-card, .section-tab, .audio-b
   justify-content: center;
   position: relative;
   overflow: hidden;
+  white-space: nowrap;
 }
 
 .stamp-btn:hover:not(:disabled) {
